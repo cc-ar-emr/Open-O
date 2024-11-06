@@ -1,13 +1,13 @@
 services:
-  open-o:
-    build:
-      context: ./development
-      dockerfile: Dockerfile
+  oscar:
+    image: openosp/open-osp:latest
+    build: development
     ports:
       - "8080:8080"
     volumes:
-      - ../.:/workspace            # Mapping the project root to /workspace inside the container
-      - ~/.m2:/root/.m2            # Persistent Maven cache
+      - ../.:/workspace
+#      - m2-volume:/root/.m2
+      - ~/.m2:/root/.m2
     env_file:
       - ./development/config/shared/local.env
     environment:
@@ -15,7 +15,7 @@ services:
       LANGUAGE: en_US:en
       TZ: America/Toronto
     networks:
-      - open-o-network
+      - oscar-network
     depends_on:
       - db
 
@@ -30,10 +30,13 @@ services:
     volumes:
       - mariadb-files:/var/lib/mysql
     environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: drugref2
+      MYSQL_USER: oscar
       TZ: America/Toronto
       container: docker
     networks:
-      - open-o-network
+      - oscar-network
     deploy:
       resources:
         limits:
@@ -48,6 +51,6 @@ volumes:
     driver: local
 
 networks:
-  open-o-network:
+  oscar-network:
     driver: bridge
-    name: open-o-network
+    name: oscar-network
