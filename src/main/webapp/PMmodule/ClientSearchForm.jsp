@@ -89,8 +89,8 @@
                     <th>Date of Birth</th>
                     <td><html:text property="criteria.dob" size="15"/><br/><font size="1">yyyy/mm/dd</font></td>
                 </tr>
-                <c:if test="${!moduleLoaded['TORONTO_RFQ']}">
-                    <c:if test="${moduleLoaded['GET_OHIP_INFO']}">
+                <caisi:isModuleLoad moduleName="TORONTO_RFQ" reverse="true">
+                    <caisi:isModuleLoad moduleName="GET_OHIP_INFO" reverse="false">
                         <tr>
                             <th>Health Card Number</th>
                             <td><html:text property="criteria.healthCardNumber" size="15"/>
@@ -106,11 +106,12 @@
                     <!-- <th>Search outside of domain <a href="javascript:void(0)" onclick="popupHelp('domain')">?</a></th>
                     -->
                     <tr>
-                        <c:if test="${moduleLoaded['pmm.client.search.outside.of.domain.enabled']}">
+                        <caisi:isModuleLoad
+                                moduleName="pmm.client.search.outside.of.domain.enabled">
                             <th>Search all clients <a href="javascript:void(0)"
                                                       onclick="popupHelp('domain')">?</a></th>
                             <td><html:checkbox property="criteria.searchOutsideDomain"/></td>
-                        </c:if>
+                        </caisi:isModuleLoad>
                     </tr>
 
                     <tr>

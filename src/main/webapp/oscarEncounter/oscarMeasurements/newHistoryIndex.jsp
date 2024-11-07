@@ -79,7 +79,7 @@
                             </th>
                             <c:forEach var="date" items="${measurementsDates}" varStatus="count">
                                 <th align="left" class="Header" style="width:50px;color:white">
-                                    <%=sf.format(date)%>
+                                    <c:out value="${sf.format(date)}" />
                                 </th>
                             </c:forEach>
                             <th align="left" class="Header" style="color:white" width="50">

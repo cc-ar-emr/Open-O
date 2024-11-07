@@ -87,7 +87,7 @@
                                 <td width="30%">${field.fieldDesc}</td>
                                 <td>
                                     <c:choose>
-                                        <!-- String Field Type (S) -->
+                                        <%-- String Field Type (S) --%>
                                         <c:when test="${field.fieldType == 'S'}">
                                             <c:choose>
                                                 <c:when test="${not field.editable}">
@@ -114,7 +114,7 @@
                                             </c:choose>
                                         </c:when>
 
-                                        <!-- Date Field Type (D) -->
+                                        <%-- Date Field Type (D) --%>
                                         <c:when test="${field.fieldType == 'D'}">
                                             <c:choose>
                                                 <c:when test="${field.editable}">
@@ -128,7 +128,7 @@
                                             </c:choose>
                                         </c:when>
 
-                                        <!-- Number Field Type (N) -->
+                                        <%-- Number Field Type (N) --%>
                                         <c:when test="${field.fieldType == 'N'}">
                                             <c:choose>
                                                 <c:when test="${field.editable}">
@@ -141,7 +141,7 @@
                                             </c:choose>
                                         </c:when>
 
-                                        <!-- Boolean Field Type (B) -->
+                                        <%-- Boolean Field Type (B) --%>
                                         <c:when test="${field.fieldType == 'B'}">
                                             <c:choose>
                                                 <c:when test="${field.editable}">

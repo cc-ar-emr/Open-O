@@ -333,7 +333,7 @@
     <input type="hidden" name="postal" value="${demographic.postal}"/>
     <input type="hidden" name="phone" value="${demographic.phone}${demographicHomeExt}"/>
     <input type="hidden" name="phone2" value="${demographic.phone2}${demographicWorkExt}"/>
-    <input type="hidden" name="dob" value="<%=DemographicData.getDob(demographic,\"/\")%>"/>
+    <input type="hidden" name="dob" value="<%= DemographicData.getDob(demographic, "/") %>"/>
     <input type="hidden" name="firstName" value="${demographic.firstName}"/>
     <input type="hidden" name="lastName" value="${demographic.lastName}"/>
 

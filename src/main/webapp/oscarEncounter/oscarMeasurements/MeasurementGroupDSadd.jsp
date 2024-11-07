@@ -81,7 +81,7 @@
         <select name="htmlName">
             <option value="-1">Select Decision Support</option>
             <%
-                List<String> dsHtmlList = measurementManager.getFlowsheetDsHTML();
+                List<String> dsHtmlList = MeasurementManager.getFlowsheetDsHTML();
                 for (String file : dsHtmlList) {%>
 
             <option value="<%=file%>"><%=file.substring(0, file.lastIndexOf('.'))%>

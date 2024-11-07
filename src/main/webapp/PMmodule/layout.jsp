@@ -82,17 +82,19 @@
     </head>
     <body style="margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;">
 
-    <tiles:insert name="topnav.jsp"></tiles:insert>
+    <jsp:include page="topnav.jsp" />
 
     <div style="height:20px"></div>
 
     <div class="composite">
         <table border="0" cellspacing="0" cellpadding="0" width="100%">
             <tr valign="top">
-                <td id="leftcol" width="20%"><tiles:insert attribute="navigation"/>
+                <td id="leftcol" width="20%">
+                    <jsp:include page="/PMmodule/navigation_blank.jsp"/>
                 </td>
                 <td width="80%">
-                    <div class="body"><tiles:insert attribute="body"/></div>
+                    <div class="body">
+                            <jsp:include page="/PMmodule/Home.jsp"/>
                 </td>
             </tr>
         </table>

@@ -26,8 +26,6 @@
 
 <%@ taglib uri="http://struts.apache.org/tags-html"
            prefix="html" %>
-<%@ taglib uri="http://struts.apache.org/tags-tiles"
-           prefix="tiles" %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html:html lang="en">
@@ -35,20 +33,20 @@
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/global.js"></script>
 
         <html:base/>
-        <title><tiles:getAsString name="title"/></title>
+        <title><c:out value="${title}" /></title>
     </head>
     <body>
     <table border="1" width="600" cellspacing="5">
         <tbody>
         <tr>
-            <td colspan="2"><tiles:insert attribute="header"/></td>
+            <td colspan="2"></td>
         </tr>
         <tr>
             <td width="200">navigation</td>
-            <td width="400"><tiles:insert attribute="body"/></td>
+            <td width="400"></td>
         </tr>
         <tr>
-            <td colspan="2"><tiles:insert attribute="footer"/></td>
+            <td colspan="2"></td>
         </tr>
         </tbody>
     </table>

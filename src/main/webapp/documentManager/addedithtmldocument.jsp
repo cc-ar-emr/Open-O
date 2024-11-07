@@ -133,7 +133,7 @@
     Long now = new Date().getTime();
     String annotation_attrib = "anno" + now;
 
-    CtlDocClassDao docClassDao = (CtlDocClassDao) SpringUtils.getBean(CtlDocClassDao.classs);
+    CtlDocClassDao docClassDao = (CtlDocClassDao) SpringUtils.getBean(CtlDocClassDao.class);
     List<String> reportClasses = docClassDao.findUniqueReportClasses();
     ArrayList<String> subClasses = new ArrayList<String>();
     ArrayList<String> consultA = new ArrayList<String>();

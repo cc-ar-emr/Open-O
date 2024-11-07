@@ -24,7 +24,8 @@
     }
 %>
 <%@ page import="java.util.*,oscar.oscarBilling.ca.bc.data.BillingCodeData" %>
-<%@ page import="oscar.oscarBilling.ca.shared.administration.GstControlAction" %>
+<%@ page import="oscar.oscarBilling.ca.on.administration.GstControlAction" %>
+<%@ page import="oscar.oscarBilling.ca.on.data.JdbcBillingCodeImpl" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="org.oscarehr.common.model.BillingService" %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
@@ -33,6 +34,7 @@
     String action = StringUtils.trimToNull(request.getParameter("action")) == null ? "search" : request.getParameter("action"); // add/edit
     String alert = "info";
     String description = StringUtils.trimToEmpty(request.getParameter("description"));
+    String percentage = StringUtils.trimToEmpty(request.getParameter("percentage"));
     String gstFlag = StringUtils.trimToNull(request.getParameter("gstFlag")) == null ? "0" : request.getParameter("gstFlag");
     String msg = "Type in a service code and search first to see if it is available.";
     String serviceCode = StringUtils.trimToEmpty(request.getParameter("service_code"));
@@ -41,6 +43,8 @@
     String value = request.getParameter("value");
 
     BillingCodeData bcds = new BillingCodeData();
+    JdbcBillingCodeImpl jdbc = new JdbcBillingCodeImpl();
+
     Properties prop = new Properties();
     String gstPercent = new BigDecimal((new GstControlAction()).readDatabase().getProperty("gstPercent")).divide(new BigDecimal(100), 0).toString();
 
@@ -53,7 +57,7 @@
             // update the service code
             serviceCode = "A" + serviceCode;
             if (serviceCode.equals(action.substring("edit".length()))) {
-                if (bcds.updateCodeByName(serviceCode, description, value, request.getParameter("billingservice_date"), gstFlag)) {
+                if (jdbc.updateCodeByName(serviceCode, description, value, percentage, request.getParameter("billingservice_date"), gstFlag)) {
                     msg = serviceCode + " is updated.<br>" + "Type in a service code and search first to see if it is available.";
                     action = "search";
                     prop.setProperty("service_code", serviceCode);
@@ -74,7 +78,7 @@
         } else if (action.startsWith("add")) {
             serviceCode = "A" + serviceCode;
             if (serviceCode.equals(action.substring("add".length()))) {
-                if (bcds.addBillingCode(serviceCode, description, value, request.getParameter("billingservice_date"), gstFlag) > 0) {
+                if (bcds.addBillingCode(serviceCode, description, value)) {
                     msg = serviceCode + " is added.<br>" + "Type in a service code and search first to see if it is available.";
                     action = "search";
                     prop.setProperty("service_code", serviceCode);
@@ -106,7 +110,7 @@
             if (!serviceCode.startsWith("A")) {
                 serviceCode = "A" + serviceCode;
             }
-            List<String> ls = bcds.getBillingCodeAttr(serviceCode);
+            List<String> ls = jdbc.getBillingCodeAttr(serviceCode);
             if (ls.size() > 0) {
                 prop.setProperty("service_code", serviceCode);
                 prop.setProperty("description", ls.get(1));
@@ -127,7 +131,7 @@
             msg = "Please type in a right service code.";
         } else {
             serviceCode = "A" + serviceCode;
-            if (bcds.deletePrivateCode(serviceCode)) {
+            if (jdbc.deletePrivateCode(serviceCode)) {
                 msg = serviceCode + " is deleted.<br>" + "Type in a service code and search first to see if it is available.";
                 action = "search";
                 prop.setProperty("service_code", "A");
@@ -139,7 +143,8 @@
         }
     }
 
-    List<BillingService> sL = bcds.findAllPrivateCodes();
+    // List<BillingService> sL = bcds.findAllPrivateCodes();
+    List<BillingService> sL = new ArrayList<>();
 %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>

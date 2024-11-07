@@ -28,6 +28,8 @@
 
 <%@ include file="/common/messages.jsp" %>
 <%@ page import="org.oscarehr.common.model.Facility" %>
+<%@ page import="java.util.List" %>
+
 <div class="tabs" id="tabs">
     <table cellpadding="3" cellspacing="0" border="0">
         <tr>
@@ -121,19 +123,20 @@
             if (request.getAttribute("program") != null) {
         %>
 
-        <% if (request.getAttribute("program") != null && ((org.oscarehr.common.model.Program) request.getAttribute("program")).getFacilityId().equals(((org.oscarehr.common.model.Facility) request.getAttribute("facility")).getId())) { %>
-            <display:column sortable="true" sortProperty="name"
-                            title="Program Name">
-                <a
-                        href="<html:rewrite action="/PMmodule/ProgramManagerView"/>?id=<c:out value="${program.id}"/>"><c:out
-                        value="${program.name}"/></a>
-            </display:column>
-        <% } else { %>
-            <display:column sortable="true" sortProperty="name"
-                            title="Program Name">
-                <c:out value="${program.name}"/>
-            </display:column>
-        <% } %>
+        <c:choose>
+            <c:when test="${program.facilityId == facility.id}">
+                <display:column sortable="true" sortProperty="name" title="Program Name">
+                    <a href="${pageContext.request.contextPath}/PMmodule/ProgramManagerView?id=${program.id}">
+                        <c:out value="${program.name}" />
+                    </a>
+                </display:column>
+            </c:when>
+            <c:otherwise>
+                <display:column sortable="true" sortProperty="name" title="Program Name">
+                    <c:out value="${program.name}" />
+                </display:column>
+            </c:otherwise>
+        </c:choose>
 
         <display:column property="type" sortable="true" title="Program Type"/>
         <display:column property="queueSize" sortable="true"
@@ -161,18 +164,20 @@
             <th>Bed Program</th>
             <th>Discharge Date/Time</th>
         </tr>
-        <% for (org.oscarehr.common.model.Client client : (List<org.oscarehr.common.model.Client>) request.getAttribute("associatedClients")) { %>
-            <% String styleColor = ""; %>
-            <% if (client.isInOneDay()) { %>
-                <% styleColor = "style=\"color:red;\""; %>
-            <% } %>
+        <c:forEach var="client" items="${associatedClients}">
+
+            <%String styleColor = ""; %>
+            <c:if test="${client.inOneDay}">
+                <%styleColor = "style=\"color:red;\"";%>
+            </c:if>
             <tr class="b" <%=styleColor%>>
                 <td><c:out value="${client.name}"/></td>
                 <td><c:out value="${client.dob}"/></td>
                 <td><c:out value="${client.programName}"/></td>
                 <td><c:out value="${client.dischargeDate}"/></td>
             </tr>
-        <% } %>
+
+        </c:forEach>
     </table>
 
 

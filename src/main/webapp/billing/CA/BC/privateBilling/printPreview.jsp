@@ -387,7 +387,7 @@
 
                     %>
 
-                    <% SystemPreferences invoiceClinicInfo = systemPreferencesDao.findPreferenceByName("invoice_custom_clinic_info");
+                    <% SystemPreferences invoiceClinicInfo = systemPreferencesDao.findPreferenceByName(SystemPreferences.GENERAL_SETTINGS_KEYS.invoice_custom_clinic_info);
                         if (invoiceClinicInfo == null || StringUtils.isNullOrEmpty(invoiceClinicInfo.getValue())) { %>
                     <div>
                         <%=Encode.forHtml(clinic.getClinicName())%>

@@ -29,7 +29,8 @@
 %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
-<%@ taglib uri="http://java.sun.com/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="java.util.List" %>
 <link rel="stylesheet" type="text/css" href="../encounterStyles.css">
 <html:html lang="en">
     <head>
@@ -69,14 +70,19 @@
                         <tr>
                             <td>
                                 <table>
+
+                                <%
+                                    // Check if messages list is not empty
+                                    List<String> messages = (List<String>) request.getAttribute("messages");
+                                    if (messages != null && !messages.isEmpty()) {
+                                %>
                                     <tr>
-                                        <c:if test="${not empty messages}">
-                                            <c:forEach var="msg" items="${messages}">
-                                                <bean:write name="msg"/>
-                                                <br>
-                                            </c:forEach>
-                                        </c:if>
+                                <%      for (String msg : messages) { %><%= msg %><br><%}%>
                                     </tr>
+                                <%
+
+                                    }
+                                %>
                                     <tr>
                                         <td>
                                     <tr>

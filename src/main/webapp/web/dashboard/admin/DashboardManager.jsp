@@ -34,7 +34,7 @@
 </security:oscarSec>
 
 <!DOCTYPE html >
-<html:html locale="true">
+<html>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -306,4 +306,4 @@
         </div>
     </div> <!-- end container -->
     </body>
-</html:html>
+</html>

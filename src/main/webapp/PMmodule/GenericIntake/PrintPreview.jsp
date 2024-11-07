@@ -30,7 +30,7 @@
     GenericIntakeEditFormBean intakeEditForm = (GenericIntakeEditFormBean) session.getAttribute("genericIntakeEditForm");
     Intake intake = intakeEditForm.getIntake();
 %>
-<html:html xhtml="true" locale="true">
+<html>
     <head>
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/global.js"></script>
         <title>Generic Intake Print</title>
@@ -116,4 +116,4 @@
         </tr>
     </table>
     </body>
-</html:html>
+</html>

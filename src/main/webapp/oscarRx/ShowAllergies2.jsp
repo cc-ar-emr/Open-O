@@ -33,7 +33,7 @@
 <%@ page language="java" import="oscar.OscarProperties" %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
-<%@ taglib uri="/WEB-INF/struts-logic.tld" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/security.tld" prefix="security" %>
 
 <%@page import="java.util.List" %>
@@ -62,16 +62,18 @@
 
     PartialDateDao partialDateDao = (PartialDateDao) SpringUtils.getBean(PartialDateDao.class);
 %>
-
-<c:if test="${empty RxSessionBean}">
-    <% response.sendRedirect("error.html"); %>
-</c:if>
-<c:if test="${not empty RxSessionBean}">
-    <bean:define id="bean" type="oscar.oscarRx.pageUtil.RxSessionBean" name="RxSessionBean" scope="session"/>
-    <c:if test="${bean.valid == 'false'}">
-        <% response.sendRedirect("error.html"); %>
-    </c:if>
-</c:if>
+<%
+    // Check if RxSessionBean is missing in the session
+    if (session.getAttribute("RxSessionBean") == null) {
+        response.sendRedirect("error.html");
+    } else {
+        // Check if RxSessionBean is present but not valid
+        oscar.oscarRx.pageUtil.RxSessionBean rxBean = (oscar.oscarRx.pageUtil.RxSessionBean) session.getAttribute("RxSessionBean");
+        if (!rxBean.isValid()) {
+            response.sendRedirect("error.html");
+        }
+    }
+%>
 <%
     oscar.oscarRx.pageUtil.RxSessionBean bean = (oscar.oscarRx.pageUtil.RxSessionBean) pageContext.findAttribute("bean");
     String annotation_display = org.oscarehr.casemgmt.model.CaseManagementNoteLink.DISP_ALLERGY;

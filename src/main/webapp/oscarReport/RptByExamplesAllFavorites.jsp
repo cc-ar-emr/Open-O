@@ -133,6 +133,6 @@
             <td class="MainTableBottomRowRightColumn"></td>
         </tr>
         </table>
-    </html:form>
+    </form>
     </body>
-</html:html>
+</html>

@@ -38,6 +38,7 @@
     String providermsgPrefs = (String) request.getAttribute("providermsgPrefs");
     String providerbtnClose = (String) request.getAttribute("providerbtnClose");
     String providerbtnSubmit = (String) request.getAttribute("providerbtnSubmit");
+    String providerbtnCancel = (String) request.getAttribute("providerbtnCancel");
     String providermsgSuccess = (String) request.getAttribute("providermsgSuccess");
 %>
 <html:html>

@@ -341,14 +341,19 @@
                 <td align="left">
                     <table width="100%">
                         <c:forEach var="billingPaymentType" items="${paymentTypeList}" varStatus="ttr">
-                            <%= ttr.intValue() % 2 == 0 ? "<tr>" : "" %>
+                            <c:if test="${ttr.index % 2 == 0}">
+                                <tr>
+                            </c:if>
                             <td width="50%">
                                 <input type="radio" name="paymentType"
                                        id="paymentType<bean:write name='billingPaymentType' property='id'/>"
-                                       value="<bean:write name='billingPaymentType' property='id'/>" <%=(ttr == 0 ? "checked=true" : "")%> />
+                                       value="<bean:write name='billingPaymentType' property='id'/>" 
+                                       <c:if test="${ttr.index == 0}">checked="true"</c:if> />
                                 <bean:write name="billingPaymentType" property="paymentType"/>
                             </td>
-                            <%= ttr.intValue() % 2 == 0 ? "" : "</tr>" %>
+                            <c:if test="${ttr.index % 2 == 0}">
+                                </tr>
+                            </c:if>
                         </c:forEach>
                     </table>
                 </td>
@@ -436,24 +441,33 @@
         <c:if test="${not empty paymentsList}">
             <c:forEach var="displayPayment" items="${paymentsList}" varStatus="ctr">
                 <tr>
-                    <td><%= ctr + 1 %>
-                    </td>
-                    <td><bean:write name="displayPayment" property="total_payment"/></td>
-                    <td><%=types.get(ctr.intValue()) %>
-                    </td>
-                    <td><bean:write name="displayPayment" property="paymentDateFormatted"/></td>
-                    <td><bean:write name="displayPayment" property="total_discount"/></td>
-                    <td><bean:write name="displayPayment" property="total_credit"/></td>
-                    <td><bean:write name="displayPayment" property="total_refund"/></td>
-                    <%if (((BigDecimal) balances.get(index)).compareTo(BigDecimal.ZERO) == -1) {%>
-                    <td><%= "-" + currency.format(balances.get(index++)) %>
-                    </td>
-                    <%} else { %>
-                    <td><%= currency.format(balances.get(index++)) %>
-                    </td>
-                    <%} %>
+                    <!-- Display index starting from 1 -->
+                    <td>${ctr.index + 1}</td>
+
+                    <!-- Display properties of displayPayment -->
+                    <td><c:out value="${displayPayment.total_payment}" /></td>
+
+                    <!-- Accessing types list using JSTL -->
+                    <td>${types[ctr.index]}</td>
+
+                    <td><c:out value="${displayPayment.paymentDateFormatted}" /></td>
+                    <td><c:out value="${displayPayment.total_discount}" /></td>
+                    <td><c:out value="${displayPayment.total_credit}" /></td>
+                    <td><c:out value="${displayPayment.total_refund}" /></td>
+
+                    <!-- Conditional formatting for balances -->
+                    <c:choose>
+                        <c:when test="${balances[ctr.index] < 0}">
+                            <td>${'-' + currency.format(balances[ctr.index])}</td>
+                        </c:when>
+                        <c:otherwise>
+                            <td>${currency.format(balances[ctr.index])}</td>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <!-- Link to view payment -->
                     <td>
-                        <a href="javascript:onViewPayment('<bean:write name="displayPayment" property="id" />')">view</a>
+                        <a href="javascript:onViewPayment('${displayPayment.id}')">view</a>
                     </td>
                 </tr>
             </c:forEach>

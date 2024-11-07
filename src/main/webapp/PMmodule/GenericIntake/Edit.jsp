@@ -63,7 +63,7 @@
 <%@page import="java.text.DateFormatSymbols" %>
 <%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
 <%@page import="org.oscarehr.common.model.Demographic" %>
-<html xhtml="true" locale="true">
+<html>
     <head>
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/global.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/check_hin.js"></script>

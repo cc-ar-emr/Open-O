@@ -42,8 +42,8 @@
             <th>Program</th>
         </tr>
         <%
-            Map<String, DemographicDao.ClientListsReportResults> reportResults = (Map<String, DemographicDao.ClientListsReportResults>) request.getAttribute("reportResults");
-            for (DemographicDao.ClientListsReportResults clientListsReportResults : reportResults.values()) {
+            Map<String, DemographicDaoImpl.ClientListsReportResults> reportResults = (Map<String, DemographicDaoImpl.ClientListsReportResults>) request.getAttribute("reportResults");
+            for (DemographicDaoImpl.ClientListsReportResults clientListsReportResults : reportResults.values()) {
         %>
         <tr>
             <td><%=clientListsReportResults.lastName + ", " + clientListsReportResults.firstName%>

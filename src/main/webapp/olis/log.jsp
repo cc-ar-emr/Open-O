@@ -38,7 +38,7 @@
 %>
 
 <!DOCTYPE html >
-<html:html locale="true">
+<html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -145,4 +145,4 @@
         </div>
     </div> <!-- end container -->
     </body>
-</html:html>
+</html>

@@ -34,7 +34,7 @@
 
 %>
 
-<html:html locale="true">
+<html>
     <head>
         <html:base/>
         <title>Measurement Mapping Configuration</title>
@@ -165,4 +165,4 @@
         </div>
     </form>
     </body>
-</html:html>
+</html>

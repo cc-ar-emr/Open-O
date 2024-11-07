@@ -614,11 +614,11 @@
                     <%if (type == null) { %>
                     <td><%=demo.getAgeAsOf(asDate)%>
                     </td>
-                    <td><%=Encode.forHtml(h.get("sex"))%>
+                    <td><%=Encode.forHtml((String) h.get("sex"))%>
                     </td>
-                    <td><%=Encode.forHtml(h.get("lastName"))%>
+                    <td><%=Encode.forHtml((String) h.get("lastName"))%>
                     </td>
-                    <td><%=Encode.forHtml(h.get("firstName"))%>
+                    <td><%=Encode.forHtml((String) h.get("firstName"))%>
                     </td>
                     <td><%=Encode.forHtml(demo.getHin()) + Encode.forHtml(demo.getVer())%>
                     </td>
@@ -643,11 +643,11 @@
                         org.oscarehr.common.model.Demographic demoSDM = demoData.getSubstituteDecisionMaker(LoggedInInfo.getLoggedInInfoFromSession(request), dis.demographicNo.toString());%>
                     <td><%=demo.getAgeAsOf(asDate)%>
                     </td>
-                    <td><%=Encode.forHtml(h.get("sex"))%>
+                    <td><%=Encode.forHtml((String) h.get("sex"))%>
                     </td>
-                    <td><%=Encode.forHtml(h.get("lastName"))%>
+                    <td><%=Encode.forHtml((String) h.get("lastName"))%>
                     </td>
-                    <td><%=Encode.forHtml(h.get("firstName"))%>
+                    <td><%=Encode.forHtml((String) h.get("firstName"))%>
                     </td>
                     <td><%=Encode.forHtml(demo.getHin()) + Encode.forHtml(demo.getVer())%>
                     </td>

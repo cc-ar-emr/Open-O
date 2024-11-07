@@ -221,7 +221,7 @@
     String defaultServiceLocation = OscarProperties.getInstance().getProperty("visittype");
 
     // 2. global billing settings
-    List<Property> userSetDefaultServiceLocationList = propertyDao.findGlobalByName(Property.PROPERTY_KEY.bc_default_service_location);
+    List<Property> userSetDefaultServiceLocationList = propertyDao.findGlobalByName(Property.PROPERTY_KEY.bc_default_service_location.toString());
     if (userSetDefaultServiceLocationList != null && !userSetDefaultServiceLocationList.isEmpty()) {
         Property uerSetDefaultServiceLocationProperty = userSetDefaultServiceLocationList.get(0);
         String userSetDefaultServiceLocation = null;

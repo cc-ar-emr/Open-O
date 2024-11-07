@@ -31,6 +31,8 @@
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
 <%@ page import="oscar.oscarReport.oscarMeasurements.pageUtil.*" %>
 <%@ page import="java.util.*, java.sql.*, java.text.*, java.net.*" %>
+<%@ page import="org.oscarehr.common.model.MeasurementType" %>
+
 <%
     GregorianCalendar now = new GregorianCalendar();
     int curYear = now.get(Calendar.YEAR);
@@ -153,7 +155,7 @@
                                             <c:forEach var="msg" items="${messages}">
                                                 <bean:write name="msg"/>
                                                 <br>
-                                            <% } %>
+                                            </c:forEach>
                                         </c:if>
                                     </tr>
                                     <tr>
@@ -180,74 +182,68 @@
                                         <th align="left" class="subTitles" width="120"><bean:message
                                                 key="oscarReport.CDMReport.msgEndDate"/></th>
                                     </tr>
-                                    <% for (int i = 0; i < measurementTypes.measurementTypeVector.size(); i++) {
-                                        MeasurementType measurementType = measurementTypes.measurementTypeVector.get(i); %>
+                                    <c:forEach var="measurementType" items="${measurementTypes.measurementTypeVector}" varStatus="ctr">
                                     <tr>
-                                        <td width="2" class="fieldBox" bgcolor="#ddddff"><input
-                                                type="checkbox" name="guidelineCheckbox" value="<%=ctr%>"/></td>
-                                        <td width="4" class="fieldBox" bgcolor="#ddddff" width="5"><bean:write
-                                                name="measurementType" property="typeDisplayName"/></td>
-                                        <td width="200" class="fieldBox" bgcolor="#ddddff"><bean:write
-                                                name="measurementType" property="typeDesc"/></td>
+                                        <td width="2" class="fieldBox" bgcolor="#ddddff">
+                                            <input type="checkbox" name="guidelineCheckbox" value="${ctr.index}" />
+                                        </td>
+                                        <td width="4" class="fieldBox" bgcolor="#ddddff">
+                                            <c:out value="${measurementType.typeDisplayName}" />
+                                        </td>
+                                        <td width="200" class="fieldBox" bgcolor="#ddddff">
+                                            <c:out value="${measurementType.typeDesc}" />
+                                        </td>
                                         <td width="200" class="fieldBox" bgcolor="#ddddff"></td>
                                         <td width="10" class="fieldBox" bgcolor="#ddddff">
                                             <table>
                                                 <tr>
-                                                    <td><input type="radio"
-                                                               name='<%="value(aboveBelow" + ctr+")"%>' value=">"
-                                                               checked="checked"/></td>
-                                                    <td><input type="radio"
-                                                               name='<%="value(aboveBelow" + ctr+")"%>'
-                                                               value="<"/></td>
+                                                    <td><input type="radio" name="value(aboveBelow${ctr.index})" value=">" checked="checked" /></td>
+                                                    <td><input type="radio" name="value(aboveBelow${ctr.index})" value="<" /></td>
                                                 </tr>
                                             </table>
                                         </td>
-                                        <td width="50" class="fieldBox" bgcolor="#ddddff"><input type="text"
-                                                                                                 name="guidelineB"
-                                                                                                 size="6"/></td>
-                                        <td width="120" class="fieldBox" bgcolor="#ddddff">
-                                            <input type="text" name="startDateB" value='<bean:write name="lastYear"/>'
-                                                   size="10">
-                                            <img src="../img/calendar.gif" border="0"
-                                                 onClick="window.open('../../oscarReport/oscarReportCalendarPopup.jsp?type=<%="startDateB[" + ctr + "]"%>&amp;year=<%=curYear%>&amp;month=<%=curMonth%>&amp;form=<%="RptInitializePatientsMetGuidelineCDMReportForm"%>','','width=300,height=300')"/>
+                                        <td width="50" class="fieldBox" bgcolor="#ddddff">
+                                            <input type="text" name="guidelineB" size="6" />
                                         </td>
                                         <td width="120" class="fieldBox" bgcolor="#ddddff">
-                                            <input type="text" name="endDateB" value='<bean:write name="today"/>'
-                                                   size="10">
+                                            <input type="text" name="startDateB" value="${lastYear}" size="10">
                                             <img src="../img/calendar.gif" border="0"
-                                                 onClick="window.open('../../oscarReport/oscarReportCalendarPopup.jsp?type=<%="endDateB[" + ctr + "]"%>&amp;year=<%=curYear%>&amp;month=<%=curMonth%>&amp;form=<%="RptInitializePatientsMetGuidelineCDMReportForm"%>','','width=300,height=300')"/>
+                                                 onclick="window.open('../../oscarReport/oscarReportCalendarPopup.jsp?type=startDateB[${ctr.index}]&amp;year=${curYear}&amp;month=${curMonth}&amp;form=RptInitializePatientsMetGuidelineCDMReportForm','','width=300,height=300')" />
                                         </td>
-                                        <input type="hidden" name='<%="value(measurementType"+ctr+")"%>'
-                                               value="<bean:write name="measurementType" property="type" />"/>
+                                        <td width="120" class="fieldBox" bgcolor="#ddddff">
+                                            <input type="text" name="endDateB" value="${today}" size="10">
+                                            <img src="../img/calendar.gif" border="0"
+                                                 onclick="window.open('../../oscarReport/oscarReportCalendarPopup.jsp?type=endDateB[${ctr.index}]&amp;year=${curYear}&amp;month=${curMonth}&amp;form=RptInitializePatientsMetGuidelineCDMReportForm','','width=300,height=300')" />
+                                        </td>
+                                        <input type="hidden" name="value(measurementType${ctr.index})" value="${measurementType.type}" />
                                     </tr>
                                     <tr>
                                         <td width="2" class="fieldBox" bgcolor="#ddddff"></td>
-                                        <td width="4" class="fieldBox" bgcolor="#ddddff" width="5"></td>
+                                        <td width="4" class="fieldBox" bgcolor="#ddddff"></td>
                                         <td width="200" class="fieldBox" bgcolor="#ddddff"></td>
                                         <td width="200" class="fieldBox" bgcolor="#ddddff">
                                             <table>
-                                                <%int i = 0;%>
-                                                <% for (int j = 0; j < mInstrcs[i].measuringInstrcVector.size(); j++) {
-                                                    MeasuringInstrc mInstrc = mInstrcs[i].measuringInstrcVector.get(j); %>
+                                                <% int i = 0; %>
+                                                <c:forEach var="mInstrc" items="${measurementType.measuringInstrcVector}" varStatus="index">
                                                     <tr>
-                                                        <td><input type="checkbox"
-                                                                   name='<%="value(mInstrcsCheckbox"+ctr+index+")"%>'
-                                                                   checked="checked"
-                                                                   value='<bean:write name="mInstrc" property="measuringInstrc" />'/><bean:write
-                                                                name="mInstrc" property="measuringInstrc"/></td>
+                                                        <td>
+                                                            <input type="checkbox" name="value(mInstrcsCheckbox${ctr.index}${index.index})" checked="checked"
+                                                                   value="${mInstrc.measuringInstrc}" />
+                                                            <c:out value="${mInstrc.measuringInstrc}" />
+                                                        </td>
                                                     </tr>
-                                                    <%i++;%>
-                                                <% } %>
+                                                    <% i++; %>
+                                                </c:forEach>
                                             </table>
                                         </td>
-                                        <input type="hidden" name='<%= "value(mNbInstrcs" + ctr + ")" %>'
-                                               value='<%=i%>'/>
+                                        <input type="hidden" name="value(mNbInstrcs${ctr.index})" value="${i}" />
                                         <td width="10" class="fieldBox" bgcolor="#ddddff"></td>
                                         <td width="50" class="fieldBox" bgcolor="#ddddff"></td>
                                         <td width="120" class="fieldBox" bgcolor="#ddddff"></td>
                                         <td width="120" class="fieldBox" bgcolor="#ddddff"></td>
                                     </tr>
                                     </c:forEach>
+
                                     <tr>
                                     </tr>
 

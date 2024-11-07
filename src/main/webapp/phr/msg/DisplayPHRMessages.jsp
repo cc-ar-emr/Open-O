@@ -45,7 +45,6 @@
 <%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://struts.apache.org/tags-nested" prefix="nested" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="/WEB-INF/phr-tag.tld" prefix="phr" %>
 <%@ taglib uri="/WEB-INF/rewrite-tag.tld" prefix="rewrite" %>
@@ -84,27 +83,22 @@
     pageContext.setAttribute("TYPE_MEDICATION", MedicalDataType.MEDICATION.name());
     pageContext.setAttribute("TYPE_ACCESSPOLICIES", "RELATIONSHIP");
 
-    <c:set var="pageMethod" value="${param.method}" />
-    <c:choose>
-        <c:when test="${empty pageMethod}">
-            <c:set var="pageMethod" value="viewMessages" />
-        </c:when>
-        <c:when test="${pageMethod eq 'delete' or pageMethod eq 'resend'}">
-            <c:set var="pageMethod" value="viewSentMessages" />
-        </c:when>
-        <c:when test="${pageMethod eq 'archive'}">
-            <c:set var="pageMethod" value="viewMessages" />
-        </c:when>
-        <c:when test="${pageMethod eq 'unarchive'}">
-            <c:set var="pageMethod" value="viewArchivedMessages" />
-        </c:when>
-    </c:choose>
-    <c:set var="pageMethod" value="${pageMethod}" scope="request" />
+    String pageMethod = request.getParameter("method");
+    if (pageMethod == null) pageMethod = "viewMessages";
 
-    <c:set var="now" value="<%= new GregorianCalendar() %>" />
-    <c:set var="curYear" value="${now.get(Calendar.YEAR)}" />
-    <c:set var="curMonth" value="${now.get(Calendar.MONTH) + 1}" />
-    <c:set var="curDay" value="${now.get(Calendar.DAY_OF_MONTH)}" />
+    if (pageMethod.equals("delete") || pageMethod.equals("resend"))
+        pageMethod = "viewSentMessages";
+    if (pageMethod.equals("archive"))
+        pageMethod = "viewMessages";
+    if (pageMethod.equals("unarchive"))
+        pageMethod = "viewArchivedMessages";
+
+    request.setAttribute("pageMethod", pageMethod);
+
+    GregorianCalendar now = new GregorianCalendar();
+    int curYear = now.get(Calendar.YEAR);
+    int curMonth = (now.get(Calendar.MONTH) + 1);
+    int curDay = now.get(Calendar.DAY_OF_MONTH);
     String dateString = curYear + "-" + curMonth + "-" + curDay;
 
     //get Actions Pending Approval

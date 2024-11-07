@@ -23,13 +23,23 @@
 
 --%>
 
+<%@ taglib uri="http://struts.apache.org/tags-bean"
+           prefix="bean" %>
+<%@ taglib uri="http://struts.apache.org/tags-html"
+           prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el"
+           prefix="html-el" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic"
+           prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://displaytag.sf.net" prefix="display" %>
 
 <c:set var="showMfhExport" value="false"/>
 <c:set var="mfhExport" value="${oscar.OscarProperties.getInstance().getProperty('MFH_UFC_EXPORT')}"/>
 <c:if test="${not empty mfhExport and mfhExport.equalsIgnoreCase('true')}">
     <c:set var="showMfhExport" value="true"/>
 </c:if>
-<%@ include file="/survey/taglibs.jsp" %>
 <link rel="stylesheet" type="text/css" media="all" href="../share/css/extractedFromPages.css"/>
 <table width="100%">
     <c:if test="${not empty messages}">

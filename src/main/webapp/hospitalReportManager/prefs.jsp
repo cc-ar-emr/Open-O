@@ -39,7 +39,7 @@
 %>
 
 <!DOCTYPE html >
-<html:html locale="true">
+<html>
     <head>
         <html:base/>
         <meta charset="utf-8">
@@ -182,4 +182,4 @@
         </div>
     </div> <!-- end container -->
     </body>
-</html:html>
+</html>

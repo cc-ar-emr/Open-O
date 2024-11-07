@@ -80,7 +80,7 @@
     <h3><bean:message key="oscarEncounter.Measurements.msgEditMeasurementGroup"/> - Remove Decision Support from
         Group </h3>
     <%
-        propValue = measurementManager.getPropertyValue(propKey);
+        propValue = MeasurementManager.getPropertyValue(propKey);
         valueDisplay = propValue.substring(0, propValue.lastIndexOf('.'));
     %>
 

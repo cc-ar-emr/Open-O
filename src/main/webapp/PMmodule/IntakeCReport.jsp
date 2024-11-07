@@ -38,7 +38,7 @@
     Date[] dateList = (Date[]) request.getAttribute("dateList");
 %>
 
-<html:html xhtml="true" locale="true">
+<html>
     <head>
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/global.js"></script>
         <title>Street Health Mental Health Report</title>
@@ -104,4 +104,4 @@
         %>
     </table>
     </body>
-</html:html>
+</html>
