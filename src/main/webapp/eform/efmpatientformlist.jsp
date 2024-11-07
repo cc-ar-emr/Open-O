@@ -68,7 +68,7 @@
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean"%>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html"%>
 
-<html:html locale="true">
+<html>
 
 	<head>
 		<title><bean:message key="eform.showmyform.title" /></title>
@@ -310,4 +310,4 @@
 		</tr>
 	</table>
 	</body>
-</html:html>
+</html>
