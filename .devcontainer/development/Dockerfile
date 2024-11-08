@@ -1,4 +1,4 @@
-FROM tomcat:10-jdk11
+FROM tomcat:9.0.56-jdk11
 
 # Labels
 LABEL author="OpenOSP" \
@@ -15,8 +15,8 @@ WORKDIR /workspace
 # Install required packages and clean up apt lists
 RUN apt-get update && apt-get install -y --no-install-recommends \
     dos2unix curl git wget apt-transport-https ca-certificates gnupg lsb-release \
-    locales iputils-ping gettext fontconfig libc6 libfreetype6 libjpeg-turbo8 \
-    libpng16-16 libssl3 libstdc++6 libx11-6 libxcb1 libxext6 libxtst6 \
+    locales iputils-ping gettext fontconfig libc6 libfreetype6 libjpeg62-turbo \
+    libpng16-16 libssl1.1 libstdc++6 libx11-6 libxcb1 libxext6 libxtst6 \
     libxrender1 xfonts-75dpi xfonts-base zlib1g maven mariadb-client \
     nano openssh-client vim-tiny \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
