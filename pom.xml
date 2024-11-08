@@ -28,6 +28,8 @@
         <slf4j.version>1.7.32</slf4j.version>
         <hapifhir.version>5.4.0</hapifhir.version>
         <struts.version>1.3.11</struts.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -1431,12 +1433,22 @@
             <version>4.4.1</version>
         </dependency>
         <!-- Coming soon: JAVA 11 -->
-        <!--<dependency>-->
-        <!--    <groupId>com.sun.xml.ws</groupId>-->
-        <!--    <artifactId>jaxws-ri</artifactId>-->
-        <!--    <version>2.3.0</version>-->
-        <!--    <type>pom</type>-->
-        <!--</dependency>-->
+        <dependency>
+           <groupId>com.sun.xml.ws</groupId>
+           <artifactId>jaxws-ri</artifactId>
+           <version>2.3.0</version>
+           <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
@@ -1534,8 +1546,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
 
