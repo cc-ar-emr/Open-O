@@ -1,1 +1,0 @@
-insert into billing_on_errorCode values ('51','Fee allowed according to the appropriate item in the current Ministry Schedule of Benefits') ON DUPLICATE KEY UPDATE description='Fee allowed according to the appropriate item in the current Ministry Schedule of Benefits';

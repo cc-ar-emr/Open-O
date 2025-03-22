@@ -1,1 +1,0 @@
-alter table client_referral add vacancy_id int(11);

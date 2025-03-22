@@ -1,1 +1,0 @@
-ALTER TABLE `pharmacyInfo` ADD `uid` int(10) NOT NULL FIRST;

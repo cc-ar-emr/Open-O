@@ -1,1 +1,0 @@
-INSERT INTO billing_on_errorCode (code, description) VALUES ('ARF', 'Technical service code requires referring physician') ON DUPLICATE KEY UPDATE description='Technical service code requires referring physician';

@@ -1,1 +1,0 @@
-ALTER TABLE document CHANGE COLUMN doctype doctype VARCHAR(60);

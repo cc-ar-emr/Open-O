@@ -1,1 +1,0 @@
-#Folder for wsdl files that have been used to generate client_stubs

@@ -1,1 +1,0 @@
-alter table hl7TextInfo modify report_status varchar(20);

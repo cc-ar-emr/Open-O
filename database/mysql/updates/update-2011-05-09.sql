@@ -1,1 +1,0 @@
-alter table allergies add column life_stage char(1);

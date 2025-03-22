@@ -1,1 +1,0 @@
-alter table appointment add column creatorSecurityId int;

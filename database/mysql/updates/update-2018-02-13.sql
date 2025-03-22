@@ -1,1 +1,0 @@
-INSERT INTO `secObjectName` (`objectName`, `description`, `orgapplicable`) VALUES ('_admin.schedule.curprovider_only','allow provider with non-admin role to create schedule templates and assign to themselves', 0);

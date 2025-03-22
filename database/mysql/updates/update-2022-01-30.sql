@@ -1,1 +1,0 @@
-alter table fax_config add column accountName varchar(55);

@@ -1,1 +1,0 @@
-alter table AppDefinition add column consentTypeId int(15);

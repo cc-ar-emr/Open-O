@@ -1,1 +1,0 @@
-alter table ProviderPreference add column encryptedMyOscarPassword varbinary(255);

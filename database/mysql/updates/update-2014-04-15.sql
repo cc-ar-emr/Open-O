@@ -1,1 +1,0 @@
-ALTER TABLE `raheader` CHANGE COLUMN `filename` VARCHAR(30) NOT NULL;
