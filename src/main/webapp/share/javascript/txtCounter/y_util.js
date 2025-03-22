@@ -24,18 +24,29 @@ ylib.util.isTextChar = function(keyCode){
 	return true;
 }
 
-ylib.util.FindValueInList = function(sValue, sList){
-	var tValue;
-	sValue = sValue.replace(/^\s+|\s+$/, '');
-	if(sList.indexOf(",")==-1){
-		return (sList.replace(/^\s+|\s+$/, '') == sValue);
-	}
-	var sArr;	
-	//find in list
-	eval("sArr = [" + sList + "];");
-	for(var i=0; i<sArr.length; i++){		
-		tValue = sArr[i].toString().replace(/^\s+|\s+$/, '');
-		if(tValue==sValue) return true;
-	}
-	return false;
-}
+ylib.util.FindValueInList = function (sValue, sList) {
+    var tValue;
+    sValue = sValue.replace(/^\s+|\s+$/g, '');
+    
+    // Check if sList is a valid array format
+    if (sList.indexOf("[") === -1 || sList.indexOf("]") === -1) {
+        return sList.replace(/^\s+|\s+$/g, '') === sValue;
+    }
+
+    var sArr;
+    try {
+        sArr = JSON.parse("[" + sList + "]");
+    } catch (e) {
+        console.error("Invalid input for sList", e);
+        return false;
+    }
+
+    // Find in list
+    for (var i = 0; i < sArr.length; i++) {
+        tValue = sArr[i].toString().replace(/^\s+|\s+$/g, '');
+        if (tValue === sValue) return true;
+    }
+    
+    return false;
+};
+
