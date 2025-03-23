@@ -1,0 +1,165 @@
+                    
+                    
+┌──────────────────┐
+│ 35 Code Findings │
+└──────────────────┘
+                                          
+  [36m[22m[24m  src/main/webapp/gpl.htm[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+           55┆ WWW: <a href="http://oscarhome.org/">http://oscarhome.org/</a></p>
+                                                         
+  [36m[22m[24m  src/main/webapp/lab/CA/BC/lablinks.htm[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+           35┆ <li>CML: <a                                                                               
+               href="http://www.canmedlab.com/physhome.asp">http://www.canmedlab.com/physhome.asp</a><br>
+                                                   
+  [36m[22m[24m  src/main/webapp/lab/lablinks.htm[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+           60┆ <li>CML: <a                                                                               
+               href="http://www.canmedlab.com/physhome.asp">http://www.canmedlab.com/physhome.asp</a><br>
+                                                              
+  [36m[22m[24m  src/main/webapp/share/calendar/dayinfo.html[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+          117┆ <address><a href="http://dynarch.com/mishoo/">mishoo</a></address>
+                                                                         
+  [36m[22m[24m  src/main/webapp/share/calendar/doc/html/reference.html[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+           50┆ &copy; Dynarch.com 2002-2005, <a                           
+               href="http://www.dynarch.com/"><tt>www.dynarch.com</tt></a>
+            ⋮┆----------------------------------------
+          182┆ <a                                                                                         
+               href="http://www.dynarch.com/projects/calendar/"><tt>www.dynarch.com/projects/calendar</tt>
+               </a>                                                                                       
+            ⋮┆----------------------------------------
+          250┆ <a href="http://www.dynarch.com/"><tt>www.dynarch.com</tt></a>
+            ⋮┆----------------------------------------
+          258┆ <a href="http://www.gnu.org/licenses/lgpl.html">GNU Lesser General Public License</a>.</p>
+            ⋮┆----------------------------------------
+          1857┆ <li><p>Sunny Chowdhury (<a href="http://www.ex3.com">www.ex3.com</a>)</p>
+            ⋮┆----------------------------------------
+          1860┆ <li><p>Ian Barrack (<a href="http://www.simban.com">www.simban.com</a>)</p>
+            ⋮┆----------------------------------------
+          1866┆ <li><p>Seyhan Ersoy (<a href="http://www.oocgi.com">www.oocgi.com</a>)</p>
+            ⋮┆----------------------------------------
+          1869┆ <li><p>Jon Stokkeland (<a href="http://www.sauen.com">www.sauen.com</a>)</p>
+            ⋮┆----------------------------------------
+          1914┆ <div align=right class=advertisement>HTML conversion by <a
+          1915┆         href="http://www.ccs.neu.edu/~dorai/tex2page/tex2page-doc.html">TeX2page
+               20050501</a></div>                                                               
+                                                            
+  [36m[22m[24m  src/main/webapp/share/calendar/index.html[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+          204┆ <h2><a href="http://www.dynarch.com/projects/calendar/"
+          205┆        title="Visit the project website">jscalendar</a>-1.0
+            ⋮┆----------------------------------------
+          365┆ &copy; <a href="http://www.dynarch.com/">dynarch.com</a> 2002-2005 <br/>
+            ⋮┆----------------------------------------
+          366┆ Author: <a href="http://www.bazon.net/mishoo/">Mihai
+          367┆ Bazon</a><br/> Distributed under the <a
+            ⋮┆----------------------------------------
+          367┆ Bazon</a><br/> Distributed under the <a
+          368┆     href="http://www.gnu.org/licenses/lgpl.html">GNU LGPL</a>.
+            ⋮┆----------------------------------------
+          372┆ would love it if you would <a href="http://www.dynarch.com/contact.html">let us
+          373┆     know</a>.</p>
+                                                                     
+  [36m[22m[24m  src/main/webapp/share/calendar/multiple-dates.html[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+           80┆ <address><a href="http://dynarch.com/mishoo/">mishoo</a></address>
+                                                                    
+  [36m[22m[24m  src/main/webapp/share/calendar/release-notes.html[0m
+    ❯❱ html.security.plaintext-http-link.plaintext-http-link
+          This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.
+          Details: https://sg.run/RA5q                                                        
+                                                                                              
+           24┆ <a href="http://www.dynarch.com/projects/calendar/">The Coolest DHTML Calendar</a><br/>
+            ⋮┆----------------------------------------
+           25┆ © <a href="http://www.dynarch.com/">Dynarch.com</a> 2002 and later.
+            ⋮┆----------------------------------------
+           84┆ <a
+           85┆         href="http://www.zapatec.com/website/main/products/prod1/">The
+           86┆     Zapatec Calendar</a>. Zapatec kindly allowed us to
+            ⋮┆----------------------------------------
+          137┆ it should work with other browsers too. Many thanks to <a
+          138┆     href="http://www.ex3.com">Sunny Chowdhury</a> for sponsoring
+            ⋮┆----------------------------------------
+          248┆ <b>scrolling area</b>. <b>Many thanks</b> to Ian Barrack (<a
+          249┆     href="http://www.simban.com">Simban.com</a>) who pointed it up and
+            ⋮┆----------------------------------------
+          381┆ <p>Check <a
+          382┆                                                                                            
+               href="http://sourceforge.net/tracker/?atid=544285&group_id=75569&func=browse">SourceForge</
+               a>,                                                                                        
+            ⋮┆----------------------------------------
+          422┆ <p>This covers only those bugs that have been reported <a
+          423┆         href="http://sourceforge.net/projects/jscalendar" target="_blank"
+          424┆         title="Project page at SourceForge">at SourceForge</a>.</p>
+            ⋮┆----------------------------------------
+          428┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=703238&group_id=75569
+               &atid=544285"                                                                              
+          429┆        target="_blank"
+          430┆        title="Go to bug description at sourceforge"><tt>#703,238</tt></a> &mdash; fixed
+            ⋮┆----------------------------------------
+          432┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=703814&group_id=75569
+               &atid=544285"                                                                              
+          433┆        target="_blank"
+          434┆        title="Go to bug description at sourceforge"><tt>#703,814</tt></a> &mdash; fixed
+            ⋮┆----------------------------------------
+          436┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=716777&group_id=75569
+               &atid=544285"                                                                              
+          437┆        target="_blank"
+          438┆        title="Go to bug description at sourceforge"><tt>#716,777</tt></a> &mdash; closed
+               (was fixed already in                                                                   
+            ⋮┆----------------------------------------
+          441┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=723335&group_id=75569
+               &atid=544285"                                                                              
+          442┆        target="_blank"
+          443┆        title="Go to bug description at sourceforge"><tt>#723,335</tt></a> &mdash; fixed
+            ⋮┆----------------------------------------
+          445┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=715122&group_id=75569
+               &atid=544285"                                                                              
+          446┆        target="_blank"
+          447┆        title="Go to bug description at sourceforge"><tt>#715,122</tt></a> &mdash; feature
+               request; implemented.                                                                    
+            ⋮┆----------------------------------------
+          449┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=721206&group_id=75569
+               &atid=544285"                                                                              
+          450┆        target="_blank"
+          451┆        title="Go to bug description at sourceforge"><tt>#721,206</tt></a> &mdash; fixed
+               (added "refresh()" function)                                                           
+            ⋮┆----------------------------------------
+          453┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=721833&group_id=75569
+               &atid=544285"                                                                              
+          454┆        target="_blank"
+          455┆        title="Go to bug description at sourceforge"><tt>#721,833</tt></a> &mdash; fixed
+               (bug concerning the "yy"                                                               
+            ⋮┆----------------------------------------
+          459┆ <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=721833&group_id=75569
+               &atid=544285"                                                                              
+          460┆        target="_blank"
+          461┆        title="Go to bug description at sourceforge"><tt>#721,833</tt></a> &mdash; won't fix
+               (we won't set the time                                                                     
+            ⋮┆----------------------------------------
+          469┆ <address><a href="http://dynarch.com/mishoo/">Mihai Bazon</a></address>
+

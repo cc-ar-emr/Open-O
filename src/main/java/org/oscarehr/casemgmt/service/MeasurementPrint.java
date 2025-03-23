@@ -49,16 +49,21 @@ public class MeasurementPrint implements ExtPrint {
 
 
     @Override
-    public void printExt(CaseManagementPrintPdf engine, HttpServletRequest request) throws IOException, DocumentException {
+     public void printExt(CaseManagementPrintPdf engine, HttpServletRequest request) throws IOException, DocumentException {
         logger.info("measurement print!!!!");
         MeasurementDao measurementsDao = SpringUtils.getBean(MeasurementDao.class);
         String startDate = request.getParameter("pStartDate");
         String endDate = request.getParameter("pEndDate");
         String demographicNo = request.getParameter("demographicNo");
 
-        logger.info("startDate = " + startDate);
-        logger.info("endDate = " + endDate);
-        logger.info("demographicNo = " + demographicNo);
+        // Sanitize user input before logging
+        String sanitizedStartDate = StringEscapeUtils.escapeJava(startDate);
+        String sanitizedEndDate = StringEscapeUtils.escapeJava(endDate);
+        String sanitizedDemographicNo = StringEscapeUtils.escapeJava(demographicNo);
+
+        logger.info("startDate = " + sanitizedStartDate);
+        logger.info("endDate = " + sanitizedEndDate);
+        logger.info("demographicNo = " + sanitizedDemographicNo);
 
         List<Measurement> measurements = null;
 

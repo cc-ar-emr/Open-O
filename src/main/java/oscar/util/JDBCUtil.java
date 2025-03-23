@@ -36,10 +36,12 @@ import java.sql.SQLException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.xerces.parsers.DOMParser;
@@ -48,6 +50,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.XMLConstants;
 
 import oscar.oscarDB.DBHandler;
 
@@ -55,6 +62,12 @@ public class JDBCUtil {
     public static Document toDocument(ResultSet rs)
             throws ParserConfigurationException, SQLException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        
+        // Disable DOCTYPE declaration and external entity declarations
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.newDocument();
 
@@ -84,6 +97,11 @@ public class JDBCUtil {
     public static void saveAsXML(Document doc, String fileName) {
         try {
             TransformerFactory transFactory = TransformerFactory.newInstance();
+            
+            // Disable access to external DTDs and stylesheets
+            transFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
             Transformer transformer = transFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
             File newXML = new File(fileName);
@@ -104,7 +122,7 @@ public class JDBCUtil {
             newXML.delete();
         }
     }
-
+    
     public static void toDataBase(InputStream inputStream, String fileName) {
         boolean validation = true;
         DOMParser parser = new DOMParser();

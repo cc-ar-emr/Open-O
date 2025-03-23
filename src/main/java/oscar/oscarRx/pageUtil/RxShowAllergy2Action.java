@@ -57,10 +57,17 @@ public final class RxShowAllergy2Action extends ActionSupport {
 
 
     public String reorder() {
+        // Validate demographic number before processing
+        String demographicNo = request.getParameter("demographicNo");
+        if (demographicNo == null || !demographicNo.matches("^\\d+$")) {
+            MiscUtils.getLogger().error("Invalid demographic number in reorder: " + demographicNo);
+            return ERROR;
+        }
+        
         reorder(request);
         //ActionForward fwd = mapping.findForward("success-redirect");
         try {
-            response.sendRedirect("/oscarRx/ShowAllergies.jsp?demographicNo=" + request.getParameter("demographicNo"));
+            response.sendRedirect("/oscarRx/ShowAllergies.jsp?demographicNo=" + demographicNo);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -87,31 +94,26 @@ public final class RxShowAllergy2Action extends ActionSupport {
             useRx3 = true;
 
 
-        String user_no = (String) request.getSession().getAttribute("user");
-        String demo_no = request.getParameter("demographicNo");
-        String view = request.getParameter("view");
+        String sanitizedUserNo = StringEscapeUtils.escapeHtml4(user_no);
+        String sanitizedDemoNo = StringEscapeUtils.escapeHtml4(demo_no);
+        String sanitizedView = view != null ? StringEscapeUtils.escapeHtml4(view) : null;
 
-        if (demo_no == null) {
-            return "failure";
-        }
         // Setup bean
         RxSessionBean bean;
 
         if (request.getSession().getAttribute("RxSessionBean") != null) {
             bean = (oscar.oscarRx.pageUtil.RxSessionBean) request.getSession().getAttribute("RxSessionBean");
-            if ((bean.getProviderNo() != user_no) || (bean.getDemographicNo() != Integer.parseInt(demo_no))) {
+            if (!bean.getProviderNo().equals(sanitizedUserNo) || bean.getDemographicNo() != Integer.parseInt(sanitizedDemoNo)) {
                 bean = new RxSessionBean();
             }
-
         } else {
             bean = new RxSessionBean();
         }
 
-
-        bean.setProviderNo(user_no);
-        bean.setDemographicNo(Integer.parseInt(demo_no));
-        if (view != null) {
-            bean.setView(view);
+        bean.setProviderNo(sanitizedUserNo);
+        bean.setDemographicNo(Integer.parseInt(sanitizedDemoNo));
+        if (sanitizedView != null) {
+            bean.setView(sanitizedView);
         }
 
         request.getSession().setAttribute("RxSessionBean", bean);
@@ -129,7 +131,7 @@ public final class RxShowAllergy2Action extends ActionSupport {
         if (patient != null) {
             request.getSession().setAttribute("Patient", patient);
             response.sendRedirect(forward);
-        } else {//no records found
+        } else {
             response.sendRedirect("error.html");
         }
         return null;
@@ -140,7 +142,25 @@ public final class RxShowAllergy2Action extends ActionSupport {
 
         String direction = request.getParameter("direction");
         String demographicNo = request.getParameter("demographicNo");
-        int allergyId = Integer.parseInt(request.getParameter("allergyId"));
+        String allergyIdStr = request.getParameter("allergyId");
+        
+        // Validate input parameters
+        if (direction == null || (!direction.equals("up") && !direction.equals("down"))) {
+            MiscUtils.getLogger().error("Invalid direction parameter: " + direction);
+            return;
+        }
+        
+        if (demographicNo == null || !demographicNo.matches("^\\d+$")) {
+            MiscUtils.getLogger().error("Invalid demographic number: " + demographicNo);
+            return;
+        }
+        
+        if (allergyIdStr == null || !allergyIdStr.matches("^\\d+$")) {
+            MiscUtils.getLogger().error("Invalid allergy ID: " + allergyIdStr);
+            return;
+        }
+        
+        int allergyId = Integer.parseInt(allergyIdStr);
         try {
             Allergy[] allergies = RxPatientData.getPatient(loggedInInfo, demographicNo).getActiveAllergies();
             for (int x = 0; x < allergies.length; x++) {
