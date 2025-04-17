@@ -1,0 +1,21 @@
+                   
+                   
+┌─────────────────┐
+│ 3 Code Findings │
+└─────────────────┘
+                                                                           
+    src/main/java/org/oscarehr/PMmodule/web/forms/SurveyExecute2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          181┆ request.getSession().setAttribute("formInstanceId", formInstanceId);
+            ⋮┆----------------------------------------
+          220┆ request.getSession().setAttribute("validation_file", descr);
+            ⋮┆----------------------------------------
+          231┆ request.getSession().setAttribute("model", model);
+

@@ -1,0 +1,1937 @@
+                     
+                     
+┌───────────────────┐
+│ 269 Code Findings │
+└───────────────────┘
+                                                            
+    /src/src/main/java/org/caisi/core/web/Infirm2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          407┆ request.getSession().setAttribute("signOnNote", onsig);
+            ⋮┆----------------------------------------
+          414┆ request.getSession().setAttribute("case_program_id", String.valueOf(pid));
+            ⋮┆----------------------------------------
+          428┆ request.getSession().setAttribute("signOnNote", onsig);
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          463┆ out.print(String.format("<option value='%s'>%s</option>", pb.getValue(), pb.getLabel()));
+                                                                   
+    /src/src/main/java/org/caisi/core/web/SystemMessage2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           77┆ request.getSession().setAttribute("systemMessageId", messageId);
+                                                                      
+    /src/src/main/java/org/caisi/tickler/web/UnreadTickler2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          141┆ request.getSession().setAttribute("user", strAuth[0]);
+                                                                                            
+    /src/src/main/java/org/oscarehr/PMmodule/caisi_integrator/CaisiIntegratorUpdateTask.java
+    ❯❱ java.lang.security.audit.crypto.use-of-md5.use-of-md5
+          Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is
+          therefore not suitable as a cryptographic signature. Use HMAC instead.                         
+          Details: https://sg.run/ryJn                                                                   
+                                                                                                         
+           ▶▶┆ Autofix ▶ "SHA-512"
+          2416┆ MessageDigest md5Digest = MessageDigest.getInstance("MD5");
+            ⋮┆----------------------------------------
+           ▶▶┆ Autofix ▶ "SHA-512"
+          2490┆ checksum = getFileChecksum(MessageDigest.getInstance("MD5"), destination.toFile());
+                                                                                 
+    /src/src/main/java/org/oscarehr/PMmodule/exporter/AbstractIntakeExporter.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          114┆ builder = factory.newDocumentBuilder();
+                                                                               
+    /src/src/main/java/org/oscarehr/PMmodule/exporter/DATISExporterServlet.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           69┆ dir = new File(dirLocation + File.separatorChar + sessionId);
+                                                                      
+    /src/src/main/java/org/oscarehr/PMmodule/exporter/TestServlet.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           89┆ response.getWriter().print(exporter.export());
+                                                                                 
+    /src/src/main/java/org/oscarehr/PMmodule/utility/MigrateStaffAssignments.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+           90┆ stmt.execute("SELECT * FROM caisi_role where name = '" + name + "'");
+                                                                          
+    /src/src/main/java/org/oscarehr/PMmodule/web/ClientManager2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          381┆ request.getSession().setAttribute("clientGender", demographic.getSex());
+            ⋮┆----------------------------------------
+          382┆ request.getSession().setAttribute("clientAge", demographic.getAge());
+            ⋮┆----------------------------------------
+          383┆ request.getSession().setAttribute("demographicId", demographic.getDemographicNo());
+                                                                                
+    /src/src/main/java/org/oscarehr/PMmodule/web/ClientSearchAction22Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          105┆ request.getSession().setAttribute("noteId", noteId);
+                                                                                     
+    /src/src/main/java/org/oscarehr/PMmodule/web/admin/ProgramManagerView2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          121┆ request.getSession().setAttribute("case_program_id", programId);
+            ⋮┆----------------------------------------
+          426┆ request.getSession().setAttribute("programId", programId);
+            ⋮┆----------------------------------------
+          427┆ request.getSession().setAttribute("admission.dischargeNotes", dischargeNotes);
+            ⋮┆----------------------------------------
+          428┆ request.getSession().setAttribute("admission.admissionNotes", admissionNotes);
+                                                                                
+    /src/src/main/java/org/oscarehr/PMmodule/web/forms/SurveyExecute2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          181┆ request.getSession().setAttribute("formInstanceId", formInstanceId);
+            ⋮┆----------------------------------------
+          220┆ request.getSession().setAttribute("validation_file", descr);
+            ⋮┆----------------------------------------
+          231┆ request.getSession().setAttribute("model", model);
+                                                                                    
+    /src/src/main/java/org/oscarehr/admin/traceability/GenerateTraceabilityUtil.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           63┆ File f_ = iterator.next();
+            ⋮┆----------------------------------------
+           64┆ FileInputStream fi_ = new FileInputStream(f_);
+                                                                        
+    /src/src/main/java/org/oscarehr/appointment/search/SearchConfig.java
+    ❯❱ java.lang.security.audit.crypto.use-of-default-aes.use-of-default-aes
+          Use of AES with no settings detected. By default, java.crypto.Cipher uses ECB mode. ECB doesn't     
+          provide message confidentiality and is not semantically secure so should not be used. Instead, use a
+          strong, secure cipher: java.crypto.Cipher.getInstance("AES/CBC/PKCS7PADDING"). See                  
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.       
+          Details: https://sg.run/nzKO                                                                        
+                                                                                                              
+          619┆ Cipher cipher = Cipher.getInstance("AES");
+            ⋮┆----------------------------------------
+          633┆ Cipher cipher = Cipher.getInstance("AES");
+                                                                               
+    /src/src/main/java/org/oscarehr/casemgmt/dao/CaseManagementNoteDAOImpl.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          698┆ ResultSet rs = ps.executeQuery(sql);
+                                                                          
+    /src/src/main/java/org/oscarehr/casemgmt/service/MeasurementPrint.java
+    ❯❱ java.lang.security.audit.crlf-injection-logs.crlf-injection-logs
+          When data from an untrusted source is put into a logger and not neutralized correctly, an attacker
+          could forge log entries or include malicious content.                                             
+          Details: https://sg.run/wek0                                                                      
+                                                                                                            
+           55┆ String startDate = request.getParameter("pStartDate");
+           56┆ String endDate = request.getParameter("pEndDate");
+           57┆ String demographicNo = request.getParameter("demographicNo");
+           58┆
+           59┆ logger.info("startDate = " + startDate);
+            ⋮┆----------------------------------------
+           56┆ String endDate = request.getParameter("pEndDate");
+           57┆ String demographicNo = request.getParameter("demographicNo");
+           58┆
+           59┆ logger.info("startDate = " + startDate);
+           60┆ logger.info("endDate = " + endDate);
+            ⋮┆----------------------------------------
+           57┆ String demographicNo = request.getParameter("demographicNo");
+           58┆
+           59┆ logger.info("startDate = " + startDate);
+           60┆ logger.info("endDate = " + endDate);
+           61┆ logger.info("demographicNo = " + demographicNo);
+                                                                                
+    /src/src/main/java/org/oscarehr/casemgmt/web/CaseManagementEntry2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          532┆ request.getSession().setAttribute("casemgmtNoteLock" + demoNo, casemgmtNoteLock);
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          2793┆ out.println(textStr);
+                                                                               
+    /src/src/main/java/org/oscarehr/casemgmt/web/CaseManagementView2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          2143┆ request.getSession().setAttribute("casemgmt_DemoNo", demono);
+                                                                   
+    /src/src/main/java/org/oscarehr/common/dao/CaseloadDaoImpl.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          246┆ Query q = entityManager.createNativeQuery(query);
+            ⋮┆----------------------------------------
+          300┆ Query q = entityManager.createNativeQuery(query);
+                                                                       
+    /src/src/main/java/org/oscarehr/common/dao/InboxResultsDaoImpl.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+           70┆ Query q = entityManager.createNativeQuery(attachQuery);
+            ⋮┆----------------------------------------
+           82┆ q = entityManager.createNativeQuery(sql);
+            ⋮┆----------------------------------------
+          117┆ Query q = entityManager.createNativeQuery(sql);
+                                                                              
+    /src/src/main/java/org/oscarehr/common/dao/InboxResultsRepositoryImpl.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          145┆ query = entityManager.createNativeQuery(sql, InboxItem.class);
+            ⋮┆----------------------------------------
+          153┆ query = entityManager.createNativeQuery(sql, InboxResponse.class);
+            ⋮┆----------------------------------------
+          159┆ query = entityManager.createNativeQuery(sql, InboxItemDemographicCount.class);
+                                                                                   
+    /src/src/main/java/org/oscarehr/common/dao/RemoteIntegratedDataCopyDaoImpl.java
+    ❯❱ java.lang.security.audit.crypto.use-of-sha1.use-of-sha1
+          Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is
+          therefore not suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or 
+          SHA256 or SHA512 for other hash function applications.                                           
+          Details: https://sg.run/bXNp                                                                     
+                                                                                                           
+          131┆ MessageDigest md = MessageDigest.getInstance("SHA-1");
+                                                                                 
+    /src/src/main/java/org/oscarehr/common/hl7/v2/EmeraldHL7A04TransportTask.java
+    ❯❱ java.lang.security.audit.crypto.unencrypted-socket.unencrypted-socket
+          Detected use of a Java socket that is not encrypted. As a result, the traffic could be read by an
+          attacker intercepting the network traffic. Use an SSLSocket created by 'SSLSocketFactory' or     
+          'SSLServerSocketFactory' instead.                                                                
+          Details: https://sg.run/W8zA                                                                     
+                                                                                                           
+          105┆ Socket client = new Socket(sendAddr, sendPort);
+                                                                                  
+    /src/src/main/java/org/oscarehr/common/hl7/v2/oscar_to_oscar/SendingUtils.java
+    ❯❱ java.lang.security.audit.weak-ssl-context.weak-ssl-context
+          An insecure SSL context was detected. TLS versions 1.0, 1.1, and all SSL versions are considered
+          weak encryption and are deprecated. Use SSLContext.getInstance("TLSv1.2") for the best security.
+          Details: https://sg.run/4x7E                                                                    
+                                                                                                          
+           ▶▶┆ Autofix ▶ SSLContext.getInstance("TLSv1.2")
+          130┆ SSLContext sslContext = SSLContext.getInstance("TLS");
+   
+    ❯❱ java.lang.security.audit.crypto.ecb-cipher.ecb-cipher
+          Cipher in ECB mode is detected. ECB mode produces the same output for the same input each time which
+          allows an attacker to intercept and replay the data. Further, ECB mode does not provide any         
+          integrity checking. See https://find-sec-bugs.github.io/bugs.htm#CIPHER_INTEGRITY.                  
+          Details: https://sg.run/Ro9K                                                                        
+                                                                                                              
+          150┆ Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+   
+    ❯❱ java.lang.security.audit.crypto.use-of-default-aes.use-of-default-aes
+          Use of AES with no settings detected. By default, java.crypto.Cipher uses ECB mode. ECB doesn't     
+          provide message confidentiality and is not semantically secure so should not be used. Instead, use a
+          strong, secure cipher: java.crypto.Cipher.getInstance("AES/CBC/PKCS7PADDING"). See                  
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.       
+          Details: https://sg.run/nzKO                                                                        
+                                                                                                              
+          157┆ Cipher cipher = Cipher.getInstance("AES");
+                                                                         
+    /src/src/main/java/org/oscarehr/common/web/BillingInvoice2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          103┆ if (fos != null) fos.close();
+                                                                          
+    /src/src/main/java/org/oscarehr/common/web/BillingONReview2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           75┆ response.getOutputStream().write(json.toString().getBytes());
+                                                                                
+    /src/src/main/java/org/oscarehr/common/web/DemographicExtService2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           90┆ response.getWriter().println(json);
+                                                                           
+    /src/src/main/java/org/oscarehr/common/web/DxresearchReport2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           99┆ request.getSession().setAttribute("listview", patientInfo);
+            ⋮┆----------------------------------------
+          103┆ request.getSession().setAttribute("Counter", patientInfo.size());
+            ⋮┆----------------------------------------
+          156┆ request.getSession().setAttribute("listview", patientInfo);
+            ⋮┆----------------------------------------
+          160┆ request.getSession().setAttribute("Counter", patientInfo.size());
+            ⋮┆----------------------------------------
+          187┆ request.getSession().setAttribute("listview", patientInfo);
+            ⋮┆----------------------------------------
+          191┆ request.getSession().setAttribute("Counter", patientInfo.size());
+            ⋮┆----------------------------------------
+          208┆ request.getSession().setAttribute("listview", patientInfo);
+            ⋮┆----------------------------------------
+          212┆ request.getSession().setAttribute("Counter", patientInfo.size());
+            ⋮┆----------------------------------------
+          229┆ request.getSession().setAttribute("listview", patientInfo);
+            ⋮┆----------------------------------------
+          233┆ request.getSession().setAttribute("Counter", patientInfo.size());
+            ⋮┆----------------------------------------
+          246┆ request.getSession().setAttribute("editingCodeDesc", editingCodeDesc);
+                                                                    
+    /src/src/main/java/org/oscarehr/common/web/Pregnancy2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           87┆ response.getWriter().println(json);
+   
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          224┆ request.getSession().setAttribute("labReq07" + demographicNo, p);
+            ⋮┆----------------------------------------
+          235┆ request.getSession().setAttribute("labReq10" + demographicNo, p);
+            ⋮┆----------------------------------------
+          260┆ request.getSession().setAttribute("labReq07" + demographicNo, p);
+            ⋮┆----------------------------------------
+          273┆ request.getSession().setAttribute("labReq10" + demographicNo, p);
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          402┆ response.getWriter().print(json.toString());
+   
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          534┆ request.getSession().setAttribute("labReq07" + demographicNo, p);
+            ⋮┆----------------------------------------
+          553┆ request.getSession().setAttribute("labReq10" + demographicNo, p);
+            ⋮┆----------------------------------------
+          573┆ request.getSession().setAttribute("labReq07" + demographicNo, p);
+            ⋮┆----------------------------------------
+          582┆ request.getSession().setAttribute("labReq10" + demographicNo, p);
+   
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          913┆ File file = new File(request.getSession().getServletContext().getRealPath("/") + "WEB-
+               INF/classes/oscar/form/prop/fundal_graph.png");                                       
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          987┆ response.getWriter().print(json.toString());
+                                                                             
+    /src/src/main/java/org/oscarehr/dashboard/admin/ExportResults2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           86┆ outputStream.write(csvFile.getBytes());
+                                                                               
+    /src/src/main/java/org/oscarehr/dashboard/admin/ManageDashboard2Action.java
+   ❯❯❱ java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-
+       decl-missing                                                                                                  
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external      
+          entity attacks. Disable this by setting the feature `http://apache.org/xml/features/disallow-       
+          doctype-decl` to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features `http://xml.org/sax/features/external-       
+          general-entities` and `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The
+          previous links are not meant to be clicked. They are the literal config key values that are supposed
+          to be used to disable these features. For more information, see https://semgrep.dev/docs/cheat-     
+          sheets/java-xxe/#3a-documentbuilderfactory.                                                         
+          Details: https://sg.run/Gj32                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+          120┆ SAXParser parser = factory.newSAXParser();
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          192┆ outputStream.write(xmlTemplate.getBytes());
+                                                                                   
+    /src/src/main/java/org/oscarehr/dashboard/handler/IndicatorTemplateHandler.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          259┆ DocumentBuilder builder = factory.newDocumentBuilder();
+                                                                               
+    /src/src/main/java/org/oscarehr/decisionSupport/web/TestActionW2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           61┆ response.getWriter().println(dsService.evaluateAndGetConsequences(loggedInInfo,
+               demographic_no, (String) request.getSession().getAttribute("user")));          
+                                                                                       
+    /src/src/main/java/org/oscarehr/documentManager/actions/AddEditDocument2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          120┆ File file = writeLocalFile(Files.newInputStream(form.getDocFile().toPath()), fileName);//
+               write file to local dir                                                                  
+   
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          153┆ request.getSession().setAttribute("preferredQueue", queueId);
+                                                                                       
+    /src/src/main/java/org/oscarehr/documentManager/actions/DocumentPreview2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          123┆ outs.write(data);
+                                                                                      
+    /src/src/main/java/org/oscarehr/documentManager/actions/DocumentUpload2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           85┆ File f = new File(IncomingDocUtil.getAndCreateIncomingDocumentFilePathName(queueId,
+               destFolder, fileName));                                                            
+   
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           99┆ request.getSession().setAttribute("preferredQueue", queueId);
+            ⋮┆----------------------------------------
+          157┆ request.getSession().setAttribute("preferredQueue", queueId);
+                                                                                      
+    /src/src/main/java/org/oscarehr/documentManager/actions/ManageDocument2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          548┆ File outfile = hasCacheVersion(d, pageNum);
+            ⋮┆----------------------------------------
+          593┆ File outfile = hasCacheVersion2(d, pn);
+            ⋮┆----------------------------------------
+          629┆ File file = new File(documentDir, d.getDocfilename());
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          704┆ outs.write(contentBytes);
+            ⋮┆----------------------------------------
+          821┆ outs.write(contentBytes);
+            ⋮┆----------------------------------------
+          866┆ out.println(annotation);
+            ⋮┆----------------------------------------
+          869┆ out.println(tickler + "<br>");
+            ⋮┆----------------------------------------
+          872┆ out.println(acknowledgement + "<br>");
+            ⋮┆----------------------------------------
+          879┆ out.println("<br>" + props.getString("dms.documentBrowser.DocumentUpdated") + ": " +
+               curDoc.getDateTimeStamp());                                                         
+            ⋮┆----------------------------------------
+          880┆ out.println("<br>" + props.getString("dms.documentBrowser.ContentUpdated") + ": " +
+               curDoc.getContentDateTime());                                                      
+            ⋮┆----------------------------------------
+          881┆ out.println("<br>" + props.getString("dms.documentBrowser.ObservationDate") + ": " +
+               curDoc.getObservationDate());                                                       
+            ⋮┆----------------------------------------
+          882┆ out.println("<br>" + props.getString("dms.documentBrowser.Type") + ": " +
+               curDoc.getType());                                                       
+            ⋮┆----------------------------------------
+          883┆ out.println("<br>" + props.getString("dms.documentBrowser.Class") + ": " +
+               curDoc.getDocClass());                                                    
+            ⋮┆----------------------------------------
+          884┆ out.println("<br>" + props.getString("dms.documentBrowser.Subclass") + ": " +
+               curDoc.getDocSubClass());                                                    
+            ⋮┆----------------------------------------
+          885┆ out.println("<br>" + props.getString("dms.documentBrowser.Description") + ": " +
+               curDoc.getDescription());                                                       
+            ⋮┆----------------------------------------
+          886┆ out.println("<br>" + props.getString("dms.documentBrowser.Creator") + ": " +
+               curDoc.getCreatorName());                                                   
+            ⋮┆----------------------------------------
+          887┆ out.println("<br>" + props.getString("dms.documentBrowser.Responsible") + ": " +
+               curDoc.getResponsibleName());                                                   
+            ⋮┆----------------------------------------
+          888┆ out.println("<br>" + props.getString("dms.documentBrowser.Reviewer") + ": " +
+               curDoc.getReviewerName());                                                   
+            ⋮┆----------------------------------------
+          889┆ out.println("<br>" + props.getString("dms.documentBrowser.Source") + ": " +
+               curDoc.getSource());                                                       
+   
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          949┆ File f1 = new File(sourceFilePath);
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          1038┆ response.getWriter().print(props.getString("dms.incomingDocs.errorInOpening") + pdfName);
+   
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          1079┆ File file = new File(filePath);
+            ⋮┆----------------------------------------
+          1090┆ bfis = new BufferedInputStream(new FileInputStream(file));
+            ⋮┆----------------------------------------
+          1125┆ File outfile = createIncomingCacheVersion(queueId, pdfDir, pdfName, pn);
+            ⋮┆----------------------------------------
+          1129┆ bfis = new BufferedInputStream(new FileInputStream(outfile));
+                                                                                     
+    /src/src/main/java/org/oscarehr/documentManager/actions/SplitDocument2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           94┆ File input = new File(docdownload + doc.getDocfilename());
+            ⋮┆----------------------------------------
+          214┆ File input = filePath.toFile();
+            ⋮┆----------------------------------------
+          239┆ File file = filePath.toFile();
+            ⋮┆----------------------------------------
+          264┆ File file = filePath.toFile();
+                                                                        
+    /src/src/main/java/org/oscarehr/email/admin/ManageEmails2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          146┆ request.getSession().setAttribute("emailAttachmentList", emailAttachmentList);
+                                                                     
+    /src/src/main/java/org/oscarehr/er/ReceptionistReport2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          167┆ request.getSession().setAttribute("RxSessionBean", bean);
+                                                                    
+    /src/src/main/java/org/oscarehr/eyeform/web/FollowUp2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          112┆ response.getWriter().print(text);
+                                                                    
+    /src/src/main/java/org/oscarehr/eyeform/web/OcularProcPrint.java
+    ❯❱ java.lang.security.audit.crlf-injection-logs.crlf-injection-logs
+          When data from an untrusted source is put into a logger and not neutralized correctly, an attacker
+          could forge log entries or include malicious content.                                             
+          Details: https://sg.run/wek0                                                                      
+                                                                                                            
+           54┆ String startDate = request.getParameter("pStartDate");
+           55┆ String endDate = request.getParameter("pEndDate");
+           56┆ String demographicNo = request.getParameter("demographicNo");
+           57┆
+           58┆ logger.info("startDate = " + startDate);
+            ⋮┆----------------------------------------
+           55┆ String endDate = request.getParameter("pEndDate");
+           56┆ String demographicNo = request.getParameter("demographicNo");
+           57┆
+           58┆ logger.info("startDate = " + startDate);
+           59┆ logger.info("endDate = " + endDate);
+            ⋮┆----------------------------------------
+           56┆ String demographicNo = request.getParameter("demographicNo");
+           57┆
+           58┆ logger.info("startDate = " + startDate);
+           59┆ logger.info("endDate = " + endDate);
+           60┆ logger.info("demographicNo = " + demographicNo);
+                                                                         
+    /src/src/main/java/org/oscarehr/eyeform/web/ProcedureBook2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          105┆ response.getWriter().print(text);
+                                                                        
+    /src/src/main/java/org/oscarehr/eyeform/web/SpecsHistory2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          151┆ out.println("setfieldvalue(\"od_manifest_refraction_sph\",\"" + latestSpecs.getOdSph() +
+               "\");");                                                                                
+            ⋮┆----------------------------------------
+          152┆ out.println("setfieldvalue(\"os_manifest_refraction_sph\",\"" + latestSpecs.getOsSph() +
+               "\");");                                                                                
+            ⋮┆----------------------------------------
+          153┆ out.println("setfieldvalue(\"od_manifest_refraction_cyl\",\"" + latestSpecs.getOdCyl() +
+               "\");");                                                                                
+            ⋮┆----------------------------------------
+          154┆ out.println("setfieldvalue(\"os_manifest_refraction_cyl\",\"" + latestSpecs.getOsCyl() +
+               "\");");                                                                                
+            ⋮┆----------------------------------------
+          155┆ out.println("setfieldvalue(\"od_manifest_refraction_axis\",\"" + latestSpecs.getOdAxis() +
+               "\");");                                                                                  
+            ⋮┆----------------------------------------
+          156┆ out.println("setfieldvalue(\"os_manifest_refraction_axis\",\"" + latestSpecs.getOsAxis() +
+               "\");");                                                                                  
+                                                                      
+    /src/src/main/java/org/oscarehr/eyeform/web/SpecsHistoryPrint.java
+    ❯❱ java.lang.security.audit.crlf-injection-logs.crlf-injection-logs
+          When data from an untrusted source is put into a logger and not neutralized correctly, an attacker
+          could forge log entries or include malicious content.                                             
+          Details: https://sg.run/wek0                                                                      
+                                                                                                            
+           54┆ String startDate = request.getParameter("pStartDate");
+           55┆ String endDate = request.getParameter("pEndDate");
+           56┆ String demographicNo = request.getParameter("demographicNo");
+           57┆
+           58┆ logger.debug("startDate = " + startDate);
+            ⋮┆----------------------------------------
+           55┆ String endDate = request.getParameter("pEndDate");
+           56┆ String demographicNo = request.getParameter("demographicNo");
+           57┆
+           58┆ logger.debug("startDate = " + startDate);
+           59┆ logger.debug("endDate = " + endDate);
+            ⋮┆----------------------------------------
+           56┆ String demographicNo = request.getParameter("demographicNo");
+           57┆
+           58┆ logger.debug("startDate = " + startDate);
+           59┆ logger.debug("endDate = " + endDate);
+           60┆ logger.debug("demographicNo = " + demographicNo);
+                                                                    
+    /src/src/main/java/org/oscarehr/eyeform/web/TestBook2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          113┆ response.getWriter().print(text);
+                                                              
+    /src/src/main/java/org/oscarehr/fax/action/Fax2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          180┆ outs.write(data);
+                                                                     
+    /src/src/main/java/org/oscarehr/fax/admin/ManageFaxes2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          230┆ outs.write(data);
+                                                                   
+    /src/src/main/java/org/oscarehr/flowsheet/Flowsheet2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          569┆ File f =                                                                              
+               MeasurementTemplateFlowSheetConfig.getInstance().getFileMap().get(fsuc.getTemplate());
+                                                                                     
+    /src/src/main/java/org/oscarehr/hospitalReportManager/HRMDownloadFile2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          116┆ File temp = File.createTempFile("HRMDownloadFile", report.getFileExtension());
+                                                                               
+    /src/src/main/java/org/oscarehr/hospitalReportManager/v2018/HRM2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          135┆ File file = new File(downloadDirectory, item.getName());
+            ⋮┆----------------------------------------
+          202┆ File file = new File(privateKeyDirectory, item.getName());
+                                                                            
+    /src/src/main/java/org/oscarehr/integration/born/BORNWbXmlGenerator.java
+    ❯❱ java.lang.security.audit.crypto.use-of-md5.use-of-md5
+          Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is
+          therefore not suitable as a cryptographic signature. Use HMAC instead.                         
+          Details: https://sg.run/ryJn                                                                   
+                                                                                                         
+           ▶▶┆ Autofix ▶ "SHA-512"
+          2142┆ MessageDigest md = MessageDigest.getInstance("MD5");
+                                                                                  
+    /src/src/main/java/org/oscarehr/integration/mcedt/mailbox/Download2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          222┆ File document = new File(inboxFolder + File.separator + d.getDescription());
+            ⋮┆----------------------------------------
+          354┆ File document = new File(inboxFolder + File.separator + d.getDescription());
+                                                                   
+    /src/src/main/java/org/oscarehr/olis/OLISAddToInbox2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           63┆ File file = new File(fileLocation);
+            ⋮┆----------------------------------------
+           68┆ is = new FileInputStream(fileLocation);
+                                                                       
+    /src/src/main/java/org/oscarehr/olis/OLISProtocolSocketFactory.java
+    ❯❱ java.lang.security.audit.weak-ssl-context.weak-ssl-context
+          An insecure SSL context was detected. TLS versions 1.0, 1.1, and all SSL versions are considered
+          weak encryption and are deprecated. Use SSLContext.getInstance("TLSv1.2") for the best security.
+          Details: https://sg.run/4x7E                                                                    
+                                                                                                          
+           ▶▶┆ Autofix ▶ SSLContext.getInstance("TLSv1.2")
+           66┆ context = SSLContext.getInstance("TLS");
+                                                                             
+    /src/src/main/java/org/oscarehr/olis/OLISUploadSimulationData2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           69┆ request.getSession().setAttribute("errors", request.getAttribute("errors"));
+            ⋮┆----------------------------------------
+           71┆ request.getSession().setAttribute("olisResponseContent", simulationData);
+                                                                         
+    /src/src/main/java/org/oscarehr/phr/web/PHRUserManagement2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          484┆ File patientRegistrationDocument = new File(docDirectory, filename);
+            ⋮┆----------------------------------------
+          485┆ fos = new FileOutputStream(patientRegistrationDocument);
+                                                               
+    /src/src/main/java/org/oscarehr/renal/web/Renal2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          291┆ request.getSession().setAttribute("labReq07" + demographicNo, p);
+            ⋮┆----------------------------------------
+          299┆ request.getSession().setAttribute("labReq10" + demographicNo, p);
+                                                                        
+    /src/src/main/java/org/oscarehr/rx/dispensary/Dispensary2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          241┆ response.getWriter().print(jsonArray);
+            ⋮┆----------------------------------------
+          256┆ response.getWriter().print(jsonArray);
+                                                                     
+    /src/src/main/java/org/oscarehr/survey/web/SurveyTest2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          115┆ request.getSession().setAttribute("validation_file", descr);
+            ⋮┆----------------------------------------
+          132┆ request.getSession().setAttribute("model", model);
+                                                                         
+    /src/src/main/java/org/oscarehr/ui/servlet/ImageRenderingServlet.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          240┆ fileInputStream = new FileInputStream(tempFilePath);
+                                                             
+    /src/src/main/java/org/oscarehr/util/EncryptionUtils.java
+    ❯❱ java.lang.security.audit.crypto.use-of-sha1.use-of-sha1
+          Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is
+          therefore not suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or 
+          SHA256 or SHA512 for other hash function applications.                                           
+          Details: https://sg.run/bXNp                                                                     
+                                                                                                           
+           58┆ return MessageDigest.getInstance("SHA-1");
+   
+    ❯❱ java.lang.security.audit.crypto.use-of-default-aes.use-of-default-aes
+          Use of AES with no settings detected. By default, java.crypto.Cipher uses ECB mode. ECB doesn't     
+          provide message confidentiality and is not semantically secure so should not be used. Instead, use a
+          strong, secure cipher: java.crypto.Cipher.getInstance("AES/CBC/PKCS7PADDING"). See                  
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.       
+          Details: https://sg.run/nzKO                                                                        
+                                                                                                              
+          132┆ Cipher cipher = Cipher.getInstance("AES");
+            ⋮┆----------------------------------------
+          147┆ Cipher cipher = Cipher.getInstance("AES");
+                                                       
+    /src/src/main/java/org/oscarehr/util/MiscUtils.java
+    ❯❱ java.lang.security.audit.weak-ssl-context.weak-ssl-context
+          An insecure SSL context was detected. TLS versions 1.0, 1.1, and all SSL versions are considered
+          weak encryption and are deprecated. Use SSLContext.getInstance("TLSv1.2") for the best security.
+          Details: https://sg.run/4x7E                                                                    
+                                                                                                          
+           ▶▶┆ Autofix ▶ SSLContext.getInstance("TLSv1.2")
+          237┆ SSLContext ctx = SSLContext.getInstance("TLS");
+                                                      
+    /src/src/main/java/org/oscarehr/util/WebUtils.java
+    ❯❱ java.lang.security.audit.crlf-injection-logs.crlf-injection-logs
+          When data from an untrusted source is put into a logger and not neutralized correctly, an attacker
+          could forge log entries or include malicious content.                                             
+          Details: https://sg.run/wek0                                                                      
+                                                                                                            
+           57┆ logger.error(key + '=' + request.getParameter(key));
+                                                      
+    /src/src/main/java/org/oscarehr/util/XmlUtils.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          118┆ DocumentBuilder builder = factory.newDocumentBuilder();
+            ⋮┆----------------------------------------
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          125┆ DocumentBuilder builder = factory.newDocumentBuilder();
+                                                                 
+    /src/src/main/java/org/oscarehr/web/OcanIarSubmit2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           54┆ response.getWriter().println(submissionId_full);
+            ⋮┆----------------------------------------
+           62┆ response.getWriter().println(submissionId_self);
+            ⋮┆----------------------------------------
+           70┆ response.getWriter().println(submissionId_core);
+                                                          
+    /src/src/main/java/oscar/DocumentMgtUploadServlet.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           92┆ File savedFile = new File(foldername, output + fullFile[fullFile.length - 1]);
+                                                       
+    /src/src/main/java/oscar/DocumentUploadServlet.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           64┆ File providedFile = new File(inboxFolder, providedFilename);
+            ⋮┆----------------------------------------
+           66┆ providedFile = new File(archiveFolder, providedFilename);
+            ⋮┆----------------------------------------
+           89┆ File savedFile = new File(foldername, fullFile[fullFile.length - 1]);
+                                                   
+    /src/src/main/java/oscar/OBChecklist_99_12.java
+   ❯❯❱ java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-
+       decl-missing                                                                                                  
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external      
+          entity attacks. Disable this by setting the feature `http://apache.org/xml/features/disallow-       
+          doctype-decl` to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features `http://xml.org/sax/features/external-       
+          general-entities` and `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The
+          previous links are not meant to be clicked. They are the literal config key values that are supposed
+          to be used to disable these features. For more information, see https://semgrep.dev/docs/cheat-     
+          sheets/java-xxe/#3a-documentbuilderfactory.                                                         
+          Details: https://sg.run/Gj32                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           54┆ SAXParser saxParser = factory.newSAXParser();
+                                               
+    /src/src/main/java/oscar/OBRisks_99_12.java
+   ❯❯❱ java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-
+       decl-missing                                                                                                  
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external      
+          entity attacks. Disable this by setting the feature `http://apache.org/xml/features/disallow-       
+          doctype-decl` to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features `http://xml.org/sax/features/external-       
+          general-entities` and `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The
+          previous links are not meant to be clicked. They are the literal config key values that are supposed
+          to be used to disable these features. For more information, see https://semgrep.dev/docs/cheat-     
+          sheets/java-xxe/#3a-documentbuilderfactory.                                                         
+          Details: https://sg.run/Gj32                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           46┆ SAXParser saxParser = factory.newSAXParser();
+            ⋮┆----------------------------------------
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           68┆ SAXParser saxParser = factory.newSAXParser();
+                                               
+    /src/src/main/java/oscar/OscarPingTalk.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              dbf.newDocumentBuilder();                                                               
+          144┆ DocumentBuilder db = dbf.newDocumentBuilder();
+                                               
+    /src/src/main/java/oscar/appt/ApptUtil.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           62┆ request.getSession().setAttribute(SESSION_APPT_BEAN, obj);
+                                                                          
+    /src/src/main/java/oscar/decision/DesAnnualReviewPlannerChecklist.java
+   ❯❯❱ java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-
+       decl-missing                                                                                                  
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external      
+          entity attacks. Disable this by setting the feature `http://apache.org/xml/features/disallow-       
+          doctype-decl` to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features `http://xml.org/sax/features/external-       
+          general-entities` and `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The
+          previous links are not meant to be clicked. They are the literal config key values that are supposed
+          to be used to disable these features. For more information, see https://semgrep.dev/docs/cheat-     
+          sheets/java-xxe/#3a-documentbuilderfactory.                                                         
+          Details: https://sg.run/Gj32                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           47┆ SAXParser saxParser = factory.newSAXParser();
+            ⋮┆----------------------------------------
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           67┆ SAXParser saxParser = factory.newSAXParser();
+                                                                     
+    /src/src/main/java/oscar/decision/DesAnnualReviewPlannerRisk.java
+   ❯❯❱ java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-
+       decl-missing                                                                                                  
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external      
+          entity attacks. Disable this by setting the feature `http://apache.org/xml/features/disallow-       
+          doctype-decl` to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features `http://xml.org/sax/features/external-       
+          general-entities` and `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The
+          previous links are not meant to be clicked. They are the literal config key values that are supposed
+          to be used to disable these features. For more information, see https://semgrep.dev/docs/cheat-     
+          sheets/java-xxe/#3a-documentbuilderfactory.                                                         
+          Details: https://sg.run/Gj32                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           47┆ SAXParser saxParser = factory.newSAXParser();
+            ⋮┆----------------------------------------
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           67┆ SAXParser saxParser = factory.newSAXParser();
+                                                                             
+    /src/src/main/java/oscar/decision/DesAntenatalPlannerChecklist_99_12.java
+   ❯❯❱ java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-
+       decl-missing                                                                                                  
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external      
+          entity attacks. Disable this by setting the feature `http://apache.org/xml/features/disallow-       
+          doctype-decl` to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features `http://xml.org/sax/features/external-       
+          general-entities` and `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The
+          previous links are not meant to be clicked. They are the literal config key values that are supposed
+          to be used to disable these features. For more information, see https://semgrep.dev/docs/cheat-     
+          sheets/java-xxe/#3a-documentbuilderfactory.                                                         
+          Details: https://sg.run/Gj32                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           54┆ SAXParser saxParser = factory.newSAXParser();
+                                                                         
+    /src/src/main/java/oscar/decision/DesAntenatalPlannerRisks_99_12.java
+   ❯❯❱ java.lang.security.audit.xxe.saxparserfactory-disallow-doctype-decl-missing.saxparserfactory-disallow-doctype-
+       decl-missing                                                                                                  
+          DOCTYPE declarations are enabled for this SAXParserFactory. This is vulnerable to XML external      
+          entity attacks. Disable this by setting the feature `http://apache.org/xml/features/disallow-       
+          doctype-decl` to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features `http://xml.org/sax/features/external-       
+          general-entities` and `http://xml.org/sax/features/external-parameter-entities` to false. NOTE - The
+          previous links are not meant to be clicked. They are the literal config key values that are supposed
+          to be used to disable these features. For more information, see https://semgrep.dev/docs/cheat-     
+          sheets/java-xxe/#3a-documentbuilderfactory.                                                         
+          Details: https://sg.run/Gj32                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           46┆ SAXParser saxParser = factory.newSAXParser();
+            ⋮┆----------------------------------------
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newSAXParser();                                                                     
+           68┆ SAXParser saxParser = factory.newSAXParser();
+                                                               
+    /src/src/main/java/oscar/eform/actions/DelImage2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           58┆ File image = new File(imgpath + "/" + imgname);
+                                                                   
+    /src/src/main/java/oscar/eform/actions/DisplayImage2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           69┆ file = new File(directory, fileName);
+                                                          
+    /src/src/main/java/oscar/eform/upload/UploadImage.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           80┆ File savedFile = new File(foldername, fullFile[fullFile.length - 1]);
+                                                                             
+    /src/src/main/java/oscar/eform/util/EFormViewForPdfGenerationServlet.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           95┆ response.getOutputStream().write(eForm.getFormHtml().getBytes(Charset.forName("UTF-8")));
+                                                            
+    /src/src/main/java/oscar/form/FrmONAREnhancedRecord.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          247┆ preparedStmt.executeUpdate();
+                                                                       
+    /src/src/main/java/oscar/form/pdfservlet/FrmCustomedPDFServlet.java
+    ❯❱ java.lang.security.audit.crlf-injection-logs.crlf-injection-logs
+          When data from an untrusted source is put into a logger and not neutralized correctly, an attacker
+          could forge log entries or include malicious content.                                             
+          Details: https://sg.run/wek0                                                                      
+                                                                                                            
+          576┆ String method = req.getParameter("__method");
+          577┆ String origPrintDate = null;
+          578┆ String numPrint = null;
+          579┆ if ("true".equals(req.getParameter("rxReprint"))) {
+          580┆     origPrintDate = req.getParameter("origPrintDate");
+          581┆     numPrint = req.getParameter("numPrints");
+          582┆ }
+          583┆
+          584┆ logger.debug("method in generatePDFDocumentBytes " + method);
+            ⋮┆----------------------------------------
+          589┆ String useSatelliteClinic = req.getParameter("useSC");
+          590┆ logger.debug(useSatelliteClinic);
+            ⋮┆----------------------------------------
+          592┆ String scAddress = req.getParameter("scAddress");
+          593┆ logger.debug("clinic detail" + "=" + scAddress);
+                                                         
+    /src/src/main/java/oscar/form/study/HSFO/HSFODAO.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          613┆ result = sql.executeQuery(query);
+            ⋮┆----------------------------------------
+          690┆ result = sql.executeQuery(query);
+            ⋮┆----------------------------------------
+          880┆ ResultSet result = sql.executeQuery(query);
+            ⋮┆----------------------------------------
+          895┆ ResultSet result = sql.executeQuery(query2);
+            ⋮┆----------------------------------------
+          1231┆ result = sql.executeQuery(query);
+                                                                            
+    /src/src/main/java/oscar/form/study/HSFO/pageUtil/ManageHSFO2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          277┆ request.getSession().setAttribute("HSFOBPCHART", chart1);
+            ⋮┆----------------------------------------
+          282┆ request.getSession().setAttribute("HSFOBBMICHART", chart2);
+            ⋮┆----------------------------------------
+          286┆ request.getSession().setAttribute("HSFOWAISTCHART", chart3);
+            ⋮┆----------------------------------------
+          291┆ request.getSession().setAttribute("HSFODLCHART", chart4);
+            ⋮┆----------------------------------------
+          296┆ request.getSession().setAttribute("HSFOimportanceconfidenceCHART", chart5);
+                                                    
+    /src/src/main/java/oscar/login/Login2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          209┆ request.getSession().setAttribute(SessionConstants.CURRENT_FACILITY, facility);
+            ⋮┆----------------------------------------
+          214┆ OcanForm.getOcanWarningMessage(facility.getId()));
+                                                           
+    /src/src/main/java/oscar/login/LoginResourceAction.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           66┆ image = new File(images, URLDecoder.decode(logoImage, "UTF-8"));
+                                                                                      
+    /src/src/main/java/oscar/oscarBilling/MSP/DocumentTeleplanReportUploadServlet.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           70┆ File pFile = new File(userHomePath, backupfilepath + ".properties");
+            ⋮┆----------------------------------------
+           74┆ FileInputStream pStream = new FileInputStream(pFile.getPath());
+                                                                                            
+    /src/src/main/java/oscar/oscarBilling/ca/bc/MSP/DocumentTeleplanReportUploadServlet.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           98┆ File savedFile = new File(foldername, fullFile[fullFile.length - 1]);
+                                                                     
+    /src/src/main/java/oscar/oscarBilling/ca/bc/MSP/GenTa2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           97┆ FileInputStream file = new FileInputStream(filepath + filename);
+                                                                          
+    /src/src/main/java/oscar/oscarBilling/ca/bc/data/BillingmasterDAO.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          247┆ Query query = entityManager.createNativeQuery(p);
+                                                                            
+    /src/src/main/java/oscar/oscarBilling/ca/bc/pageUtil/Billing2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           96┆ request.getSession().setAttribute("billingSessionBean", bean);
+                                                                                    
+    /src/src/main/java/oscar/oscarBilling/ca/bc/pageUtil/BillingEditCode2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           78┆ response.getOutputStream().write(jsonObject.toString().getBytes());
+                                                                                   
+    /src/src/main/java/oscar/oscarBilling/ca/bc/pageUtil/ManageTeleplan2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          357┆ File f = new File(datacenter, filename);
+            ⋮┆----------------------------------------
+          492┆ File file = tr.getFile();
+                                                                             
+    /src/src/main/java/oscar/oscarDemographic/PrintDemoChartLabel2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          120┆ ins = new FileInputStream(System.getProperty("user.home") + File.separator + labelFile);
+                                                                                    
+    /src/src/main/java/oscar/oscarDemographic/pageUtil/CihiExportPHC_VRS2Action.java
+    ❯❱ java.lang.security.audit.crypto.use-of-md5.use-of-md5
+          Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is
+          therefore not suitable as a cryptographic signature. Use HMAC instead.                         
+          Details: https://sg.run/ryJn                                                                   
+                                                                                                         
+           ▶▶┆ Autofix ▶ "SHA-512"
+          398┆ digest = MessageDigest.getInstance("MD5");
+                                                                                           
+    /src/src/main/java/oscar/oscarDemographic/pageUtil/DemographicExportAction42Action.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          3469┆ builder = factory.newDocumentBuilder();
+                                                                                    
+    /src/src/main/java/oscar/oscarDemographic/pageUtil/ImportLogDownload2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           54┆ File importLogFile = new File(importLog);
+            ⋮┆----------------------------------------
+           55┆ InputStream in = new FileInputStream(importLog);
+   
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           63┆ while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                                                                 
+    /src/src/main/java/oscar/oscarEncounter/data/EctFormData.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          148┆ ResultSet rs = s.executeQuery(sql);
+            ⋮┆----------------------------------------
+          158┆ ResultSet rs = s.executeQuery(sql);
+            ⋮┆----------------------------------------
+          207┆ ResultSet rs = s.executeQuery(sql);
+            ⋮┆----------------------------------------
+          221┆ ResultSet rs = s.executeQuery(sql);
+                                                                                     
+    /src/src/main/java/oscar/oscarEncounter/oceanEReferal/pageUtil/ERefer2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           57┆ writer.write(eReferAttachment.getId().toString());
+                                                                                                                
+    /src/src/main/java/oscar/oscarEncounter/oscarConsultationRequest/pageUtil/ConsultationAttachDocs2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          201┆ File tempLabPDF = File.createTempFile("lab" + segmentID, "pdf");
+            ⋮┆----------------------------------------
+          203┆ FileOutputStream fileOutputStream = new FileOutputStream(tempLabPDF);
+                                                                                                    
+    /src/src/main/java/oscar/oscarEncounter/oscarMeasurements/hl7/MeasurementHL7Uploader2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          228┆ File file = new File(filePath);
+                                                                                                         
+    /src/src/main/java/oscar/oscarEncounter/oscarMeasurements/pageUtil/EctAddShortMeasurement2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           79┆ response.getWriter().print("id=" + id + "&followupValue=" + followUpValue + "&Date=" +
+               UtilDateUtilities.DateToString(new Date()));                                          
+                                                                          
+    /src/src/main/java/oscar/oscarEncounter/pageUtil/EctDisplayAction.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          146┆ request.getSession().setAttribute("EctSessionBean", bean);
+                                                                                     
+    /src/src/main/java/oscar/oscarEncounter/pageUtil/EctIncomingEncounter2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          145┆ request.getSession().setAttribute("EctSessionBean", bean);
+            ⋮┆----------------------------------------
+          246┆ request.getSession().setAttribute("EctSessionBean", bean);
+                                                                                 
+    /src/src/main/java/oscar/oscarEncounter/pageUtil/EctSaveEncounter2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          305┆ httpservletrequest.getSession().setAttribute("billingSessionBean", bean);
+                                                                                                 
+    /src/src/main/java/oscar/oscarLab/ca/all/pageUtil/DownloadEmbeddedDocumentFromLab2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           79┆ output.write(decodedData);
+                                                                           
+    /src/src/main/java/oscar/oscarLab/ca/all/pageUtil/LabUpload2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          104┆ File file = new File(filePath);
+            ⋮┆----------------------------------------
+          125┆ is = new FileInputStream(file);
+   
+    ❯❱ java.lang.security.audit.crypto.ecb-cipher.ecb-cipher
+          Cipher in ECB mode is detected. ECB mode produces the same output for the same input each time which
+          allows an attacker to intercept and replay the data. Further, ECB mode does not provide any         
+          integrity checking. See https://find-sec-bugs.github.io/bugs.htm#CIPHER_INTEGRITY.                  
+          Details: https://sg.run/Ro9K                                                                        
+                                                                                                              
+          181┆ Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+   
+    ❯❱ java.lang.security.audit.crypto.use-of-default-aes.use-of-default-aes
+          Use of AES with no settings detected. By default, java.crypto.Cipher uses ECB mode. ECB doesn't     
+          provide message confidentiality and is not semantically secure so should not be used. Instead, use a
+          strong, secure cipher: java.crypto.Cipher.getInstance("AES/CBC/PKCS7PADDING"). See                  
+          https://owasp.org/www-community/Using_the_Java_Cryptographic_Extensions for more information.       
+          Details: https://sg.run/nzKO                                                                        
+                                                                                                              
+          187┆ Cipher msgCipher = Cipher.getInstance("AES");
+                                                                           
+    /src/src/main/java/oscar/oscarLab/ca/all/pageUtil/PrintLabs2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+           87┆ File f = File.createTempFile("lab" + request.getParameter("segmentID"), "pdf");
+            ⋮┆----------------------------------------
+           88┆ FileOutputStream fos = new FileOutputStream(f);
+                                                                        
+    /src/src/main/java/oscar/oscarLab/ca/all/upload/MessageUploader.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          414┆ ResultSet rs = pstmt.executeQuery();
+            ⋮┆----------------------------------------
+          491┆ ResultSet rs = pstmt.executeQuery();
+            ⋮┆----------------------------------------
+          567┆ ResultSet rs = pstmt.executeQuery();
+            ⋮┆----------------------------------------
+          693┆ ResultSet rs = pstmt.executeQuery();
+                                                                                
+    /src/src/main/java/oscar/oscarLab/ca/all/upload/handlers/DefaultHandler.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          113┆ Document doc = factory.newDocumentBuilder().parse(new FileInputStream(fileName));
+                                                                                          
+    /src/src/main/java/oscar/oscarLab/ca/all/upload/handlers/ExcellerisOntarioHandler.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              docFactory.newDocumentBuilder();                                                               
+           52┆ DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                                                                            
+    /src/src/main/java/oscar/oscarLab/ca/all/upload/handlers/IHAHandler.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          193┆ Document doc = factory.newDocumentBuilder().parse(new FileInputStream(fileName));
+                                                                               
+    /src/src/main/java/oscar/oscarLab/ca/all/upload/handlers/IHAPOIHandler.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              docFactory.newDocumentBuilder();                                                               
+          170┆ DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                                                                                 
+    /src/src/main/java/oscar/oscarLab/ca/all/upload/handlers/MEDITECHHandler.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              docFactory.newDocumentBuilder();                                                               
+          136┆ DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                                                                               
+    /src/src/main/java/oscar/oscarLab/ca/all/upload/handlers/PATHL7Handler.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              docFactory.newDocumentBuilder();                                                               
+           62┆ DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                                                                 
+    /src/src/main/java/oscar/oscarLab/ca/all/util/KeyPairGen.java
+    ❯❱ java.lang.security.audit.crypto.weak-rsa.use-of-weak-rsa-key
+          RSA keys should be at least 2048 bits based on NIST recommendation.
+          Details: https://sg.run/4x6x                                       
+                                                                             
+           63┆ KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+           64┆ keyGen.initialize(1024);
+                                                                            
+    /src/src/main/java/oscar/oscarLab/ca/all/web/SubmitLabByForm2Action.java
+   ❯❯❱ java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal
+          Detected a potential path traversal. A malicious actor could control the location of this file, to
+          include going backwards in the directory with '../'. To address this, ensure that user-controlled 
+          variables in file paths are sanitized. You may also consider using a utility method such as       
+          org.apache.commons.io.FilenameUtils.getName(...) to only retrieve the file name from the path.    
+          Details: https://sg.run/oxXN                                                                      
+                                                                                                            
+          165┆ File file = new File(filePath);
+            ⋮┆----------------------------------------
+          167┆ FileInputStream fis = new FileInputStream(filePath);
+                                                                            
+    /src/src/main/java/oscar/oscarLab/ca/bc/PathNet/Communication/HTTPS.java
+    ❯❱ java.lang.security.audit.crypto.unencrypted-socket.unencrypted-socket
+          Detected use of a Java socket that is not encrypted. As a result, the traffic could be read by an
+          attacker intercepting the network traffic. Use an SSLSocket created by 'SSLSocketFactory' or     
+          'SSLServerSocketFactory' instead.                                                                
+          Details: https://sg.run/W8zA                                                                     
+                                                                                                           
+           50┆ this.socket = new Socket(this.url, 80);
+                                                                   
+    /src/src/main/java/oscar/oscarLab/ca/bc/PathNet/Connection.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+          149┆ DocumentBuilder builder = factory.newDocumentBuilder();
+                                                               
+    /src/src/main/java/oscar/oscarLab/ca/on/CML/ABCDParser.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          172┆ ResultSet rs = pstmt.executeQuery();
+                                                            
+    /src/src/main/java/oscar/oscarMDS/data/CategoryData.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          379┆ ResultSet rs = ps.executeQuery(sql);
+                                                                      
+    /src/src/main/java/oscar/oscarMDS/pageUtil/ReportMacro2Action.java
+    ❯❱ java.lang.security.audit.crlf-injection-logs.crlf-injection-logs
+          When data from an untrusted source is put into a logger and not neutralized correctly, an attacker
+          could forge log entries or include malicious content.                                             
+          Details: https://sg.run/wek0                                                                      
+                                                                                                            
+          115┆ String segmentID = request.getParameter("segmentID");
+          116┆ String providerNo = request.getParameter("providerNo");
+          117┆ String labType = request.getParameter("labType");
+          118┆ String demographicNo = request.getParameter("demographicNo");
+          119┆
+          120┆ if (macro.has("acknowledge")) {
+          121┆     logger.info("Acknowledging lab " + labType + ":" + segmentID);
+          122┆     JSONObject jAck = macro.getJSONObject("acknowledge");
+          123┆     String comment = jAck.getString("comment");
+          124┆     CommonLabResultData.updateReportStatus(Integer.parseInt(segmentID), providerNo, 'A',
+               comment, labType,                                                                       
+               skipComment(LoggedInInfo.getLoggedInInfoFromSession(request).getLoggedInProviderNo())); 
+             [hid 1 additional lines, adjust with --max-lines-per-finding] 
+          117┆ String labType = request.getParameter("labType");
+          118┆ String demographicNo = request.getParameter("demographicNo");
+          119┆
+          120┆ if (macro.has("acknowledge")) {
+          121┆     logger.info("Acknowledging lab " + labType + ":" + segmentID);
+          122┆     JSONObject jAck = macro.getJSONObject("acknowledge");
+          123┆     String comment = jAck.getString("comment");
+          124┆     CommonLabResultData.updateReportStatus(Integer.parseInt(segmentID), providerNo, 'A',
+               comment, labType,                                                                       
+               skipComment(LoggedInInfo.getLoggedInInfoFromSession(request).getLoggedInProviderNo())); 
+          125┆ }
+                                                                                              
+    /src/src/main/java/oscar/oscarMessenger/pageUtil/MsgDisplayDemographicMessages2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           87┆ request.getSession().setAttribute("msgSessionBean", bean);
+                                                                                   
+    /src/src/main/java/oscar/oscarMessenger/pageUtil/MsgDisplayMessages2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           73┆ request.getSession().setAttribute("msgSessionBean", bean);
+            ⋮┆----------------------------------------
+           83┆ request.getSession().setAttribute("msgSessionBean", bean);
+                                                                            
+    /src/src/main/java/oscar/oscarReport/pageUtil/RptDownloadCSVServlet.java
+    ❯❱ java.lang.security.audit.sqli.tainted-sql-from-http-request.tainted-sql-from-http-request
+          Detected input from a HTTPServletRequest going into a SQL sink or statement. This could lead to SQL
+          injection if variables in the SQL statement are not properly sanitized. Use parameterized SQL      
+          queries or properly sanitize user input instead.                                                   
+          Details: https://sg.run/Lg56                                                                       
+                                                                                                             
+          471┆ vecFieldValue = (new RptReportCreator()).query(sql, vecFieldName);
+            ⋮┆----------------------------------------
+          510┆ vecFieldValue = (new RptReportCreator()).query(sql, vecFieldName);
+            ⋮┆----------------------------------------
+          592┆ vecFieldValue = (new RptReportCreator()).query(sql, vecFieldName);
+                                                                                              
+    /src/src/main/java/oscar/oscarReport/reportByTemplate/actions/GenerateOutFiles2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+           69┆ response.getWriter().write(csv);
+                                                                       
+    /src/src/main/java/oscar/oscarRx/pageUtil/RxRePrescribe2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          143┆ request.getSession().setAttribute("tmpBeanRX", beanRX);
+            ⋮┆----------------------------------------
+          145┆ request.getSession().setAttribute("comment", comment);
+                                                                       
+    /src/src/main/java/oscar/oscarRx/pageUtil/RxShowAllergy2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+          117┆ request.getSession().setAttribute("RxSessionBean", bean);
+            ⋮┆----------------------------------------
+          130┆ request.getSession().setAttribute("Patient", patient);
+                                                                            
+    /src/src/main/java/oscar/oscarSurveillance/CheckSurveillance2Action.java
+    ❯❱ java.lang.security.audit.tainted-session-from-http-request.tainted-session-from-http-request
+          Detected input from a HTTPServletRequest going into a session command, like `setAttribute`. User    
+          input into such a command could lead to an attacker inputting malicious code into your session      
+          parameters, blurring the line between what's trusted and untrusted, and therefore leading to a trust
+          boundary violation. This could lead to programmers trusting unvalidated data. Instead, thoroughly   
+          sanitize user input before passing it into such function calls.                                     
+          Details: https://sg.run/QbDZ                                                                        
+                                                                                                              
+           74┆ request.getSession().setAttribute("case_program_id", programId);
+                                                        
+    /src/src/main/java/oscar/scratch/Scratch2Action.java
+    ❯❱ java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer
+          Detected a request with potential user-input going into a OutputStream or Writer object. This      
+          bypasses any view or template environments, including HTML escaping, which may expose this         
+          application to cross-site scripting (XSS) vulnerabilities. Consider using a view technology such as
+          JavaServer Faces (JSFs) which automatically escapes HTML views.                                    
+          Details: https://sg.run/KlRL                                                                       
+                                                                                                             
+          104┆ response.getWriter().print("id=" + URLEncoder.encode(returnId, "utf-8") + "&text=" +
+               URLEncoder.encode(returnText, "utf-8") + "&windowId=" + URLEncoder.encode(windowId, 
+               "utf-8"));                                                                          
+                                               
+    /src/src/main/java/oscar/util/JDBCUtil.java
+   ❯❯❱ java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-
+       disallow-doctype-decl-missing                                                                            
+          DOCTYPE declarations are enabled for this DocumentBuilderFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the feature "http://apache.org/xml/features/disallow-       
+          doctype-decl" to true. Alternatively, allow DOCTYPE declarations and only prohibit external entities
+          declarations. This can be done by setting the features "http://xml.org/sax/features/external-       
+          general-entities" and "http://xml.org/sax/features/external-parameter-entities" to false.           
+          Details: https://sg.run/PYBz                                                                        
+                                                                                                              
+           ▶▶┆ Autofix ▶ factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+              factory.newDocumentBuilder();                                                               
+           58┆ DocumentBuilder builder = factory.newDocumentBuilder();
+   
+   ❯❯❱ java.lang.security.audit.xxe.transformerfactory-dtds-not-disabled.transformerfactory-dtds-not-disabled
+          DOCTYPE declarations are enabled for this TransformerFactory. This is vulnerable to XML external
+          entity attacks. Disable this by setting the attributes "accessExternalDTD" and                  
+          "accessExternalStylesheet" to "".                                                               
+          Details: https://sg.run/1wyQ                                                                    
+                                                                                                          
+           ▶▶┆ Autofix ▶ transFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+              transFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");    
+              transFactory.newTransformer(...);                                          
+           87┆ Transformer transformer = transFactory.newTransformer();
+

@@ -1,0 +1,17 @@
+                   
+                   
+┌─────────────────┐
+│ 2 Code Findings │
+└─────────────────┘
+                                                              
+    src/main/java/org/oscarehr/common/dao/CaseloadDaoImpl.java
+   ❯❯❱ java.lang.security.audit.formatted-sql-string.formatted-sql-string
+          Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the
+          SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement)    
+          instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.                    
+          Details: https://sg.run/OPXp                                                                        
+                                                                                                              
+          246┆ Query q = entityManager.createNativeQuery(query);
+            ⋮┆----------------------------------------
+          300┆ Query q = entityManager.createNativeQuery(query);
+
