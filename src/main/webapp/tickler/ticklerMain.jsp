@@ -409,6 +409,11 @@
                 document.serviceform.xml_vdate.value = beginD;
             }
 
+            function setMinDate() {
+            var dateInput = document.getElementById("xml_vdate");
+            dateInput.min = "1900-01-01"; 
+            }
+
             function Check(e) {
                 e.checked = true;
                 //Highlight(e);
@@ -606,7 +611,7 @@
                             href="javascript:void(0)" id="dateRange" onClick="allYear()"><fmt:setBundle basename="oscarResources"/><fmt:message key="tickler.ticklerMain.btnViewAll"/></a></label>
                     <div class="form-group">
                         <label for="xml_vdate">From</label>
-                        <input type="date" class="form-control" name="xml_vdate" id="xml_vdate">
+                        <input type="date" class="form-control" name="xml_vdate" id="xml_vdate" onfocus="setMinDate()">
                     </div>
                     <div class="form-group">
                         <label for="xml_appointment_date">To</label>
