@@ -954,6 +954,9 @@ public class Hsfo2Visit extends AbstractModel<Integer> implements Serializable {
 
   public int getLDLP1()
   {
+    if (LDL < Integer.MIN_VALUE || LDL > Integer.MAX_VALUE) {
+      throw new IllegalArgumentException("LDL value is out of range for an integer: " + LDL);
+    }
     return (int) LDL;
   }
 
