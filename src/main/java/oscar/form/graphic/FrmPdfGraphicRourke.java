@@ -166,7 +166,7 @@ public class FrmPdfGraphicRourke extends FrmPdfGraphic {
                 
             case Calendar.MONTH:
             	smonth += startDate.get(Calendar.YEAR) * 12.0;
-                emonth += curDate.get(Calendar.YEAR) * 12.0;
+                emonth += (float) (curDate.get(Calendar.YEAR) * 12.0);
                 break;
                 
             default:
