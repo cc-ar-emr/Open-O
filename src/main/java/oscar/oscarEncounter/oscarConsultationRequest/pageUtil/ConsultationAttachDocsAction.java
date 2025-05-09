@@ -193,6 +193,9 @@ public class ConsultationAttachDocsAction extends DispatchAction {
         //      to eforms and ticklers
 
         String segmentID = request.getParameter("segmentID");
+        if (segmentID == null || !segmentID.matches("^[a-zA-Z0-9_-]+$")) {
+            throw new IllegalArgumentException("Invalid segmentID");
+        }
         request.setAttribute("segmentID", segmentID);
         try {
             File tempLabPDF = File.createTempFile("lab" + segmentID, "pdf");
