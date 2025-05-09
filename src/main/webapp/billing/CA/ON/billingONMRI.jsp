@@ -156,7 +156,7 @@ function recreate(si) {
 	if(ret) {
 		ss=document.forms[0].billcenter[document.forms[0].billcenter.selectedIndex].value;
 		var su = document.forms[0].useProviderMOH.checked;
-		location.href="onregenreport.jsp?diskId="+si+"&billcenter="+ss+"&useProviderMOH="+su;		
+		location.href="onregenreport.jsp?diskId=" + encodeURIComponent(si) + "&billcenter=" + encodeURIComponent(ss) + "&useProviderMOH=" + encodeURIComponent(su);		
 	}
 }
 
