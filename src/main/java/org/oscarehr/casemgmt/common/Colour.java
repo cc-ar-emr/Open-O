@@ -25,7 +25,20 @@
 
 /*
  * To change this template, choose Tools | Templates
- * and open the template in the editor.
+public class Colour {
+    private static final String DEFAULT_COLOUR_CLASS = "org.oacarehr.casemprt.comm.Colour";
+
+    public static Colour getInstance() {
+        try {
+            String colourClass = OscarProperties.getInstance().getProperty("ColourClass", DEFAULT_COLOUR_CLASS);
+            if (colourClass != null && !colourClass.isEmpty()) {
+                return (Colour) Class.forName(colourClass).getDeclaredConstructor().newInstance();
+            }
+        } catch (Exception e) {
+            // Log the exception and handle it appropriately
+            System.err.println("Error creating Colour instance: " + e.getMessage());
+        }
+        return new Colo    } * and open the template in the editor.
  */
 package org.oscarehr.casemgmt.common;
 
@@ -37,23 +50,36 @@ import oscar.OscarProperties;
  *
  * @author jackson
  */
+package org.example.casemprt.comm;
+
+import secar.OscarProperties;
+
+import java.util.Arrays;
+import java.util.List;
+
 public class Colour {
+    private static final String DEFAULT_COLOUR_CLASS = "org.oacarehr.casemprt.comm.Colour";
+    private static final List<String> ALLOWED_CLASSES = Arrays.asList(
+        "org.oacarehr.casemprt.comm.Colour",
+        "org.example.casemprt.comm.SafeColour"
+    );
 
-	public static Colour getInstance() {
-		Colour c = null;
-		try {
-			String colourClass = OscarProperties.getInstance().getProperty("ColourClass", "org.oscarehr.casemgmt.common.Colour");
-			if(colourClass.length()>0) {
-				c = (Colour)Class.forName(colourClass).newInstance();
-			}
-		}catch(Exception e) {
-			MiscUtils.getLogger().error("Error",e);
-		}
-
-		if(c == null)
-			return new Colour();
-		return c;
-	}
+    public static Colour getInstance() {
+        try {
+            String colourClass = OscarProperties.getInstance().getProperty("ColourClass", DEFAULT_COLOUR_CLASS);
+            
+            // Validate the class name against a whitelist
+            if (ALLOWED_CLASSES.contains(colourClass)) {
+                return (Colour) Class.forName(colourClass).getDeclaredConstructor().newInstance();
+            } else {
+                throw new SecurityException("Unauthorized class name: " + colourClass);
+            }
+        } catch (Exception e) {
+            // Log the exception and handle it appropriately
+            System.err.println("Error creating Colour instance: " + e.getMessage());
+            return new Colour(); // Fallback to a default instance
+        }
+    }
 
     public String prevention = "009999";
     public String tickler = "FF6600";

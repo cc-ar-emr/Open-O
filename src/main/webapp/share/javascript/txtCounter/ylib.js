@@ -7,19 +7,45 @@ You may reuse this script, on condition that:
 www.WebOnWebOff.com
 ********************************************************
 */
-var ylib = function(){
-	return {
-		util: {},
-		widget: {},
-		namespace: function(sNameSpace){
-			if(!xStr(sNameSpace)) return null;
-			var levels = sNameSpace.split('.');
-			var thisNameSpace = ylib;
-			
-			for(var i=(levels[0]=='ylib'? 1 : 0); i<levels.length; i++){
-				thisNameSpace[levels[i]] = thisNameSpace[levels[i]] || {};
-				thisNameSpace = thisNameSpace[levels[i]];
-			} 
-		}
-	};
-}();
+var yLib = (function() {
+    // Helper function to check if a string is valid and safe
+    function isValidNamespace(sNameSpace) {
+        return typeof sNameSpace === 'string' && 
+               sNameSpace.trim() !== '' && 
+               !sNameSpace.includes('__proto__') && 
+               !sNameSpace.includes('constructor');
+    }
+
+    return {
+        util: Object.create(null), // Create an object without a prototype
+        widget: Object.create(null), // Create an object without a prototype
+        namespace: function(sNameSpace) {
+            if (!isValidNamespace(sNameSpace)) {
+                console.error('Invalid or unsafe namespace:', sNameSpace);
+                return null;
+            }
+
+            var levels = sNameSpace.split('.');
+            var thisNameSpace = this;
+
+            for (var i = (levels[0] === 'yLib' ? 1 : 0); i < levels.length; i++) {
+                var level = levels[i];
+
+                // Skip unsafe levels
+                if (level === '__proto__' || level === 'constructor') {
+                    console.error('Unsafe level detected:', level);
+                    return null;
+                }
+
+                // Create a new level if it doesn't exist
+                if (!thisNameSpace[level]) {
+                    thisNameSpace[level] = Object.create(null); // Create an object without a prototype
+                }
+
+                thisNameSpace = thisNameSpace[level];
+            }
+
+            return thisNameSpace;
+        }
+    };
+})();
