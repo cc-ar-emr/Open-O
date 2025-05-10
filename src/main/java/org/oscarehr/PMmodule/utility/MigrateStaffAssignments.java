@@ -86,9 +86,9 @@ public class MigrateStaffAssignments {
     }
 
     public long getRoleId(String name) throws Exception {
-        Statement stmt = DbConnectionFilter.getThreadLocalDbConnection().createStatement();
-        stmt.execute("SELECT * FROM caisi_role where name = '" + name + "'");
-        ResultSet rs = stmt.getResultSet();
+        java.sql.PreparedStatement stmt = DbConnectionFilter.getThreadLocalDbConnection().prepareStatement("SELECT * FROM caisi_role where name = ?");
+        stmt.setString(1, name);
+        ResultSet rs = stmt.executeQuery();
         if (rs.next()) {
             return rs.getInt("role_id");
         } else {

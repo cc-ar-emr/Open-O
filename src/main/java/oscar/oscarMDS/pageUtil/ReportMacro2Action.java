@@ -72,7 +72,7 @@ public class ReportMacro2Action extends ActionSupport {
 
         String name = request.getParameter("name");
 
-        logger.info("RunMacro called with name = " + name);
+        logger.info("RunMacro called with name = {}", name);
 
         if (name == null) {
             result.put("success", false);
@@ -111,14 +111,14 @@ public class ReportMacro2Action extends ActionSupport {
     }
 
     protected boolean runMacro(JSONObject macro, HttpServletRequest request) {
-        logger.info("running macro " + macro.getString("name"));
+        logger.info("running macro {}", macro.getString("name"));
         String segmentID = request.getParameter("segmentID");
         String providerNo = request.getParameter("providerNo");
         String labType = request.getParameter("labType");
         String demographicNo = request.getParameter("demographicNo");
 
         if (macro.has("acknowledge")) {
-            logger.info("Acknowledging lab " + labType + ":" + segmentID);
+            logger.info("Acknowledging lab {}:{}", labType, segmentID);
             JSONObject jAck = macro.getJSONObject("acknowledge");
             String comment = jAck.getString("comment");
             CommonLabResultData.updateReportStatus(Integer.parseInt(segmentID), providerNo, 'A', comment, labType, skipComment(LoggedInInfo.getLoggedInInfoFromSession(request).getLoggedInProviderNo()));
