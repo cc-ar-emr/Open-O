@@ -1,11 +1,12 @@
+InlineEditBox.js
 /*
-	Copyright (c) 2004-2006, The Dojo Foundation
-	All Rights Reserved.
+        Copyright (c) 2004-2006, The Dojo Foundation
+        All Rights Reserved.
 
-	Licensed under the Academic Free License version 2.1 or above OR the
-	modified BSD license. For more information on Dojo licensing, see:
+        Licensed under the Academic Free License version 2.1 or above OR the
+        modified BSD license. For more information on Dojo licensing, see:
 
-		http://dojotoolkit.org/community/licensing.shtml
+                http://dojotoolkit.org/community/licensing.shtml
 */
 
 dojo.provide("dojo.widget.InlineEditBox");
@@ -23,9 +24,9 @@ dojo.widget.defineWidget(
     dojo.widget.HtmlWidget,
     function () {
         // summary
-        //		Given node is displayed as-is (for example, an <h1 dojoType="InlineEditBox">
-        //		is displayed as an <h1>, but when you click on it, it turns into an
-        //		<input> or <textarea>, and the user can edit the value.
+        //              Given node is displayed as-is (for example, an <h1 dojoType="InlineEditBox">
+        //              is displayed as an <h1>, but when you click on it, it turns into an
+        //              <input> or <textarea>, and the user can edit the value.
 
         // mutable objects need to be in constructor to give each instance its own copy
         this.history = [];
@@ -35,31 +36,31 @@ dojo.widget.defineWidget(
         templateCssPath: dojo.uri.dojoUri("src/widget/templates/InlineEditBox.css"),
 
         // mode: String
-        //		"text" is the default, and means that the node will convert it into a (single-line) <input>
-        //		when you click on it;
-        //		"textarea" means that the node will be converted into a multi-line <textarea> for editing.
+        //              "text" is the default, and means that the node will convert it into a (single-line) <input>
+        //              when you click on it;
+        //              "textarea" means that the node will be converted into a multi-line <textarea> for editing.
         mode: "text",
 
         // name: String
-        //		This is passed as the third argument to onSave().
+        //              This is passed as the third argument to onSave().
         name: "",
 
         // minWidth:  Integer
-        //		Pixel minimum width of edit box
+        //              Pixel minimum width of edit box
         minWidth: 100,
 
         // minHeight: Integer
-        //		Pixel minimum height of edit box, if it's a <textarea>
+        //              Pixel minimum height of edit box, if it's a <textarea>
         minHeight: 200,
 
         // editing: Boolean
-        //		Is the node currently in edit mode?
+        //              Is the node currently in edit mode?
         editing: false,
 
         // value: String
-        //		The text string displayed or edited.
-        //		Initial value can also be specified inline, like
-        //		<h1 dojoType="InlineEditBox">Hello world</h1>
+        //              The text string displayed or edited.
+        //              Initial value can also be specified inline, like
+        //              <h1 dojoType="InlineEditBox">Hello world</h1>
         value: "",
 
         // deprecated
@@ -96,11 +97,11 @@ dojo.widget.defineWidget(
 
             // get value and display it
             if (this.value) {
-                this.editable.innerHTML = this.value;
+                this.editable.textContent  = this.value;
                 return;
             } else {
-                this.value = dojo.string.trim(this.editable.innerHTML);
-                this.editable.innerHTML = this.value;
+                this.value = dojo.string.trim(this.editable.textContent );
+                this.editable.textContent  = this.value;
             }
         },
 
@@ -127,8 +128,8 @@ dojo.widget.defineWidget(
 
         _beginEdit: function (e) {
             // summary
-            // 		When user clicks the text, then start editing.
-            // 		Hide the text and display the form instead.
+            //          When user clicks the text, then start editing.
+            //          Hide the text and display the form instead.
 
             if (this.editing || this.disabled) {
                 return;
@@ -210,8 +211,11 @@ dojo.widget.defineWidget(
             // sets the text without informing the server
             txt = "" + txt;
             var tt = dojo.string.trim(txt);
-            this.value = tt
-            this.editable.innerHTML = tt;
+           
+            this.editable.textContent = tt;
+            
+           
+            this.editable.textContent = tt;
         },
 
         undo: function () {
@@ -219,7 +223,7 @@ dojo.widget.defineWidget(
             if (this.history.length > 0) {
                 var curValue = this.value;
                 var value = this.history.pop();
-                this.editable.innerHTML = value;
+                this.editable.textContent = value;
                 this.value = value;
                 this.onUndo(value);
                 this.onSave(value, curValue, this.name);
@@ -228,8 +232,8 @@ dojo.widget.defineWidget(
 
         checkForValueChange: function () {
             // summary
-            //		Callback when user changes input value.
-            //		Enable save button if the text value is different than the original value.
+            //          Callback when user changes input value.
+            //          Enable save button if the text value is different than the original value.
             var ee = this[this.mode.toLowerCase()];
             if ((this.value != ee.value) &&
                 (dojo.string.trim(ee.value) != "")) {
