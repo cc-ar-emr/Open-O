@@ -104,13 +104,23 @@ public class ManageDashboard2Action extends ActionSupport {
         JSONObject json = null;
 
         if (indicatorTemplateFile != null) {
-            try {
-                filebytes = Files.readAllBytes(indicatorTemplateFile.toPath());
-            } catch (Exception e) {
+            // Check file size before processing
+            if (indicatorTemplateFile.length() > 5 * 1024 * 1024) { // 5MB limit
                 json = new JSONObject();
                 json.put("status", "error");
-                json.put("message", e.getMessage());
-                MiscUtils.getLogger().error("Failed to transfer file. ", e);
+                json.put("message", "File size exceeds maximum allowed (5MB)");
+                MiscUtils.getLogger().warn("File upload rejected - size exceeds limit: " + 
+                    indicatorTemplateFile.length() + " bytes from user " + loggedInInfo.getLoggedInProviderNo());
+            } else {
+                try {
+                    filebytes = Files.readAllBytes(indicatorTemplateFile.toPath());
+                } catch (Exception e) {
+                    json = new JSONObject();
+                    json.put("status", "error");
+                    json.put("message", "Error processing uploaded file");
+                    MiscUtils.getLogger().error("Failed to transfer file from user " + 
+                        loggedInInfo.getLoggedInProviderNo(), e);
+                }
             }
         }
 
@@ -128,25 +138,43 @@ public class ManageDashboard2Action extends ActionSupport {
             try {
                 XMLErrorHandler errorHandler = new XMLErrorHandler();
                 SAXParserFactory factory = SAXParserFactory.newInstance();
+                
+                // Secure parser configuration to prevent XXE attacks
+                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+                factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+                factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+                
                 factory.setValidating(true);
                 factory.setNamespaceAware(true);
+                
                 SAXParser parser = factory.newSAXParser();
                 SAXReader xmlReader = new SAXReader();
+                
+                // Configure SAXReader to prevent XXE
+                xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+                xmlReader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+                
                 Document xmlDocument = (Document) xmlReader.read(Files.newBufferedReader(indicatorTemplateFile.toPath()));
+                
                 parser.setProperty(
                         "http://java.sun.com/xml/jaxp/properties/schemaLanguage",
                         "http://www.w3.org/2001/XMLSchema");
                 parser.setProperty(
                         "http://java.sun.com/xml/jaxp/properties/schemaSource",
                         "file:" + schemaSource.getPath());
+                
                 SAXValidator validator = new SAXValidator(parser.getXMLReader());
                 validator.setErrorHandler(errorHandler);
                 validator.validate(xmlDocument);
+                
                 if (!errorHandler.getErrors().hasContent()) {
                     isOscarXml = true;
                 }
             } catch (Exception e) {
-                MiscUtils.getLogger().error("Failed to transfer file. ", e);
+                MiscUtils.getLogger().error("XML validation failed for user " + 
+                    loggedInInfo.getLoggedInProviderNo(), e);
             }
 
             if (isOscarXml) {
@@ -187,13 +215,29 @@ public class ManageDashboard2Action extends ActionSupport {
         String xmlTemplate = null;
         OutputStream outputStream = null;
 
+        // Validate indicatorId parameter
+        if (indicator == null || !indicator.matches("^\\d+$")) {
+            MiscUtils.getLogger().warn("Invalid indicatorId parameter: " + indicator + 
+                " from user " + loggedInInfo.getLoggedInProviderNo());
+            return ERROR;
+        }
+        
+        // Sanitize indicatorName to prevent header injection and path traversal
         if (indicatorName == null || indicatorName.isEmpty()) {
             indicatorName = "indicator_template-" + System.currentTimeMillis() + ".xml";
         } else {
+            // Remove any characters that could be used for path traversal or header injection
+            indicatorName = indicatorName.replaceAll("[^a-zA-Z0-9_\\-\\.]", "_");
             indicatorName = indicatorName + ".xml";
         }
 
-        xmlTemplate = dashboardManager.exportIndicatorTemplate(loggedInInfo, Integer.parseInt(indicator));
+        try {
+            indicatorId = Integer.parseInt(indicator);
+            xmlTemplate = dashboardManager.exportIndicatorTemplate(loggedInInfo, indicatorId);
+        } catch (NumberFormatException e) {
+            MiscUtils.getLogger().error("Failed to parse indicator ID: " + indicator, e);
+            return ERROR;
+        }
 
         if (xmlTemplate != null) {
 
@@ -201,10 +245,17 @@ public class ManageDashboard2Action extends ActionSupport {
             response.setHeader("Content-disposition", "attachment; filename=" + indicatorName);
 
             try {
+                // Set security headers
+                response.setHeader("Content-Security-Policy", "default-src 'self'");
+                response.setHeader("X-Content-Type-Options", "nosniff");
+                response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+                response.setHeader("Pragma", "no-cache");
+                
                 outputStream = response.getOutputStream();
                 outputStream.write(xmlTemplate.getBytes());
             } catch (Exception e) {
-                MiscUtils.getLogger().error("File not found", e);
+                MiscUtils.getLogger().error("Error writing template to output stream for user " + 
+                    loggedInInfo.getLoggedInProviderNo(), e);
             } finally {
                 if (outputStream != null) {
                     try {
@@ -228,19 +279,74 @@ public class ManageDashboard2Action extends ActionSupport {
         if (!securityInfoManager.hasPrivilege(loggedInInfo, "_dashboardManager", SecurityInfoManager.WRITE, null)) {
             return "unauthorized";
         }
+        
         String dashboard = request.getParameter("indicatorDashboardId");
         String indicator = request.getParameter("indicatorId");
         int dashboardId = 0;
         int indicatorId = 0;
 
         JSONObject jsonObject = new JSONObject();
-
+        
+        // Validate dashboard parameter
         if (dashboard != null && !dashboard.isEmpty()) {
-            dashboardId = Integer.parseInt(dashboard);
+            if (!dashboard.matches("^\\d+$")) {
+                jsonObject.put("success", "false");
+                jsonObject.put("message", "Invalid dashboard ID format");
+                MiscUtils.getLogger().warn("Invalid dashboard ID format: " + dashboard + 
+                    " from user " + loggedInInfo.getLoggedInProviderNo());
+                try {
+                    jsonObject.write(response.getWriter());
+                    return null;
+                } catch (IOException e) {
+                    MiscUtils.getLogger().error("JSON response failed", e);
+                    return ERROR;
+                }
+            }
+            try {
+                dashboardId = Integer.parseInt(dashboard);
+            } catch (NumberFormatException e) {
+                MiscUtils.getLogger().error("Failed to parse dashboard ID: " + dashboard, e);
+                jsonObject.put("success", "false");
+                jsonObject.put("message", "Invalid dashboard ID");
+                try {
+                    jsonObject.write(response.getWriter());
+                    return null;
+                } catch (IOException ex) {
+                    MiscUtils.getLogger().error("JSON response failed", ex);
+                    return ERROR;
+                }
+            }
         }
 
+        // Validate indicator parameter
         if (indicator != null && !indicator.isEmpty()) {
-            indicatorId = Integer.parseInt(indicator);
+            if (!indicator.matches("^\\d+$")) {
+                jsonObject.put("success", "false");
+                jsonObject.put("message", "Invalid indicator ID format");
+                MiscUtils.getLogger().warn("Invalid indicator ID format: " + indicator + 
+                    " from user " + loggedInInfo.getLoggedInProviderNo());
+                try {
+                    jsonObject.write(response.getWriter());
+                    return null;
+                } catch (IOException e) {
+                    MiscUtils.getLogger().error("JSON response failed", e);
+                    return ERROR;
+                }
+            }
+            try {
+                indicatorId = Integer.parseInt(indicator);
+            } catch (NumberFormatException e) {
+                MiscUtils.getLogger().error("Failed to parse indicator ID: " + indicator, e);
+                jsonObject.put("success", "false");
+                jsonObject.put("message", "Invalid indicator ID");
+                try {
+                    jsonObject.write(response.getWriter());
+                    return null;
+                } catch (IOException ex) {
+                    MiscUtils.getLogger().error("JSON response failed", ex);
+                    return ERROR;
+                }
+            }
         }
 
         if (dashboardManager.assignIndicatorToDashboard(loggedInInfo, dashboardId, indicatorId)) {
@@ -277,8 +383,33 @@ public class ManageDashboard2Action extends ActionSupport {
         Integer id = null;
         Boolean active = Boolean.FALSE;
 
+        // Validate dashboardId parameter
         if (dashboardId != null && !dashboardId.isEmpty()) {
-            id = Integer.parseInt(dashboardId);
+            if (!dashboardId.matches("^\\d+$")) {
+                MiscUtils.getLogger().warn("Invalid dashboardId parameter: " + dashboardId + 
+                    " from user " + loggedInInfo.getLoggedInProviderNo());
+                return ERROR;
+            }
+            
+            try {
+                id = Integer.parseInt(dashboardId);
+            } catch (NumberFormatException e) {
+                MiscUtils.getLogger().error("Failed to parse dashboard ID: " + dashboardId, e);
+                return ERROR;
+            }
+        }
+        
+        // Validate dashboardName parameter
+        if (dashboardName == null || dashboardName.trim().isEmpty()) {
+            MiscUtils.getLogger().warn("Missing or empty dashboardName parameter from user " + 
+                loggedInInfo.getLoggedInProviderNo());
+            return ERROR;
+        }
+        
+        // Sanitize input parameters
+        dashboardName = dashboardName.trim();
+        if (dashboardDescription != null) {
+            dashboardDescription = dashboardDescription.trim();
         }
 
         if (dashboardActive != null && !dashboardActive.isEmpty()) {
@@ -323,8 +454,36 @@ public class ManageDashboard2Action extends ActionSupport {
         Boolean active = Boolean.FALSE;
         int id = 0;
 
+        // Validate objectClassName parameter
+        if (objectClassName == null || objectClassName.isEmpty()) {
+            MiscUtils.getLogger().warn("Missing objectClassName parameter from user " + 
+                loggedInInfo.getLoggedInProviderNo());
+            return ERROR;
+        }
+        
+        // Validate objectClassName is a valid enum value
+        try {
+            ObjectName.valueOf(objectClassName);
+        } catch (IllegalArgumentException e) {
+            MiscUtils.getLogger().warn("Invalid objectClassName parameter: " + objectClassName + 
+                " from user " + loggedInInfo.getLoggedInProviderNo());
+            return ERROR;
+        }
+
+        // Validate objectId parameter
         if (objectId != null && !objectId.isEmpty()) {
-            id = Integer.parseInt(objectId);
+            if (!objectId.matches("^\\d+$")) {
+                MiscUtils.getLogger().warn("Invalid objectId parameter: " + objectId + 
+                    " from user " + loggedInInfo.getLoggedInProviderNo());
+                return ERROR;
+            }
+            
+            try {
+                id = Integer.parseInt(objectId);
+            } catch (NumberFormatException e) {
+                MiscUtils.getLogger().error("Failed to parse object ID: " + objectId, e);
+                return ERROR;
+            }
         }
 
         if (activeState != null) {
@@ -332,7 +491,12 @@ public class ManageDashboard2Action extends ActionSupport {
         }
 
         if (id > 0 && objectClassName != null) {
-            dashboardManager.toggleStatus(loggedInInfo, id, ObjectName.valueOf(objectClassName), active);
+            try {
+                dashboardManager.toggleStatus(loggedInInfo, id, ObjectName.valueOf(objectClassName), active);
+            } catch (Exception e) {
+                MiscUtils.getLogger().error("Error toggling status for " + objectClassName + " with ID " + id, e);
+                return ERROR;
+            }
         }
 
         return null;

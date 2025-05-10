@@ -40,9 +40,34 @@
 %>
 
 <%
-    if (session.getAttribute("user") == null) response.sendRedirect("../logout.jsp");
+    // Validate session and check for authentication
+    if (session.getAttribute("user") == null) {
+        response.sendRedirect("../logout.jsp");
+        return;
+    }
+    
+    // Generate CSRF token if not already present
+    if (session.getAttribute("csrf_token") == null) {
+        java.security.SecureRandom secureRandom = new java.security.SecureRandom();
+        byte[] bytes = new byte[32];
+        secureRandom.nextBytes(bytes);
+        String csrfToken = java.util.Base64.getEncoder().encodeToString(bytes);
+        session.setAttribute("csrf_token", csrfToken);
+    }
+    
     String deepcolor = "#CCCCFF", weakcolor = "#EEEEFF", tableTitle = "#99ccff";
-    boolean bEdit = request.getParameter("appointment_no") != null ? true : false;
+    
+    // Validate appointment_no parameter
+    String appointmentNoParam = request.getParameter("appointment_no");
+    boolean bEdit = false;
+    if (appointmentNoParam != null) {
+        // Validate appointment_no is numeric
+        if (!appointmentNoParam.matches("^\\d+$")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid appointment number");
+            return;
+        }
+        bEdit = true;
+    }
 %>
 <%@ page import="java.util.*, oscar.*, oscar.util.*, java.sql.*"
          errorPage="/errorpage.jsp" %>
@@ -75,13 +100,48 @@
 %>
 <%
     if (request.getParameter("groupappt") != null) {
+        // Verify CSRF token
+        String csrfToken = request.getParameter("csrf_token");
+        String sessionToken = (String) session.getAttribute("csrf_token");
+        
+        if (csrfToken == null || sessionToken == null || !csrfToken.equals(sessionToken)) {
+            oscar.OscarLogger.getInstance().log("appointment_control", "warn", 
+                "CSRF token validation failed for user: " + session.getAttribute("user") + 
+                " IP: " + request.getRemoteAddr());
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Security validation failed");
+            return;
+        }
+        
         boolean bSucc = false;
         String createdDateTime = UtilDateUtilities.DateToString(new java.util.Date(), "yyyy-MM-dd HH:mm:ss");
         String userName = (String) session.getAttribute("userlastname") + ", " + (String) session.getAttribute("userfirstname");
-        String everyNum = request.getParameter("everyNum") != null ? request.getParameter("everyNum") : "0";
-        String everyUnit = request.getParameter("everyUnit") != null ? request.getParameter("everyUnit") : "day";
-        String endDate = request.getParameter("endDate") != null ? request.getParameter("endDate") : UtilDateUtilities.DateToString(new java.util.Date(), "dd/MM/yyyy");
-        int delta = Integer.parseInt(everyNum);
+        
+        // Validate and sanitize input parameters
+        String everyNum = request.getParameter("everyNum");
+        if (everyNum == null || !everyNum.matches("^[1-9][0-9]?$")) {
+            everyNum = "1"; // Default to 1 if invalid
+        }
+        
+        String everyUnit = request.getParameter("everyUnit");
+        if (everyUnit == null || !(everyUnit.equals("day") || everyUnit.equals("week") || 
+                                  everyUnit.equals("month") || everyUnit.equals("year"))) {
+            everyUnit = "day"; // Default to day if invalid
+        }
+        
+        String endDate = request.getParameter("endDate");
+        if (endDate == null || !endDate.matches("^\\d{2}/\\d{2}/\\d{4}$")) {
+            endDate = UtilDateUtilities.DateToString(new java.util.Date(), "dd/MM/yyyy");
+        }
+        
+        int delta;
+        try {
+            delta = Integer.parseInt(everyNum);
+            if (delta <= 0) delta = 1; // Ensure positive value
+            if (delta > 99) delta = 99; // Limit to reasonable value
+        } catch (NumberFormatException e) {
+            delta = 1; // Default to 1 if parsing fails
+        }
+        
         if (everyUnit.equals("week")) {
             delta = delta * 7;
             everyUnit = "day";
@@ -95,36 +155,110 @@
             String[] param = new String[19];
             int rowsAffected = 0, datano = 0;
 
-            java.util.Date iDate = ConversionUtils.fromDateString(request.getParameter("appointment_date"));
+            // Validate appointment_date parameter
+            String appointmentDate = request.getParameter("appointment_date");
+            if (appointmentDate == null || !appointmentDate.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid appointment date format");
+                return;
+            }
+            
+            java.util.Date iDate;
+            try {
+                iDate = ConversionUtils.fromDateString(appointmentDate);
+                if (iDate == null) {
+                    throw new IllegalArgumentException("Invalid date");
+                }
+            } catch (Exception e) {
+                oscar.OscarLogger.getInstance().log("appointment_control", "error", 
+                    "Error parsing appointment date: " + e.getMessage());
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid appointment date");
+                return;
+            }
 
             while (true) {
                 Appointment a = new Appointment();
-                a.setProviderNo(request.getParameter("provider_no"));
+                // Validate and sanitize input parameters
+                String providerNo = request.getParameter("provider_no");
+                if (providerNo == null || providerNo.isEmpty()) {
+                    providerNo = (String) session.getAttribute("user");
+                }
+                
+                String startTime = request.getParameter("start_time");
+                if (startTime == null || !startTime.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "error", 
+                        "Invalid start time format: " + startTime);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid start time format");
+                    return;
+                }
+                
+                String endTime = request.getParameter("end_time");
+                if (endTime == null || !endTime.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "error", 
+                        "Invalid end time format: " + endTime);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid end time format");
+                    return;
+                }
+                
+                // Set appointment properties with validated inputs
+                a.setProviderNo(providerNo);
                 a.setAppointmentDate(iDate);
-                a.setStartTime(ConversionUtils.fromTimeStringNoSeconds(request.getParameter("start_time")));
-                a.setEndTime(ConversionUtils.fromTimeStringNoSeconds(request.getParameter("end_time")));
-                a.setName(request.getParameter("keyword"));
-                a.setNotes(request.getParameter("notes"));
-                a.setReason(request.getParameter("reason"));
-                a.setLocation(request.getParameter("location"));
-                a.setResources(request.getParameter("resources"));
-                a.setType(request.getParameter("type"));
-                a.setStyle(request.getParameter("style"));
-                a.setBilling(request.getParameter("billing"));
-                a.setStatus(request.getParameter("status"));
+                a.setStartTime(ConversionUtils.fromTimeStringNoSeconds(startTime));
+                a.setEndTime(ConversionUtils.fromTimeStringNoSeconds(endTime));
+                a.setName(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("keyword")));
+                a.setNotes(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("notes")));
+                a.setReason(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("reason")));
+                a.setLocation(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("location")));
+                a.setResources(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("resources")));
+                a.setType(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("type")));
+                a.setStyle(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("style")));
+                a.setBilling(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("billing")));
+                a.setStatus(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("status")));
                 a.setCreateDateTime(new java.util.Date());
                 a.setCreator(userName);
-                a.setRemarks(request.getParameter("remarks"));
-                if (request.getParameter("demographic_no") != null && !(request.getParameter("demographic_no").equals(""))) {
-                    a.setDemographicNo(Integer.parseInt(request.getParameter("demographic_no")));
+                a.setRemarks(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("remarks")));
+                
+                // Validate demographic_no parameter
+                String demographicNo = request.getParameter("demographic_no");
+                if (demographicNo != null && !demographicNo.isEmpty()) {
+                    if (!demographicNo.matches("^\\d+$")) {
+                        oscar.OscarLogger.getInstance().log("appointment_control", "error", 
+                            "Invalid demographic number format: " + demographicNo);
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid demographic number");
+                        return;
+                    }
+                    a.setDemographicNo(Integer.parseInt(demographicNo));
                 } else {
                     a.setDemographicNo(0);
                 }
 
-                a.setProgramId(Integer.parseInt((String) request.getSession().getAttribute("programId_oscarView")));
-                a.setUrgency(request.getParameter("urgency"));
-                a.setReasonCode(Integer.parseInt(request.getParameter("reasonCode")));
+                // Validate programId parameter
+                String programId = (String) request.getSession().getAttribute("programId_oscarView");
+                if (programId == null || !programId.matches("^\\d+$")) {
+                    programId = "0"; // Default to 0 if invalid
+                }
+                a.setProgramId(Integer.parseInt(programId));
+                
+                // Validate urgency parameter
+                String urgency = request.getParameter("urgency");
+                if (urgency != null) {
+                    urgency = org.apache.commons.lang.StringEscapeUtils.escapeHtml(urgency);
+                }
+                a.setUrgency(urgency);
+                
+                // Validate reasonCode parameter
+                String reasonCode = request.getParameter("reasonCode");
+                if (reasonCode == null || !reasonCode.matches("^-?\\d+$")) {
+                    reasonCode = "-1"; // Default to -1 if invalid
+                }
+                a.setReasonCode(Integer.parseInt(reasonCode));
+                
+                // Persist the appointment
                 appointmentDao.persist(a);
+                
+                // Log the appointment creation
+                oscar.OscarLogger.getInstance().log("appointment_control", "info", 
+                    "Created repeat appointment for date: " + UtilDateUtilities.DateToString(iDate) + 
+                    ", provider: " + providerNo);
 
 
                 gCalDate.setTime(UtilDateUtilities.StringToDate(param[1], "yyyy-MM-dd"));
@@ -162,6 +296,23 @@
 
             // group cancel
             if (request.getParameter("groupappt").equals("Group Cancel")) {
+                // Verify user has permission to cancel appointments
+                LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
+                if (loggedInInfo == null) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+                    return;
+                }
+            
+                // Check if user has permission to cancel appointments
+                if (!loggedInInfo.getCurrentProvider().hasAdminRole() && 
+                    !loggedInInfo.getLoggedInProviderNo().equals(paramE[1])) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "warn", 
+                        "Unauthorized attempt to cancel appointments for provider: " + paramE[1] + 
+                        " by user: " + loggedInInfo.getLoggedInProviderNo());
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Not authorized to cancel these appointments");
+                    return;
+                }
+            
                 Object[] param = new Object[13];
                 param[0] = "C";
                 param[1] = createdDateTime;
@@ -195,6 +346,23 @@
 
             // group delete
             if (request.getParameter("groupappt").equals("Group Delete")) {
+                // Verify user has permission to delete appointments
+                LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
+                if (loggedInInfo == null) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+                    return;
+                }
+            
+                // Check if user has permission to delete appointments
+                if (!loggedInInfo.getCurrentProvider().hasAdminRole() && 
+                    !loggedInInfo.getLoggedInProviderNo().equals(paramE[1])) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "warn", 
+                        "Unauthorized attempt to delete appointments for provider: " + paramE[1] + 
+                        " by user: " + loggedInInfo.getLoggedInProviderNo());
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Not authorized to delete these appointments");
+                    return;
+                }
+            
                 Object[] param = new Object[10];
                 for (int k = 0; k < paramE.length; k++) param[k] = paramE[k];
 
@@ -219,19 +387,68 @@
             }
 
             if (request.getParameter("groupappt").equals("Group Update")) {
+                // Verify user has permission to update appointments
+                LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
+                if (loggedInInfo == null) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+                    return;
+                }
+            
+                // Check if user has permission to update appointments
+                if (!loggedInInfo.getCurrentProvider().hasAdminRole() && 
+                    !loggedInInfo.getLoggedInProviderNo().equals(paramE[1])) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "warn", 
+                        "Unauthorized attempt to update appointments for provider: " + paramE[1] + 
+                        " by user: " + loggedInInfo.getLoggedInProviderNo());
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Not authorized to update these appointments");
+                    return;
+                }
+            
+                // Validate input parameters
+                String startTime = request.getParameter("start_time");
+                if (startTime == null || !startTime.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "error", 
+                        "Invalid start time format: " + startTime);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid start time format");
+                    return;
+                }
+            
+                String endTime = request.getParameter("end_time");
+                if (endTime == null || !endTime.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "error", 
+                        "Invalid end time format: " + endTime);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid end time format");
+                    return;
+                }
+            
+                // Validate demographic_no parameter
+                String demographicNo = request.getParameter("demographic_no");
+                if (demographicNo != null && !demographicNo.isEmpty() && !demographicNo.matches("^\\d+$")) {
+                    oscar.OscarLogger.getInstance().log("appointment_control", "error", 
+                        "Invalid demographic number format: " + demographicNo);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid demographic number");
+                    return;
+                }
+            
+                // Validate reasonCode parameter
+                String reasonCode = request.getParameter("reasonCode");
+                if (reasonCode == null || !reasonCode.matches("^-?\\d+$")) {
+                    reasonCode = "-1"; // Default to -1 if invalid
+                }
+            
                 Object[] param = new Object[22];
-                param[0] = MyDateFormat.getTimeXX_XX_XX(request.getParameter("start_time"));
-                param[1] = MyDateFormat.getTimeXX_XX_XX(request.getParameter("end_time"));
-                param[2] = request.getParameter("keyword");
-                param[3] = request.getParameter("demographic_no");
-                param[4] = request.getParameter("notes");
-                param[5] = request.getParameter("reason");
-                param[6] = request.getParameter("location");
-                param[7] = request.getParameter("resources");
+                param[0] = MyDateFormat.getTimeXX_XX_XX(startTime);
+                param[1] = MyDateFormat.getTimeXX_XX_XX(endTime);
+                param[2] = org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("keyword"));
+                param[3] = demographicNo;
+                param[4] = org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("notes"));
+                param[5] = org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("reason"));
+                param[6] = org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("location"));
+                param[7] = org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("resources"));
                 param[8] = createdDateTime;
                 param[9] = userName;
-                param[10] = request.getParameter("urgency");
-                param[11] = request.getParameter("reasonCode");
+                param[10] = org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("urgency"));
+                param[11] = reasonCode;
                 for (int k = 0; k < paramE.length; k++)
                     param[k + 12] = paramE[k];
 
@@ -241,18 +458,43 @@
                             (String) paramE[4], (String) paramE[5], (String) paramE[6], ConversionUtils.fromTimestampString((String) paramE[7]), (String) paramE[8], Integer.parseInt((String) paramE[9]));
                     for (Appointment appt : appts) {
                         appointmentArchiveDao.archiveAppointment(appt);
-                        appt.setStartTime(ConversionUtils.fromTimeString(MyDateFormat.getTimeXX_XX_XX(request.getParameter("start_time"))));
-                        appt.setEndTime(ConversionUtils.fromTimeString(MyDateFormat.getTimeXX_XX_XX(request.getParameter("end_time"))));
-                        appt.setName(request.getParameter("keyword"));
-                        appt.setDemographicNo(Integer.parseInt((String) paramE[9]));
-                        appt.setNotes(request.getParameter("notes"));
-                        appt.setReason(request.getParameter("reason"));
-                        appt.setLocation(request.getParameter("location"));
-                        appt.setResources(request.getParameter("resources"));
+                        // Validate and sanitize input parameters
+                        String startTime = request.getParameter("start_time");
+                        if (startTime == null || !startTime.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+                            startTime = "00:00"; // Default if invalid
+                        }
+                        
+                        String endTime = request.getParameter("end_time");
+                        if (endTime == null || !endTime.matches("^([01]?[0-9]|2[0-3]):[0-5][0-9]$")) {
+                            endTime = "00:15"; // Default if invalid
+                        }
+                        
+                        // Validate reasonCode parameter
+                        String reasonCode = request.getParameter("reasonCode");
+                        if (reasonCode == null || !reasonCode.matches("^-?\\d+$")) {
+                            reasonCode = "-1"; // Default to -1 if invalid
+                        }
+                        
+                        // Set appointment properties with validated inputs
+                        appt.setStartTime(ConversionUtils.fromTimeString(MyDateFormat.getTimeXX_XX_XX(startTime)));
+                        appt.setEndTime(ConversionUtils.fromTimeString(MyDateFormat.getTimeXX_XX_XX(endTime)));
+                        appt.setName(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("keyword")));
+                        
+                        // Validate demographic_no from paramE
+                        if (paramE[9] != null && paramE[9].toString().matches("^\\d+$")) {
+                            appt.setDemographicNo(Integer.parseInt((String) paramE[9]));
+                        } else {
+                            appt.setDemographicNo(0);
+                        }
+                        
+                        appt.setNotes(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("notes")));
+                        appt.setReason(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("reason")));
+                        appt.setLocation(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("location")));
+                        appt.setResources(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("resources")));
                         appt.setUpdateDateTime(ConversionUtils.fromTimestampString(createdDateTime));
                         appt.setLastUpdateUser(userName);
-                        appt.setUrgency(request.getParameter("urgency"));
-                        appt.setReasonCode(Integer.parseInt(request.getParameter("reasonCode")));
+                        appt.setUrgency(org.apache.commons.lang.StringEscapeUtils.escapeHtml(request.getParameter("urgency")));
+                        appt.setReasonCode(Integer.parseInt(reasonCode));
                         appointmentDao.merge(appt);
                         rowsAffected++;
                     }
@@ -342,6 +584,7 @@
     <form name="groupappt" method="POST"
           action="appointmenteditrepeatbooking.jsp" onSubmit="return ( onSub());">
         <INPUT TYPE="hidden" NAME="groupappt" value="">
+        <INPUT TYPE="hidden" NAME="csrf_token" value="<%= session.getAttribute("csrf_token") %>">
         <table width="100%" BGCOLOR="silver">
             <tr>
                 <TD>
@@ -429,12 +672,43 @@
                 temp = e.nextElement().toString();
                 if (temp.equals("dboperation") || temp.equals("displaymode") || temp.equals("search_mode") || temp.equals("chart_no"))
                     continue;
-                out.println("<input type='hidden' name='" + temp + "' value=\"" + UtilMisc.htmlEscape(request.getParameter(temp)) + "\">");
+                
+                // Sanitize parameter names and values to prevent XSS
+                String paramName = org.owasp.encoder.Encode.forHtmlAttribute(temp);
+                String paramValue = org.owasp.encoder.Encode.forHtmlAttribute(request.getParameter(temp));
+                
+                out.println("<input type='hidden' name='" + paramName + "' value=\"" + paramValue + "\">");
             }
         %>
     </form>
 
     <script type="text/javascript">
+        // Add CSRF token validation to form submission
+        function validateForm() {
+            var csrfToken = document.querySelector('input[name="csrf_token"]');
+            if (!csrfToken || csrfToken.value.trim() === '') {
+                alert("Security validation failed. Please refresh the page and try again.");
+                return false;
+            }
+            return true;
+        }
+            
+        // Override form submission to include validation
+        var form = document.forms['groupappt'];
+        if (form) {
+            var originalSubmit = form.onsubmit;
+            form.onsubmit = function(event) {
+                if (!validateForm()) {
+                    event.preventDefault();
+                    return false;
+                }
+                if (originalSubmit) {
+                    return originalSubmit.call(this, event);
+                }
+                return true;
+            };
+        }
+            
         Calendar.setup({
             inputField: "endDate",      // id of the input field
             ifFormat: "%d/%m/%Y",       // format of the input field

@@ -77,15 +77,31 @@ public class BillingInvoice2Action extends ActionSupport {
             throw new SecurityException("missing required security object (_billing)");
         }
 
-
-        if (invoiceNo != null) {
-            response.setContentType("application/pdf"); // octet-stream
-            response.setHeader("Content-Disposition", "attachment; filename=\"BillingInvoice" + invoiceNo + "_" + UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss") + ".pdf\"");
-            boolean bResult = processPrintPDF(Integer.parseInt(invoiceNo), request.getLocale(), response.getOutputStream());
-            if (bResult) {
-                actionResult = "success";
+        // Validate invoiceNo parameter
+        if (invoiceNo != null && invoiceNo.matches("^\\d+$")) {
+            try {
+                // Set security headers
+                response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+                response.setHeader("Pragma", "no-cache");
+                response.setHeader("X-Content-Type-Options", "nosniff");
+                
+                response.setContentType("application/pdf");
+                String safeFilename = "BillingInvoice" + invoiceNo + "_" + UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss") + ".pdf";
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + safeFilename + "\"");
+                
+                boolean bResult = processPrintPDF(Integer.parseInt(invoiceNo), request.getLocale(), response.getOutputStream());
+                if (bResult) {
+                    actionResult = "success";
+                }
+            } catch (NumberFormatException e) {
+                MiscUtils.getLogger().error("Invalid invoice number format: " + invoiceNo, e);
+            } catch (Exception e) {
+                MiscUtils.getLogger().error("Error generating PDF for invoice: " + invoiceNo, e);
             }
+        } else {
+            MiscUtils.getLogger().warn("Invalid or missing invoice number parameter");
         }
+        
         return actionResult;
     }
 
@@ -100,27 +116,94 @@ public class BillingInvoice2Action extends ActionSupport {
 
         ArrayList<Object> fileList = new ArrayList<Object>();
         OutputStream fos = null;
+        
+        // Get and validate INVOICE_DIR
+        String invoiceDir = oscar.OscarProperties.getInstance().getProperty("INVOICE_DIR");
+        if (invoiceDir == null || invoiceDir.isEmpty()) {
+            MiscUtils.getLogger().error("INVOICE_DIR property not set");
+            return actionResult;
+        }
+        
+        // Validate directory exists and is writable
+        File invoiceDirFile = new File(invoiceDir);
+        if (!invoiceDirFile.exists() || !invoiceDirFile.isDirectory() || !invoiceDirFile.canWrite()) {
+            MiscUtils.getLogger().error("INVOICE_DIR is not a writable directory: " + invoiceDir);
+            return actionResult;
+        }
+        
         if (invoiceNos != null) {
             for (String invoiceNoStr : invoiceNos) {
                 try {
+                    // Validate invoice number format
+                    if (!invoiceNoStr.matches("^\\d+$")) {
+                        MiscUtils.getLogger().warn("Invalid invoice number format: " + invoiceNoStr);
+                        continue;
+                    }
+                    
                     Integer invoiceNo = Integer.parseInt(invoiceNoStr);
-                    String filename = "BillingInvoice" + invoiceNo + "_" + UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss") + ".pdf";
-                    String savePath = oscar.OscarProperties.getInstance().getProperty("INVOICE_DIR") + "/" + filename;
+                    String timestamp = UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss");
+                    String filename = "BillingInvoice" + invoiceNo + "_" + timestamp + ".pdf";
+                    
+                    // Create a safe file path
+                    File outputFile = new File(invoiceDirFile, filename);
+                    String savePath = outputFile.getAbsolutePath();
+                    
+                    // Validate the file path is within the expected directory
+                    if (!outputFile.getCanonicalPath().startsWith(invoiceDirFile.getCanonicalPath())) {
+                        MiscUtils.getLogger().error("Path traversal attempt detected: " + filename);
+                        continue;
+                    }
+                    
                     fos = new FileOutputStream(savePath);
                     processPrintPDF(invoiceNo, request.getLocale(), fos);
                     fileList.add(savePath);
+                } catch (NumberFormatException e) {
+                    MiscUtils.getLogger().error("Invalid invoice number: " + invoiceNoStr, e);
                 } catch (Exception e) {
-                    MiscUtils.getLogger().error("Error", e);
+                    MiscUtils.getLogger().error("Error processing invoice: " + invoiceNoStr, e);
                 } finally {
-                    if (fos != null) fos.close();
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                        } catch (IOException e) {
+                            MiscUtils.getLogger().error("Error closing output stream", e);
+                        }
+                        fos = null;
+                    }
                 }
             }
         }
+        
         if (!fileList.isEmpty()) {
-            response.setContentType("application/pdf"); // octet-stream
-            response.setHeader("Content-Disposition", "attachment; filename=\"BillingInvoices" + "_" + UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss") + ".pdf\"");
-            ConcatPDF.concat(fileList, response.getOutputStream());
-            actionResult = "listSuccess";
+            try {
+                // Set security headers
+                response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+                response.setHeader("Pragma", "no-cache");
+                response.setHeader("X-Content-Type-Options", "nosniff");
+                
+                response.setContentType("application/pdf");
+                String safeFilename = "BillingInvoices_" + UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss") + ".pdf";
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + safeFilename + "\"");
+                
+                ConcatPDF.concat(fileList, response.getOutputStream());
+                actionResult = "listSuccess";
+                
+                // Clean up temporary files
+                for (Object filePath : fileList) {
+                    try {
+                        File file = new File(filePath.toString());
+                        if (file.exists() && file.isFile()) {
+                            if (!file.delete()) {
+                                MiscUtils.getLogger().warn("Failed to delete temporary file: " + filePath);
+                            }
+                        }
+                    } catch (Exception e) {
+                        MiscUtils.getLogger().error("Error deleting temporary file: " + filePath, e);
+                    }
+                }
+            } catch (Exception e) {
+                MiscUtils.getLogger().error("Error generating combined PDF", e);
+            }
         }
 
         return actionResult;
@@ -183,17 +266,23 @@ public class BillingInvoice2Action extends ActionSupport {
     }
 
     private boolean processPrintPDF(Integer invoiceNo, Locale locale, OutputStream os) {
-
         boolean bResult = false;
 
-        if (invoiceNo != null) {
-            //Create PDF of the invoice
-            PdfRecordPrinter printer = new PdfRecordPrinter(os);
-            printer.printBillingInvoice(invoiceNo, locale);
+        if (invoiceNo != null && invoiceNo > 0) {
+            try {
+                // Create PDF of the invoice
+                PdfRecordPrinter printer = new PdfRecordPrinter(os);
+                printer.printBillingInvoice(invoiceNo, locale);
 
-            BillingONManager billingManager = SpringUtils.getBean(BillingONManager.class);
-            billingManager.addPrintedBillingComment(invoiceNo, locale);
-            bResult = true;
+                BillingONManager billingManager = SpringUtils.getBean(BillingONManager.class);
+                billingManager.addPrintedBillingComment(invoiceNo, locale);
+                bResult = true;
+            } catch (Exception e) {
+                MiscUtils.getLogger().error("Error generating PDF for invoice: " + invoiceNo, e);
+                bResult = false;
+            }
+        } else {
+            MiscUtils.getLogger().warn("Invalid invoice number: " + invoiceNo);
         }
 
         return bResult;

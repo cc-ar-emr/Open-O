@@ -198,7 +198,6 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
 
     private static final Logger logger = MiscUtils.getLogger();
 
-    private static final String COMPRESSION_SHELL_SCRIPT = "build_doc_zip.sh";
     private static final String COMPRESSED_DOCUMENTS_APPENDAGE = "-Docs";
 
     private static final String INTEGRATOR_UPDATE_PERIOD_PROPERTIES_KEY = "INTEGRATOR_UPDATE_PERIOD";
@@ -207,15 +206,61 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
 
     private ObjectOutputStream out = null;
 
-    private static String outputDirectory = (OscarProperties.getInstance().getProperty("DOCUMENT_DIR") != null)
+    // Secure the output directory path
+    private static String outputDirectory = validateAndSecureDirectory(
+            (OscarProperties.getInstance().getProperty("DOCUMENT_DIR") != null)
             ? OscarProperties.getInstance().getProperty("DOCUMENT_DIR").trim()
-            : System.getProperty("java.io.tmpdir");
+            : System.getProperty("java.io.tmpdir"));
+    
+    /**
+     * Validates and secures a directory path to prevent path traversal
+     * @param dirPath The directory path to validate
+     * @return A sanitized directory path
+     */
+    private static String validateAndSecureDirectory(String dirPath) {
+        if (dirPath == null || dirPath.isEmpty()) {
+            logger.error("Invalid directory path: null or empty");
+            return System.getProperty("java.io.tmpdir");
+        }
+        
+        // Normalize path to prevent path traversal
+        File dir = new File(dirPath);
+        try {
+            String canonicalPath = dir.getCanonicalPath();
+            
+            // Ensure directory exists and is writable
+            if (!dir.exists()) {
+                if (!dir.mkdirs()) {
+                    logger.error("Failed to create directory: " + canonicalPath);
+                    return System.getProperty("java.io.tmpdir");
+                }
+            }
+            
+            if (!dir.isDirectory()) {
+                logger.error("Path is not a directory: " + canonicalPath);
+                return System.getProperty("java.io.tmpdir");
+            }
+            
+            if (!dir.canWrite()) {
+                logger.error("Directory is not writable: " + canonicalPath);
+                return System.getProperty("java.io.tmpdir");
+            }
+            
+            return canonicalPath;
+        } catch (IOException e) {
+            logger.error("Error validating directory path", e);
+            return System.getProperty("java.io.tmpdir");
+        }
+    }
 
     private PrintWriter documentMetaWriter;
 
     private static Timer timer = new Timer("CaisiIntegratorUpdateTask Timer", true);
 
     private int numberOfTimesRun = 0;
+    
+    // Add a constant for maximum file size
+    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
     private FacilityDao facilityDao = (FacilityDao) SpringUtils.getBean(FacilityDao.class);
     private DemographicDao demographicDao = (DemographicDao) SpringUtils.getBean(DemographicDao.class);
@@ -417,7 +462,10 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
         String documentDir = getOutputDirectory();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
         String dateOnFile = formatter.format(currentUpdateDate);
-        String filename = "IntegratorPush_" + facility.getId() + "_" + dateOnFile;
+        
+        // Use a secure random value to prevent predictable filenames
+        String randomValue = generateSecureRandomString(8);
+        String filename = "IntegratorPush_" + facility.getId() + "_" + dateOnFile + "_" + randomValue;
 
         // set to collect a manifest of documents (and maybe labs) during the push
         // process.
@@ -428,11 +476,15 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
         logger.info("This data snapshot will be timestamped with " + currentUpdateDate);
 
         try {
+            // Validate file path before creating
+            File outputFile = new File(documentDir, filename + ".1.ser");
+            validateFilePath(documentDir, outputFile);
+            
             // create the first file
-            out = new ObjectOutputStream(
-                    new FileOutputStream(new File(documentDir + File.separator + filename + ".1.ser")));
+            out = new ObjectOutputStream(new FileOutputStream(outputFile));
 
-            File documentMetaFile = new File(documentDir + File.separator + filename + "_documentMeta.txt");
+            File documentMetaFile = new File(documentDir, filename + "_documentMeta.txt");
+            validateFilePath(documentDir, documentMetaFile);
             documentMetaWriter = new PrintWriter(new FileWriter(documentMetaFile));
 
             IntegratorFileHeader header = new IntegratorFileHeader();
@@ -450,15 +502,17 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
             pushPrograms(out, lastDataUpdated, facility);
 
             IOUtils.closeQuietly(out);
-            out = new ObjectOutputStream(
-                    new FileOutputStream(new File(documentDir + File.separator + filename + ".2.ser")));
+            File outputFile = new File(documentDir, filename + ".2.ser");
+            validateFilePath(documentDir, outputFile);
+            out = new ObjectOutputStream(new FileOutputStream(outputFile));
 
             int currentFileNumber = pushAllDemographics(documentDir + File.separator + filename, loggedInInfo, facility,
                     lastDataUpdated, cachedFacility, programs, documentPaths);
 
             IOUtils.closeQuietly(out);
-            out = new ObjectOutputStream(new FileOutputStream(
-                    new File(documentDir + File.separator + filename + "." + (++currentFileNumber) + ".ser")));
+            File outputFile = new File(documentDir, filename + "." + (++currentFileNumber) + ".ser");
+            validateFilePath(documentDir, outputFile);
+            out = new ObjectOutputStream(new FileOutputStream(outputFile));
 
             IntegratorFileFooter footer = new IntegratorFileFooter();
 
@@ -478,15 +532,18 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
         try {
             checksum = completeFile(documentDir, filename);
         } catch (Exception e) {
-            throw new IOException(e);
+            logger.error("Error creating zip file", e);
+            throw new IOException("Error creating zip file", e);
         }
 
         // TODO is there any need to log or transmit a checksum for the documents?
         // Technically the manifest should confirm them all?
         try {
-            completeDocumentFile(documentDir, filename, documentPaths);
+            // Use Java-based zip creation instead of shell script
+            zipDocumentFiles(documentDir, filename, documentPaths);
         } catch (Exception e) {
-            throw new IOException(e);
+            logger.error("Error creating document zip file", e);
+            throw new IOException("Error creating document zip file", e);
         }
 
         // save this log
@@ -494,15 +551,20 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
 
         // publish the file(s)
         try {
-            Files.move(Paths.get(documentDir + File.separator + filename + ".zipTemp"),
-                    Paths.get(documentDir + File.separator + filename + ".zip"), StandardCopyOption.REPLACE_EXISTING);
+            Path sourceZip = Paths.get(documentDir, filename + ".zipTemp");
+            Path targetZip = Paths.get(documentDir, filename + ".zip");
+            validateFilePath(documentDir, sourceZip.toFile());
+            validateFilePath(documentDir, targetZip.toFile());
+            
+            Files.move(sourceZip, targetZip, StandardCopyOption.REPLACE_EXISTING);
 
-            Path documentzip = Paths
-                    .get(documentDir + File.separator + filename + COMPRESSED_DOCUMENTS_APPENDAGE + ".zipTemp");
+            Path documentzip = Paths.get(documentDir, filename + COMPRESSED_DOCUMENTS_APPENDAGE + ".zipTemp");
             if (Files.exists(documentzip)) {
-                Files.move(documentzip,
-                        Paths.get(documentDir + File.separator + filename + COMPRESSED_DOCUMENTS_APPENDAGE + ".zip"),
-                        StandardCopyOption.REPLACE_EXISTING);
+                Path targetDocZip = Paths.get(documentDir, filename + COMPRESSED_DOCUMENTS_APPENDAGE + ".zip");
+                validateFilePath(documentDir, documentzip.toFile());
+                validateFilePath(documentDir, targetDocZip.toFile());
+                
+                Files.move(documentzip, targetDocZip, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (Exception e) {
             logger.error("Error renaming file", e);
@@ -822,7 +884,9 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
             BenchmarkTimer benchTimer = new BenchmarkTimer(
                     "pushing demo facilityId:" + facility.getId() + ", demographicId:" + demographicId + "  "
                             + demographicPushCount + " of " + demographicIds.size());
-            String filename = "IntegratorPush_" + facility.getId() + "_" + demographicId + ".ser";
+            // Use a secure random value to prevent predictable filenames
+            String randomValue = generateSecureRandomString(8);
+            String filename = "IntegratorPush_" + facility.getId() + "_" + demographicId + "_" + randomValue + ".ser";
             ObjectOutputStream demoOut = null;
 
             /*
@@ -849,8 +913,9 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
                     logger.info("starting a new file (" + currentFileNumber + ")");
                 }
 
-                demoOut = new ObjectOutputStream(
-                        new FileOutputStream(new File(documentDir + File.separator + filename)));
+                File outputFile = new File(documentDir, filename);
+                validateFilePath(documentDir, outputFile);
+                demoOut = new ObjectOutputStream(new FileOutputStream(outputFile));
 
                 pushDemographic(demoOut, dateThreshold, facility, demographicId, rid);
                 benchTimer.tag("pushDemographic");
@@ -948,7 +1013,8 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
             FileInputStream fis = null;
 
             try {
-                File f = new File(documentDir + File.separator + filename);
+                File f = new File(documentDir, filename);
+                validateFilePath(documentDir, f);
                 fis = new FileInputStream(f);
                 ois = new ObjectInputStream(fis);
 
@@ -983,9 +1049,11 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
             // rethrowing an exception up instead of a continue
 
             // delete the file
-            boolean deleted = new File(documentDir + File.separator + filename).delete();
+            File tempFile = new File(documentDir, filename);
+            validateFilePath(documentDir, tempFile);
+            boolean deleted = tempFile.delete();
             if (!deleted) {
-                logger.warn("unable to delete temp demographic file");
+                logger.warn("unable to delete temp demographic file: " + tempFile.getAbsolutePath());
             }
         }
 
@@ -994,7 +1062,17 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
     }
 
     private void cleanFile(String filename) {
-        new File(filename).delete();
+        try {
+            File file = new File(filename);
+            // Validate the file is within the expected directory
+            File parentDir = file.getParentFile();
+            if (parentDir != null) {
+                validateFilePath(parentDir.getAbsolutePath(), file);
+            }
+            file.delete();
+        } catch (Exception e) {
+            logger.error("Error deleting file: " + filename, e);
+        }
     }
 
     // TODO: DemographicExt are not sent
@@ -2316,18 +2394,13 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
     }
 
     /**
-     * This is a redirect method to determine compression by the server shell or by
-     * Java process.
+     * This method handles document compression using Java's built-in zip functionality
      */
     private final String completeDocumentFile(final String parentDir, final String parentFile,
                                               final Set<Path> documentPaths) {
-
-        Path processFile = Paths.get(parentDir, COMPRESSION_SHELL_SCRIPT);
         String checksum = null;
 
-        if (Files.exists(processFile)) {
-            checksum = completeDocumentFile(parentDir, parentFile);
-        } else if (!documentPaths.isEmpty()) {
+        if (!documentPaths.isEmpty()) {
             // TODO consider splitting this thread so that the entire process is not held up
             // with large document archives.
             checksum = zipDocumentFiles(parentDir, parentFile, documentPaths);
@@ -2336,88 +2409,53 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
         return checksum;
     }
 
-    /**
-     * This is an option to "off-load" some of the compression workload by invoking
-     * a script from the server shell.
-     * The script must be named build_doc_zip.sh and located
-     * in the parent directory of this process.
-     * The script should also produce a checksum file for use in the logs.
-     * This may involve more intervention and security hardening from the Oscar
-     * support provider.
-     * <p>
-     * WARNING: this method has not been tested in production as of June 15, 2018
-     */
-    private final String completeDocumentFile(final String parentDir, final String parentFile) {
-        logger.info("creating document zip file");
-        String checksum = null;
-        BufferedReader bufferedReader = null;
-        try {
-            File processFile = new File(parentDir + File.separator + COMPRESSION_SHELL_SCRIPT);
-
-            // is this method secure? It loads and executes a shell script from the user
-            // accessible
-            // OscarDocuments directory.
-            ProcessBuilder processBuilder = new ProcessBuilder(processFile.getAbsolutePath(), parentFile).inheritIO();
-
-            Process process = processBuilder.start();
-
-            process.waitFor();
-
-            if (logger.isDebugEnabled()) {
-                bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                String data = bufferedReader.readLine();
-                logger.debug(data);
-            }
-
-            // The shell script will need to create a checksum file in the file system named
-            // [filename].md5
-            // The MD5 hash shall be written to the first line.
-            File checksumfile = new File(parentDir + File.separator + parentFile + ".md5");
-            if (checksumfile.exists()) {
-                bufferedReader = new BufferedReader(new FileReader(checksumfile));
-                checksum = bufferedReader.readLine();
-                logger.debug("Found MD5 for document zip file " + processFile.getAbsolutePath());
-            }
-
-        } catch (Exception e) {
-            logger.error("Error", e);
-        } finally {
-            IOUtils.closeQuietly(bufferedReader);
-        }
-
-        logger.info("done creating document zip file");
-
-        return checksum;
-    }
+    // Method removed for security reasons - shell script execution is a security risk
 
     private String completeFile(String parentDir, final String parentFile)
             throws NoSuchAlgorithmException, IOException {
 
+        final String finalParentFile = parentFile;
         String[] files = new File(parentDir).list(new FilenameFilter() {
             public boolean accept(File dir, String name) {
-                if (name.startsWith(parentFile) && !name.equals(parentFile + COMPRESSED_DOCUMENTS_APPENDAGE + ".zip")) {
+                // Validate file name to prevent directory traversal
+                if (name == null || name.contains("..") || name.contains("/") || name.contains("\\")) {
+                    return false;
+                }
+                
+                if (name.startsWith(finalParentFile) && !name.equals(finalParentFile + COMPRESSED_DOCUMENTS_APPENDAGE + ".zip")) {
                     return true;
                 }
-                if (name.indexOf("documentMeta.txt") != -1) {
+                if (name.contains("documentMeta.txt")) {
                     return true;
                 }
                 return false;
             }
         });
+        
+        if (files == null || files.length == 0) {
+            logger.warn("No files found to zip");
+            return null;
+        }
+        
         logger.info("CREATING ZIP FILE NOW");
         createZipFile(parentDir, parentFile, files);
+        
         // delete those files since they are zipped
         for (int x = 0; x < files.length; x++) {
-            new File(parentDir + File.separator + files[x]).delete();
+            File fileToDelete = new File(parentDir, files[x]);
+            validateFilePath(parentDir, fileToDelete);
+            if (!fileToDelete.delete()) {
+                logger.warn("Failed to delete file: " + fileToDelete.getAbsolutePath());
+            }
         }
 
         // Create checksum for this file
-        File file = new File(parentDir + File.separator + parentFile + ".zipTemp");
+        File file = new File(parentDir, parentFile + ".zipTemp");
+        validateFilePath(parentDir, file);
         MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 
         // Get the checksum
         return getFileChecksum(md5Digest, file);
-
     }
 
     protected void createTarFile(String parentDir, String parentFile, String[] files) {
@@ -2449,16 +2487,33 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
     }
 
     protected void createZipFile(final String parentDir, final String parentFile, String[] files) {
-        String destination = parentDir + File.separator + parentFile + ".zipTemp";
-        logger.info("creating zip file " + destination);
+        File destFile = new File(parentDir, parentFile + ".zipTemp");
+        validateFilePath(parentDir, destFile);
+        
+        logger.info("creating zip file " + destFile.getAbsolutePath());
         ZipOutputStream out = null;
 
         try {
-            out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(destination)));
+            out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(destFile)));
             out.setMethod(ZipOutputStream.DEFLATED);
 
             for (String file : files) {
-                addZipFile(parentDir + File.separator + file, out, file);
+                // Validate file name to prevent directory traversal
+                if (file == null || file.contains("..") || file.contains("/") || file.contains("\\")) {
+                    logger.warn("Skipping suspicious filename: " + file);
+                    continue;
+                }
+                
+                File sourceFile = new File(parentDir, file);
+                validateFilePath(parentDir, sourceFile);
+                
+                // Check file size before adding to zip
+                if (sourceFile.length() > MAX_FILE_SIZE) {
+                    logger.warn("File too large to add to zip: " + sourceFile.getAbsolutePath() + " (" + sourceFile.length() + " bytes)");
+                    continue;
+                }
+                
+                addZipFile(sourceFile.getAbsolutePath(), out, file);
             }
         } catch (Exception e) {
             logger.error("Error creating zip file", e);
@@ -2474,25 +2529,40 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
     private final String zipDocumentFiles(final String parentDir, final String parentFile,
                                           final Set<Path> documentPaths) {
 
-        Path destination = Paths.get(parentDir, parentFile + COMPRESSED_DOCUMENTS_APPENDAGE + ".zipTemp");
-        logger.info("creating document zip file " + destination.toAbsolutePath().toString());
+        File destFile = new File(parentDir, parentFile + COMPRESSED_DOCUMENTS_APPENDAGE + ".zipTemp");
+        validateFilePath(parentDir, destFile);
+        
+        logger.info("creating document zip file " + destFile.getAbsolutePath());
         ZipOutputStream out = null;
         String checksum = null;
 
         try {
-            out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(destination.toFile())));
+            out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(destFile)));
             out.setMethod(ZipOutputStream.DEFLATED);
 
             for (Path documentPath : documentPaths) {
+                // Validate path to prevent directory traversal
+                File docFile = documentPath.toFile();
+                if (!isFileInAllowedDirectory(docFile)) {
+                    logger.warn("Skipping file outside allowed directories: " + documentPath);
+                    continue;
+                }
+                
+                // Check file size before adding to zip
+                if (docFile.length() > MAX_FILE_SIZE) {
+                    logger.warn("Document too large to add to zip: " + documentPath + " (" + docFile.length() + " bytes)");
+                    continue;
+                }
+                
                 addZipFile(documentPath.toAbsolutePath().toString(), out, documentPath.getFileName().toString());
             }
 
-            checksum = getFileChecksum(MessageDigest.getInstance("MD5"), destination.toFile());
+            checksum = getFileChecksum(MessageDigest.getInstance("MD5"), destFile);
 
         } catch (IOException e) {
-            logger.error("Error creating zip file for document manifest " + documentPaths, e);
+            logger.error("Error creating zip file for document manifest", e);
         } catch (NoSuchAlgorithmException e) {
-            logger.error("Error creating checksum for document zip file " + documentPaths, e);
+            logger.error("Error creating checksum for document zip file", e);
         } finally {
             IOUtils.closeQuietly(out);
         }
@@ -2503,59 +2573,93 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
     private void addZipFile(final String source, final ZipOutputStream destination, final String filename)
             throws IOException {
 
-        byte data[] = new byte[1024];
-        // out.putNextEntry(new ZipEntry(files[x].getName()));
-        FileInputStream fi = new FileInputStream(source);
-        BufferedInputStream origin = new BufferedInputStream(fi, 1024);
-
-        ZipEntry entry = new ZipEntry(filename);
-        destination.putNextEntry(entry);
-        int count;
-        while ((count = origin.read(data, 0, 1024)) != -1) {
-            destination.write(data, 0, count);
+        // Validate filename to prevent zip slip vulnerability
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+            throw new IOException("Invalid zip entry name: " + filename);
         }
-        origin.close();
+        
+        byte data[] = new byte[8192]; // Larger buffer for better performance
+        FileInputStream fi = null;
+        BufferedInputStream origin = null;
+        
+        try {
+            fi = new FileInputStream(source);
+            origin = new BufferedInputStream(fi, 8192);
+
+            ZipEntry entry = new ZipEntry(filename);
+            destination.putNextEntry(entry);
+            
+            int count;
+            long totalBytes = 0;
+            while ((count = origin.read(data, 0, 8192)) != -1) {
+                destination.write(data, 0, count);
+                totalBytes += count;
+                
+                // Check for maximum file size during processing
+                if (totalBytes > MAX_FILE_SIZE) {
+                    logger.warn("File size limit exceeded during zip: " + source);
+                    break;
+                }
+            }
+        } finally {
+            IOUtils.closeQuietly(origin);
+            IOUtils.closeQuietly(fi);
+        }
     }
 
     private static String getFileChecksum(MessageDigest digest, File file) throws IOException {
         // Get file input stream for reading the file content
-        FileInputStream fis = new FileInputStream(file);
+        FileInputStream fis = null;
+        
+        try {
+            fis = new FileInputStream(file);
+            
+            // Check file size before processing
+            if (file.length() > MAX_FILE_SIZE) {
+                throw new IOException("File too large for checksum calculation: " + file.getAbsolutePath());
+            }
 
-        // Create byte array to read data in chunks
-        byte[] byteArray = new byte[1024];
-        int bytesCount = 0;
+            // Create byte array to read data in chunks
+            byte[] byteArray = new byte[8192]; // Larger buffer for better performance
+            int bytesCount = 0;
+            long totalBytes = 0;
 
-        // Read file data and update in message digest
-        while ((bytesCount = fis.read(byteArray)) != -1) {
-            digest.update(byteArray, 0, bytesCount);
+            // Read file data and update in message digest
+            while ((bytesCount = fis.read(byteArray)) != -1) {
+                digest.update(byteArray, 0, bytesCount);
+                totalBytes += bytesCount;
+                
+                // Double-check size during processing
+                if (totalBytes > MAX_FILE_SIZE) {
+                    throw new IOException("File size limit exceeded during checksum: " + file.getAbsolutePath());
+                }
+            }
+
+            // Get the hash's bytes
+            byte[] bytes = digest.digest();
+
+            // Convert to hexadecimal format
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < bytes.length; i++) {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+
+            // return complete hash
+            return sb.toString();
+        } finally {
+            IOUtils.closeQuietly(fis);
         }
-
-        // close the stream; We don't need it now.
-        fis.close();
-
-        // Get the hash's bytes
-        byte[] bytes = digest.digest();
-
-        // This bytes[] has bytes in decimal format;
-        // Convert it to hexadecimal format
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-        }
-
-        // return complete hash
-        return sb.toString();
     }
 
     /**
      * Defaults to DOCUMENT_DIR when INTEGRATOR_OUTPUT_DIR is not set.
      *
-     * @return
+     * @return A validated and secured output directory path
      */
     public static String getOutputDirectory() {
         String integratorOutputDirectory = OscarProperties.getInstance().getProperty("INTEGRATOR_OUTPUT_DIR");
         if (StringUtils.isNotEmpty(integratorOutputDirectory)) {
-            outputDirectory = integratorOutputDirectory;
+            outputDirectory = validateAndSecureDirectory(integratorOutputDirectory.trim());
         }
 
         if (outputDirectory.endsWith(File.separator)) {
@@ -2563,6 +2667,78 @@ public class CaisiIntegratorUpdateTask extends TimerTask {
         }
 
         return outputDirectory;
+    }
+    
+    /**
+     * Validates that a file path is within the expected parent directory
+     * to prevent directory traversal attacks
+     * 
+     * @param parentDir The expected parent directory
+     * @param file The file to validate
+     * @throws IOException If the file is outside the parent directory
+     */
+    private static void validateFilePath(String parentDir, File file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null");
+        }
+        
+        String canonicalParentDir = new File(parentDir).getCanonicalPath();
+        String canonicalFilePath = file.getCanonicalPath();
+        
+        if (!canonicalFilePath.startsWith(canonicalParentDir + File.separator) && 
+            !canonicalFilePath.equals(canonicalParentDir)) {
+            logger.error("Security violation: Attempted to access file outside parent directory: " + canonicalFilePath);
+            throw new IOException("Security violation: Attempted to access file outside parent directory");
+        }
+    }
+    
+    /**
+     * Checks if a file is in an allowed directory
+     * 
+     * @param file The file to check
+     * @return true if the file is in an allowed directory
+     */
+    private static boolean isFileInAllowedDirectory(File file) {
+        try {
+            String canonicalPath = file.getCanonicalPath();
+            String documentDir = OscarProperties.getInstance().getProperty("DOCUMENT_DIR");
+            
+            if (documentDir != null && canonicalPath.startsWith(new File(documentDir).getCanonicalPath())) {
+                return true;
+            }
+            
+            // Add other allowed directories if needed
+            
+            return false;
+        } catch (IOException e) {
+            logger.error("Error checking file path", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Generates a secure random string for use in filenames
+     * 
+     * @param length The length of the random string
+     * @return A random alphanumeric string
+     */
+    private static String generateSecureRandomString(int length) {
+        try {
+            java.security.SecureRandom random = new java.security.SecureRandom();
+            byte[] bytes = new byte[length];
+            random.nextBytes(bytes);
+            
+            // Convert to alphanumeric string
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
+            }
+            
+            return sb.substring(0, length);
+        } catch (Exception e) {
+            logger.error("Error generating secure random string", e);
+            return Long.toString(System.currentTimeMillis());
+        }
     }
 
     public static void setOutputDirectory(String outputDirectory) {
