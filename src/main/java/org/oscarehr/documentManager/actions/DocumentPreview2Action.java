@@ -1,6 +1,8 @@
 //CHECKSTYLE:OFF
 package org.oscarehr.documentManager.actions;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import net.sf.json.JSONObject;
 import oscar.eform.EFormUtil;
 import oscar.oscarEncounter.data.EctFormData;
@@ -118,19 +120,28 @@ public class DocumentPreview2Action extends ActionSupport {
     }
 
     public void renderPDF() {
-        String pdfPathString = StringUtils.isNullOrEmpty(request.getParameter("pdfPath")) ? "" : request.getParameter("pdfPath");
+        String pdfPathString = StringUtils.isNullOrEmpty(request.getParameter("pdfPath")) ? ""
+                : request.getParameter("pdfPath");
         Path pdfPath = Paths.get(pdfPathString);
         response.setContentType("application/pdf");
         try (InputStream inputStream = Files.newInputStream(pdfPath);
-             BufferedInputStream bfis = new BufferedInputStream(inputStream);
-             ServletOutputStream outs = response.getOutputStream()) {
+                BufferedInputStream bfis = new BufferedInputStream(inputStream);
+                ServletOutputStream outs = response.getOutputStream()) {
 
+            StringBuilder textData = new StringBuilder();
             int data;
+
             while ((data = bfis.read()) != -1) {
-                outs.write(data);
+                textData.append((char) data); // Read file as text instead of bytes
             }
 
+            // Escape any potentially harmful HTML content
+            String safeData = StringEscapeUtils.escapeHtml4(textData.toString());
+
+            // Write the escaped data to the output stream
+            outs.write(safeData.getBytes(StandardCharsets.UTF_8));
             outs.flush();
+
         } catch (IOException e) {
             logger.error("Error", e);
         }
