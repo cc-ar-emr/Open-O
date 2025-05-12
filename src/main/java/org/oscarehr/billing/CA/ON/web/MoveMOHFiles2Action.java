@@ -87,10 +87,10 @@ public class MoveMOHFiles2Action extends ActionSupport {
     private boolean validateFileLocation(File file) {
     boolean result = false;
     try {
-        String filePath = file.getCanonicalPath();
-        for(EDTFolder folder : EDTFolder.values()) {
-            String edtFolderPath = new File(folder.getPath()).getCanonicalPath();
-            if (filePath.startsWith(edtFolderPath)) {
+        Path filePath = file.toPath().normalize();
+        for (EDTFolder folder : EDTFolder.values()) {
+            Path edtFolderPath = new File(folder.getPath()).toPath().normalize();
+            if (filePath.startsWith(edtFolderPath) && !filePath.equals(edtFolderPath)) {
                 result = true;
             }
         }
