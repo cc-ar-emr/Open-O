@@ -123,7 +123,7 @@ public class EctAddMeasurementType2Action extends ActionSupport {
             isValid = false;
         }
 
-        errorField = "The display name " + typeDisplayName;
+        errorField = "The display name " + sanitizeInput(typeDisplayName);
         if (!validate.matchRegExp(regExp, typeDisplayName)) {
             addActionError(getText("errors.invalid", errorField));
             isValid = false;
@@ -143,6 +143,14 @@ public class EctAddMeasurementType2Action extends ActionSupport {
             isValid = false;
         }
         return isValid;
+    }
+
+    private String sanitizeInput(String input) {
+        if (input == null) {
+            return null;
+        }
+        // Escape special characters to neutralize OGNL syntax
+        return input.replaceAll("[{}\\[\\]\"'`$]", "");
     }
 
 
