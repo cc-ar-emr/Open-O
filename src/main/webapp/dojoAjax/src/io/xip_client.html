@@ -185,7 +185,7 @@
         function makeServerUrl(cmd, message) {
             var serverUrl = xipServerUrl + "#" + (xipIdCounter++) + ":" + cmd;
             if (message) {
-                serverUrl += ":" + message;
+                serverUrl += ":" + encodeURIComponent(message);
             }
             return serverUrl;
         }
