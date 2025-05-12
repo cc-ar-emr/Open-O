@@ -23,7 +23,7 @@
                 for (var x = 0; x < sparams.length; x++) {
                     var tp = sparams[x].split("=");
                     if (typeof window[tp[0]] != "undefined") {
-                        window[tp[0]] = ((tp[1] == "true") || (tp[1] == "false")) ? eval(tp[1]) : tp[1];
+                        window[tp[0]] = (tp[1] === "true") ? true : (tp[1] === "false") ? false : tp[1];
                     }
                 }
             }
