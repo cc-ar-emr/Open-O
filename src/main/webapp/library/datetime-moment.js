@@ -36,7 +36,11 @@
             if (d) {
                 // Strip HTML tags and newline characters if possible
                 if (d.replace) {
-                    d = d.replace(/(<.*?>)|(\r?\n|\r)/g, '');
+                    let previous;
+                    do {
+                        previous = d;
+                        d = d.replace(/(<.*?>)|(\r?\n|\r)/g, '');
+                    } while (d !== previous);
                 }
 
                 // Strip out surrounding white space
@@ -58,7 +62,11 @@
             if (d) {
                 // Strip HTML tags and newline characters if possible
                 if (d.replace) {
-                    d = d.replace(/(<.*?>)|(\r?\n|\r)/g, '');
+                    let previous;
+                    do {
+                        previous = d;
+                        d = d.replace(/(<.*?>)|(\r?\n|\r)/g, '');
+                    } while (d !== previous);
                 }
 
                 // Strip out surrounding white space
