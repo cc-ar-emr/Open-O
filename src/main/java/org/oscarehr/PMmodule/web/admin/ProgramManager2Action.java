@@ -1455,7 +1455,7 @@ public class ProgramManager2Action extends ActionSupport {
 
         LogAction.log("write", "edit program - save status", String.valueOf(program.getId()), request);
 
-        addActionMessage(getText("program.saved", program.getName()));
+        addActionMessage(getText("program.saved", escapeOgnlExpression(program.getName())));
         this.setClient_status(new ProgramClientStatus());
         setEditAttributes(request, String.valueOf(program.getId()));
 
@@ -1716,5 +1716,11 @@ public class ProgramManager2Action extends ActionSupport {
 
     public void setVacancyOrTemplateId(String vacancyOrTemplateId) {
         this.vacancyOrTemplateId = vacancyOrTemplateId;
+    }
+    private String escapeOgnlExpression(String input) {
+        if (input == null) {
+            return null;
+        }
+        return org.apache.commons.text.StringEscapeUtils.escapeHtml4(input);
     }
 }
