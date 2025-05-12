@@ -698,6 +698,9 @@ public class Hsfo2Visit extends AbstractModel<Integer> implements Serializable {
     }
 
     public int getTriglyceridesP1() {
+        if (Triglycerides < Integer.MIN_VALUE || Triglycerides > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Triglycerides value is out of range for an int: " + Triglycerides);
+        }
         return (int) Triglycerides;
     }
 
