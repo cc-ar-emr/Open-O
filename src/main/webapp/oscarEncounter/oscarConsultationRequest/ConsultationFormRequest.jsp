@@ -1306,7 +1306,7 @@
         let addr, ph, fx;
 
         <% if (consultUtil.letterheadAddress != null) { %>
-        addr = '<%= Encode.forHtmlContent(consultUtil.letterheadAddress).replace('\n', ' ') %>';
+        addr = '<%= Encode.forHtmlContent(consultUtil.letterheadAddress).replace(/\\n/g, ' ') %>';
         <%} else {%>
         addr = '<%=Encode.forHtmlContent(clinic.getClinicAddress()) + " " + Encode.forHtmlContent(clinic.getClinicCity()) + " " + Encode.forHtmlContent(clinic.getClinicProvince()) + " " + Encode.forHtmlContent(clinic.getClinicPostal()) %>';
         <%}%>
