@@ -45,6 +45,8 @@ import oscar.oscarEncounter.oscarMeasurements.data.MeasurementTypes;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.ServletActionContext;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 public class EctAddMeasurementType2Action extends ActionSupport {
     HttpServletRequest request = ServletActionContext.getRequest();
     HttpServletResponse response = ServletActionContext.getResponse();
@@ -133,7 +135,7 @@ public class EctAddMeasurementType2Action extends ActionSupport {
             isValid = false;
         }
 
-        errorField = "The measuring instruction " + measuringInstrc;
+        errorField = "The measuring instruction " + escapeOgnl(measuringInstrc);
         if (!validate.matchRegExp(regExp, measuringInstrc)) {
             addActionError(getText("errors.invalid", errorField));
             isValid = false;
@@ -143,6 +145,10 @@ public class EctAddMeasurementType2Action extends ActionSupport {
             isValid = false;
         }
         return isValid;
+    }
+
+    private String escapeOgnl(String input) {
+        return StringEscapeUtils.escapeOgnl(input);
     }
 
 
