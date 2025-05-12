@@ -72,6 +72,11 @@ public class IHAPOIHandler implements MessageHandler {
 
         try {
 
+            // Validate the fileName to prevent directory traversal
+            if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+                throw new IllegalArgumentException("Invalid file name: " + fileName);
+            }
+
             is = new FileInputStream(fileName);
             hl7BodyMap = parse(is);
             Iterator<String> keySetIterator = null;
