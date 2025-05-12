@@ -36,21 +36,38 @@
 <link rel="stylesheet" href="<%=request.getContextPath() %>/css/font-awesome.min.css">
 
 <script type="text/javascript">
+function isValidURL(url) {
+    try {
+        new URL(url, window.location.origin);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 function popupPage(vheight,vwidth,varpage) { //open a new popup window
 	  var page = "" + varpage;
 	  windowprops = "height="+vheight+",width="+vwidth+",location=no,scrollbars=yes,menubars=no,toolbars=no,resizable=yes,screenX=0,screenY=0,top=0,left=0";//360,680
-	  window.location = page;
+	  if (isValidURL(page)) {
+	      window.location = page;
+	  } else {
+	      console.error('Invalid page URL:', page);
+	  }
 }
 
 function demographicSearch() {
-	var search_param =$('#nameForlooksOnly').val();
+	var search_param = encodeURIComponent($('#nameForlooksOnly').val());
 	var url = '../../../demographic/demographicsearch2reportresults.jsp';
-	url += '?originalpage='+escape('../billing/CA/ON/endYearStatement.do?demosearch=true');
+	url += '?originalpage=' + encodeURIComponent('../billing/CA/ON/endYearStatement.do?demosearch=true');
 	url += '&search_mode=search_name';
 	url += '&orderby=last_name, first_name';
 	url += '&limit1=0&limit2=5';
-	url += '&keyword='+search_param;
-	popupPage(700,1000,url,'master');
+	url += '&keyword=' + search_param;
+	if (isValidURL(url)) {
+	    popupPage(700, 1000, url, 'master');
+	} else {
+	    console.error('Invalid URL:', url);
+	}
 	return false;	
 }
 
