@@ -1179,6 +1179,9 @@ public class Hsfo2Visit extends AbstractModel<Integer> implements Serializable {
     }
 
     public int getWeightP1() {
+        if (Weight < Integer.MIN_VALUE || Weight > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Weight value is out of range for an int: " + Weight);
+        }
         return (int) Weight;
     }
 
