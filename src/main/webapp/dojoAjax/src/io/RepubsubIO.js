@@ -106,9 +106,9 @@ dojo.io.repubsub = new function () {
             var opts = [];
             for (var x in pairs) {
                 var sp = pairs[x].split("=");
-                // FIXME: is this eval dangerous?
                 try {
-                    opts[sp[0]] = eval(sp[1]);
+                    // Decode the parameter value safely
+                    opts[sp[0]] = decodeURIComponent(sp[1]);
                 } catch (e) {
                     opts[sp[0]] = sp[1];
                 }
