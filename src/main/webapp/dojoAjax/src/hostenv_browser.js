@@ -26,8 +26,9 @@ if (typeof window != 'undefined') {
                     if ((sp[0].length > 9) && (sp[0].substr(0, 9) == "djConfig.")) {
                         var opt = sp[0].substr(9);
                         try {
-                            djConfig[opt] = eval(sp[1]);
+                            djConfig[opt] = JSON.parse(sp[1]);
                         } catch (e) {
+                            // If parsing fails, treat the value as a plain string
                             djConfig[opt] = sp[1];
                         }
                     }
