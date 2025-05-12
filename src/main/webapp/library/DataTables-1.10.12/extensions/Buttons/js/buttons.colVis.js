@@ -141,9 +141,11 @@
                 // `$( column(col).node() ).text()` but the node might not have been
                 // populated when Buttons is constructed.
                 var idx = dt.column(col).index();
-                return dt.settings()[0].aoColumns[idx].sTitle
+                var sTitle = dt.settings()[0].aoColumns[idx].sTitle;
+                var tempDiv = document.createElement("div");
+                tempDiv.innerHTML = sTitle;
+                return tempDiv.textContent || tempDiv.innerText || ""
                     .replace(/\n/g, " ")        // remove new lines
-                    .replace(/<.*?>/g, "")   // strip HTML
                     .replace(/^\s+|\s+$/g, ""); // trim
             }
         },
