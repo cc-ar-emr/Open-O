@@ -133,7 +133,7 @@ public class FacilityManager2Action extends ActionSupport {
             request.getSession().setAttribute(SessionConstants.CURRENT_FACILITY, facility);
             loggedInInfo.setCurrentFacility(facility);
         }
-        addActionMessage(getText("facility.saved", facility.getName()));
+        addActionMessage(getText("facility.saved", escapeOgnl(facility.getName())));
         request.setAttribute("id", facility.getId());
 
         integratorControlDao.saveRemoveDemographicIdentity(facility.getId(), rdid);
@@ -158,5 +158,13 @@ public class FacilityManager2Action extends ActionSupport {
 
     public void setRemoveDemographicIdentity(boolean removeDemographicIdentity) {
         this.removeDemographicIdentity = removeDemographicIdentity;
+    }
+
+    private String escapeOgnl(String input) {
+        if (input == null) {
+            return null;
+        }
+        // Escape OGNL special characters to prevent injection
+        return org.apache.commons.text.StringEscapeUtils.escapeHtml4(input);
     }
 }
