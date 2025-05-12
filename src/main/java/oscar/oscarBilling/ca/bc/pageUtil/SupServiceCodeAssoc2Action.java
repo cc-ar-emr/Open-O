@@ -78,7 +78,7 @@ public class SupServiceCodeAssoc2Action extends ActionSupport {
                 addActionError(getText("oscar.billing.CA.BC.billingBC.error.nullservicecode", secondaryCode));
             } else if (!per.serviceCodeExists(secondaryCode)) {
                 test = false;
-                addActionError(getText("oscar.billing.CA.BC.billingBC.error.invalidsvccode", secondaryCode));
+                addActionError(getText("oscar.billing.CA.BC.billingBC.error.invalidsvccode", sanitizeInput(secondaryCode)));
             }
         }
         return test;
@@ -124,4 +124,11 @@ public class SupServiceCodeAssoc2Action extends ActionSupport {
         return id;
     }
 
+    private String sanitizeInput(String input) {
+        // Reject input containing OGNL special characters or patterns
+        if (input != null && input.matches(".*[{}\\[\\]#@].*")) {
+            throw new IllegalArgumentException("Invalid input detected.");
+        }
+        return input;
+    }
 }
