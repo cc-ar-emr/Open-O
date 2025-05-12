@@ -1146,6 +1146,9 @@ public class Hsfo2Visit extends AbstractModel<Integer> implements Serializable {
     }
 
     public int getWaistP1() {
+        if (Waist < Integer.MIN_VALUE || Waist > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Waist value is out of range for an int: " + Waist);
+        }
         return (int) Waist;
     }
 
