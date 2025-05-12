@@ -327,6 +327,9 @@ public class Hsfo2Visit extends AbstractModel<Integer> implements Serializable {
     }
 
     public int getA1CP1() {
+        if (A1C < 0.0 || A1C > 100.0) {
+            throw new IllegalArgumentException("Invalid A1C value: " + A1C + ". Must be between 0.0 and 100.0.");
+        }
         return (int) A1C;
     }
 
