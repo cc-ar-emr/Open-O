@@ -1471,7 +1471,12 @@ public class ProgramManager2Action extends ActionSupport {
         ad.setClientStatusId(admission.getClientStatusId());
 
         admissionManager.saveAdmission(ad);
-        addActionMessage(getText("program.saved", program.getName()));
+        if (isValidProgramName(program.getName())) {
+            addActionMessage(getText("program.saved", program.getName()));
+        } else {
+            LogAction.log("error", "Invalid program name detected", String.valueOf(program.getId()), request);
+            addActionMessage(getText("program.invalid.name"));
+        }
 
         LogAction.log("write", "edit program - assign client to status", String.valueOf(program.getId()), request);
 
@@ -1716,5 +1721,9 @@ public class ProgramManager2Action extends ActionSupport {
 
     public void setVacancyOrTemplateId(String vacancyOrTemplateId) {
         this.vacancyOrTemplateId = vacancyOrTemplateId;
+    }
+    private boolean isValidProgramName(String name) {
+        // Example validation: Ensure the name does not contain special characters or OGNL expressions
+        return name != null && name.matches("^[a-zA-Z0-9 _-]+$");
     }
 }
