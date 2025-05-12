@@ -155,7 +155,7 @@
         if (lis != null){ %>
         <script>
 			function change_form(value) {
-				location.href='EditIntake.jsp?id=' + value;
+				location.href='EditIntake.jsp?id=' + encodeURIComponent(value);
 			}
         </script>
 	<select onchange="change_form(this.options[this.selectedIndex].value)">

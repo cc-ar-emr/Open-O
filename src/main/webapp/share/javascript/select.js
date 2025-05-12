@@ -86,7 +86,7 @@ initialize: function(select, options) {
 		});
 		selectElement.selectedIndex = nodes.indexOf(opt);
 		if (self.options.redirect) {
-			document.location.href = opt.value;
+			document.location.href = encodeURIComponent(opt.value);
 		}
 		if(self.options.autoSubmit) {
 			const autoSubmitElement = document.getElementById(self.options.autoSubmit);
