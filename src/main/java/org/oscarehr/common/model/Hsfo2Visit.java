@@ -1076,6 +1076,9 @@ public class Hsfo2Visit extends AbstractModel<Integer> implements Serializable {
     }
 
     public int getTC_HDLP1() {
+        if (TC_HDL < Integer.MIN_VALUE || TC_HDL > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("TC_HDL value is out of range for an int: " + TC_HDL);
+        }
         return (int) TC_HDL;
     }
 
