@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import org.apache.commons.text.StringEscapeUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -103,8 +104,9 @@ public class EctAddMeasurementType2Action extends ActionSupport {
             isValid = false;
         }
 
-        String errorField = "The type " + type;
-        if (!validate.matchRegExp(regExp, type)) {
+        String escapedType = org.apache.commons.text.StringEscapeUtils.escapeHtml4(type);
+        String errorField = "The type " + escapedType;
+        if (!validate.matchRegExp(regExp, escapedType)) {
             addActionError(getText("errors.invalid", errorField));
             isValid = false;
         }
