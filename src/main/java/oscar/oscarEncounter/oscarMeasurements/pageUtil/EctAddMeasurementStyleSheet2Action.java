@@ -72,8 +72,14 @@ public class EctAddMeasurementStyleSheet2Action extends ActionSupport {
                 return NONE;
             } else {
                 write2Database(fileName);
-                String msg = getText("oscarEncounter.oscarMeasurement.msgAddedStyleSheet", fileName);
-                messages.add(msg);
+                if (isValidFileName(fileName)) {
+                    String msg = getText("oscarEncounter.oscarMeasurement.msgAddedStyleSheet", fileName);
+                    messages.add(msg);
+                } else {
+                    addActionError(getText("errors.invalidFileName"));
+                    response.sendRedirect(contextPath + "/oscarEncounter/oscarMeasurements/AddMeasurementStyleSheet.jsp");
+                    return NONE;
+                }
                 request.setAttribute("messages", messages);
                 return SUCCESS;
             }
@@ -148,5 +154,16 @@ public class EctAddMeasurementStyleSheet2Action extends ActionSupport {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    /**
+     * Validates the file name to ensure it does not contain unexpected characters or patterns.
+     *
+     * @param fileName - the file name to validate
+     * @return true if the file name is valid, false otherwise
+     */
+    private boolean isValidFileName(String fileName) {
+        // Allow only alphanumeric characters, underscores, hyphens, and periods
+        return fileName != null && fileName.matches("^[a-zA-Z0-9._-]+$");
     }
 }
