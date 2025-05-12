@@ -113,7 +113,7 @@ public class EctAddMeasurementType2Action extends ActionSupport {
             isValid = false;
         }
 
-        errorField = "The type description " + typeDesc;
+        errorField = "The type description " + escapeInput(typeDesc);
         if (!validate.matchRegExp(regExp, typeDesc)) {
             addActionError(getText("errors.invalid", errorField));
             isValid = false;
@@ -143,6 +143,11 @@ public class EctAddMeasurementType2Action extends ActionSupport {
             isValid = false;
         }
         return isValid;
+    }
+
+    private String escapeInput(String input) {
+        // Escape special characters to prevent OGNL injection
+        return org.apache.commons.text.StringEscapeUtils.escapeHtml4(input);
     }
 
 
