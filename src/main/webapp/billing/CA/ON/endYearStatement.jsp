@@ -49,7 +49,7 @@
             url += '&search_mode=search_name';
             url += '&orderby=last_name, first_name';
             url += '&limit1=0&limit2=5';
-            url += '&keyword=' + search_param;
+            url += '&keyword=' + encodeURIComponent(search_param);
             popupPage(700, 1000, url, 'master');
             return false;
         }
