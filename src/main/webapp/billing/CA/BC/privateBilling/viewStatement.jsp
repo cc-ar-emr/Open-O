@@ -245,7 +245,7 @@
 
         function handleFilterByProvider() {
             var providerId = $("select#providerList").val();
-            window.location.href = "${ctx}/PrivateBillingController?action=listPrivateBills&providerId=" + providerId;
+            window.location.href = "${ctx}/PrivateBillingController?action=listPrivateBills&providerId=" + encodeURIComponent(providerId);
         }
 
         $(function () {
