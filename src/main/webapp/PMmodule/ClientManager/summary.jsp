@@ -132,7 +132,7 @@
         document.clientManagerForm.clientId.value = '<c:out value="${client.demographicNo}"/>';
         document.clientManagerForm.formId.value = formId;
         var id = document.getElementById('formInstanceId').value;
-        location.href = "<%=request.getContextPath() %>/PMmodule/Forms/SurveyExecute.do?method=survey&formId=" + formId + "&formInstanceId=" + id + "&clientId=" + '<c:out value="${client.demographicNo}"/>';
+        location.href = "<%=request.getContextPath() %>/PMmodule/Forms/SurveyExecute.do?method=survey&formId=" + encodeURIComponent(formId) + "&formInstanceId=" + encodeURIComponent(id) + "&clientId=" + '<c:out value="${client.demographicNo}"/>';
     }
 
 </script>
