@@ -88,7 +88,9 @@
             }
 
             function selectprovider(s) {
-                self.location.href = "scheduletemplateapplying.jsp?provider_no=" + s.options[s.selectedIndex].value + "&provider_name=" + urlencode(s.options[s.selectedIndex].text);
+                var providerNo = encodeURIComponent(s.options[s.selectedIndex].value);
+                var providerName = encodeURIComponent(s.options[s.selectedIndex].text);
+                self.location.href = "scheduletemplateapplying.jsp?provider_no=" + providerNo + "&provider_name=" + providerName;
             }
 
             function urlencode(str) {
