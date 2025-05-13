@@ -244,13 +244,14 @@
 
                 //get scroll position
                 var ycoord = $('input[name=ycoord]').val();
+                var encodedYcoord = encodeURIComponent(ycoord);
 
                 $.ajax({
                     url: link,
                     method: 'POST',
                     data: deletevalue,
                     success: function (returnData) {
-                        window.location = "<%=request.getContextPath()%>/oscarEncounter/oscarMeasurements/TemplateFlowSheet.jsp?ycoord=" + ycoord + "&demographic_no=<%=demographic_no%>&template=diab3";
+                        window.location = "<%=request.getContextPath()%>/oscarEncounter/oscarMeasurements/TemplateFlowSheet.jsp?ycoord=" + encodedYcoord + "&demographic_no=<%=demographic_no%>&template=diab3";
 
                     }
                 });
