@@ -140,7 +140,7 @@
                 control.disabled = true;
             }
             var temp = jQuery("#serviceId").val();
-            window.location.href = "resourceInfo.do?resourceId=" + resourceId + "&serviceId=" + jQuery("#serviceId").val();
+            window.location.href = "resourceInfo.do?resourceId=" + encodeURIComponent(resourceId) + "&serviceId=" + encodeURIComponent(jQuery("#serviceId").val());
             return false;
 
         }
