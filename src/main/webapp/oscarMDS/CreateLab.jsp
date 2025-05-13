@@ -75,7 +75,8 @@
 
         function deleteTest(id) {
             var testId = jQuery("input[name='test_" + id + ".id']").val();
-            jQuery("form[name='testForm']").append("<input type=\"hidden\" name=\"test.delete\" value=\"" + testId + "\"/>");
+            var escapedTestId = jQuery('<div>').text(testId).html(); // Escape the value
+            jQuery("form[name='testForm']").append("<input type=\"hidden\" name=\"test.delete\" value=\"" + escapedTestId + "\"/>");
             jQuery("#test_" + id).remove();
 
         }
