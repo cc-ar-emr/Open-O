@@ -150,7 +150,7 @@
                 control.disabled = true;
             }
 
-            window.location.href = "reSubmit.do?resourceId=" + resourceId + "&serviceId=" + jQuery("#serviceId").val();
+            window.location.href = "reSubmit.do?resourceId=" + encodeURIComponent(resourceId) + "&serviceId=" + encodeURIComponent(jQuery("#serviceId").val());
             return false;
 
         }
