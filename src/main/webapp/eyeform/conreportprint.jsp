@@ -162,7 +162,7 @@
             }
 
             function phoneNumSelect() {
-                document.getElementById("clinicPhone").innerHTML = "Tel: " + document.getElementById("sendersPhone").value;
+                document.getElementById("clinicPhone").textContent = "Tel: " + document.getElementById("sendersPhone").value;
             }
 
             function faxNumSelect() {
