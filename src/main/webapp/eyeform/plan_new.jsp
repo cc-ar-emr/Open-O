@@ -83,7 +83,8 @@
 
         function deleteProcedure(id) {
             var procedureId = jQuery("input[name='procedure_" + id + ".id']").val();
-            jQuery("form[name='eyeformPlanForm']").append("<input type=\"hidden\" name=\"procedure.delete\" value=\"" + procedureId + "\"/>");
+            var escapedProcedureId = jQuery('<div>').text(procedureId).html();
+            jQuery("form[name='eyeformPlanForm']").append("<input type=\"hidden\" name=\"procedure.delete\" value=\"" + escapedProcedureId + "\"/>");
             jQuery("#procedure_" + id).remove();
         }
 
