@@ -153,17 +153,17 @@
                     if (prevPage < 1) {
                         return false;
                     }
-                    location.href = '<%=reloadUrl%>' + '&page=' + prevPage + '&pageSize=' + $("#pageSize").val();
+                    location.href = '<%=reloadUrl%>' + '&page=' + encodeURIComponent(prevPage) + '&pageSize=' + encodeURIComponent($("#pageSize").val());
                 });
 
                 $("#next").bind('click', function (event) {
                     var page = $("#pageEl").val();
                     var nextPage = parseInt(page) + 1;
-                    location.href = '<%=reloadUrl%>' + '&page=' + nextPage + '&pageSize=' + $("#pageSize").val();
+                    location.href = encodeURIComponent('<%=reloadUrl%>') + '&page=' + encodeURIComponent(nextPage) + '&pageSize=' + encodeURIComponent($("#pageSize").val());
                 });
 
                 $("#pageSize").bind('change', function (event) {
-                    location.href = '<%=reloadUrl%>' + '&page=1&pageSize=' + $("#pageSize").val();
+                    location.href = encodeURIComponent('<%=reloadUrl%>') + '&page=1&pageSize=' + encodeURIComponent($("#pageSize").val());
                 });
 
             });
