@@ -401,7 +401,7 @@ and other liscences (MIT, LGPL etc) as indicated
             var ListItem = document.createElement("li");
             ListItem.setAttribute('name', 'UserSignatureListItem');
             var UserSignature = UserName + '|' + FileName;
-            ListItem.innerHTML = UserSignature;
+            ListItem.textContent = UserSignature;
             UserSignatureList.appendChild(ListItem);
         }
 
