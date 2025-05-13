@@ -44,7 +44,7 @@
         if (formId != "") {
             alert("formid = " + formId);
             //alert('<%=request.getContextPath() %>/SurveyManager.do?method=export_csv&id=' + formId);
-            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=getUcfReport&forId=' + formId;
+            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=getUcfReport&forId=' + encodeURIComponent(formId);
             return true;
         } else {
             alert("Please select a form from the form list.");
