@@ -65,7 +65,8 @@
             //var deleteList = jQuery("input[name='followup.delete']").val();
             var followUpId = jQuery("input[name='followup_" + id + ".id']").val();
             //jQuery("input[name='followup.delete']").val(deleteList += ','+followUpId);
-            jQuery("form[name='eyeformPlanForm']").append("<input type=\"hidden\" name=\"followup.delete\" value=\"" + followUpId + "\"/>");
+            var escapedFollowUpId = jQuery('<div>').text(followUpId).html();
+            jQuery("form[name='eyeformPlanForm']").append("<input type=\"hidden\" name=\"followup.delete\" value=\"" + escapedFollowUpId + "\"/>");
             jQuery("#followup_" + id).remove();
 
         }
