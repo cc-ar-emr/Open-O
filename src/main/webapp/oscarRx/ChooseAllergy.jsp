@@ -89,7 +89,7 @@
                 if (isEmpty() == true) {
                     name = name.toUpperCase();
                     alert(name);
-                    window.location = "addReaction.do?ID=0&type=0&name=" + name;
+                    window.location = "addReaction.do?ID=0&type=0&name=" + encodeURIComponent(name);
                 }
             }
 
