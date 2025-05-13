@@ -435,7 +435,7 @@
                                         <%--          <label for="view"><fmt:setBundle basename="oscarResources"/><fmt:message key="dms.documentReport.msgView"/></label>--%>
                                     <select id="viewdoctype<%=i%>" name="view" id="view"
                                             class="input-medium form-control"
-                                            onchange="window.location.href='?function=<%=module%>&functionid=<%=moduleid%>&view='+this.options[this.selectedIndex].value;">
+                                            onchange="window.location.href='?function=<%=module%>&functionid=<%=moduleid%>&view='+encodeURIComponent(this.options[this.selectedIndex].value);">
                                         <option value="">All</option>
                                         <%
                                             for (int i3 = 0; i3 < doctypes.size(); i3++) {
