@@ -174,7 +174,7 @@
                         ids += sels[x].value;
                     }
                 }
-                location.href = ctx + "/eyeform/Eyeform.do?method=print&apptNos=" + ids + "&cpp=" + cpp;
+                location.href = ctx + "/eyeform/Eyeform.do?method=print&apptNos=" + encodeURIComponent(ids) + "&cpp=" + encodeURIComponent(cpp);
             }
 
             function selectAllCheckboxes() {
