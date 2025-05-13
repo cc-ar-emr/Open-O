@@ -60,7 +60,8 @@
         function selectrschedule(s) {
             if (self.location.href.lastIndexOf("&sdate=") > 0) a = self.location.href.substring(0, self.location.href.lastIndexOf("&sdate="));
             else a = self.location.href;
-            self.location.href = a + "&sdate=" + s.options[s.selectedIndex].value;
+            var sanitizedValue = encodeURIComponent(s.options[s.selectedIndex].value);
+            self.location.href = a + "&sdate=" + sanitizedValue;
         }
 
         function upCaseCtrl(ctrl) {
