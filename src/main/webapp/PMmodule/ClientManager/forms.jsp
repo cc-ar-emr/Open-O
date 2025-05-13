@@ -104,12 +104,13 @@
         document.clientManagerForm.clientId.value = '<c:out value="${client.demographicNo}"/>';
         document.clientManagerForm.formId.value = formId;
         var id = document.getElementById('formInstanceId').value;
+        var sanitizedId = encodeURIComponent(id);
         if (methodId == 0)
             methodName = "survey";
         else
             methodName = "printPreview_survey";
 
-        location.href = "<%=request.getContextPath() %>/PMmodule/Forms/SurveyExecute.do?method=" + methodName + "&formId=" + formId + "&formInstanceId=" + id + "&clientId=" + '<c:out value="${client.demographicNo}"/>';
+        location.href = "<%=request.getContextPath() %>/PMmodule/Forms/SurveyExecute.do?method=" + methodName + "&formId=" + encodeURIComponent(formId) + "&formInstanceId=" + sanitizedId + "&clientId=" + '<c:out value="${client.demographicNo}"/>';
     }
 
     function createIntake(clientId, nodeId) {
