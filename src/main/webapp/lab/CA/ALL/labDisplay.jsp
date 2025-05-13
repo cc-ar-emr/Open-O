@@ -1039,7 +1039,7 @@
                     ajaxcall: true
                 }
             })
-            jQuery("#labelspan_<%=Encode.forJavaScript(segmentID)%> i").html(jQuery("#label_<%=Encode.forJavaScript(segmentID)%>").val());
+            jQuery("#labelspan_<%=Encode.forJavaScript(segmentID)%> i").text(jQuery("#label_<%=Encode.forJavaScript(segmentID)%>").val());
             document.forms['acknowledgeForm_<%=Encode.forJavaScript(segmentID)%>'].label.value = "";
         });
     });
