@@ -143,7 +143,7 @@
         var formId = selectObj.options[selectObj.selectedIndex].value;
         if (formId != "") {
             //alert('<%=request.getContextPath() %>/SurveyManager.do?method=export_csv&id=' + formId);
-            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=export_csv&id=' + formId;
+            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=export_csv&id=' + encodeURIComponent(formId);
         }
         //run the command
 
@@ -154,7 +154,7 @@
         var formId = selectObj.options[selectObj.selectedIndex].value;
         if (formId != "") {
             //alert('<%=request.getContextPath() %>/SurveyManager.do?method=export_csv&id=' + formId);
-            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=export_inverse_csv&id=' + formId;
+            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=export_inverse_csv&id=' + encodeURIComponent(formId);
         }
         //run the command
 
@@ -165,7 +165,7 @@
         var formId = selectObj.options[selectObj.selectedIndex].value;
         if (formId != "") {
             //alert('<%=request.getContextPath() %>/SurveyManager.do?method=export_csv&id=' + formId);
-            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=export_to_db&id=' + formId;
+            location.href = '<%=request.getContextPath() %>/SurveyManager.do?method=export_to_db&id=' + encodeURIComponent(formId);
         }
         //run the command
 
