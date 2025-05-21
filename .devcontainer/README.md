@@ -39,7 +39,7 @@ and VS-Code.
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/cc-ar-emr/Open-O.git
-   cd open-osp
+   cd Open-O
    ```
 
 2. **Confirm port availability:**
@@ -52,6 +52,9 @@ and VS-Code.
     code ./
     ```
     * VS Code should automatically detect the `.devcontainer` folder and prompt you to "Reopen in Container".
+    * *Note - Log out of any Docker Desktop account that is currently signed in*
+    * *Note - Ensure that you are on the correct git branch before opening VS Code container*
+        * Switching git branches while inside VS Code container might disconnect you from the container
     * Click "Reopen in Container" to start the development environment.
     * *Note - In case "Reopen in Container" option does not work then:*
         * Look on bottom left of VSCode you will find a remote connection icon (green colored). Click on it.
