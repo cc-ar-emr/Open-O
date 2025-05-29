@@ -166,7 +166,7 @@
             }
 
             function faxNumSelect() {
-                document.getElementById("clinicFax").innerHTML = "Fax: " + document.getElementById("sendersFax").value;
+                document.getElementById("clinicFax").textContent = "Fax: " + document.getElementById("sendersFax").value;
             }
 
             function addressSelect() {
