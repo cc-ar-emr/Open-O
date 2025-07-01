@@ -656,12 +656,12 @@ public class Survey {
 
 
     public static Survey createSurvey(byte[] bArray) throws IOException, SAXException, ParserConfigurationException {
-        Document doc = XmlUtils.toDocument(bArray);
+        Document doc = XmlUtils.toDocument(bArray); // Ensure XmlUtils.toDocument is secure.
         return fromDocument(doc);
     }
 
     public static Survey createSurvey(String str) throws IOException, SAXException, ParserConfigurationException {
-        Document doc = XmlUtils.toDocument(str);
+        Document doc = XmlUtils.toDocument(str); // Ensure XmlUtils.toDocument is secure.
         return fromDocument(doc);
     }
 

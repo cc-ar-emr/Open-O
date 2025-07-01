@@ -538,7 +538,7 @@ public class SurveillanceService extends AbstractServiceImpl {
                 //Need to migrate participants from the running surviellance
 
                 Survey currentSurvey = Survey.createSurvey(resourceStorage.getFileContents());
-                Survey newSurvey = Survey.createSurvey(jSONObject.getString("xml"));//resource.getBytes());
+                Survey newSurvey = Survey.createSurvey(jSONObject.getString("xml")); // Ensure Survey.createSurvey is secure.
                 newSurvey.setProviderList(currentSurvey.getProviderList());
 
 
