@@ -431,7 +431,8 @@ public class ProgramManager2Action extends ActionSupport {
         pp.setRoleId(provider.getRoleId());
 
         programManager.saveProgramProvider(pp);
-        addActionMessage(getText("program.saved", program.getName()));
+        String sanitizedProgramName = sanitizeInput(program.getName());
+        addActionMessage(getText("program.saved", sanitizedProgramName));
 
         LogAction.log("write", "edit program - assign role", String.valueOf(program.getId()), request);
         this.setProvider(new ProgramProvider());
@@ -1716,5 +1717,9 @@ public class ProgramManager2Action extends ActionSupport {
 
     public void setVacancyOrTemplateId(String vacancyOrTemplateId) {
         this.vacancyOrTemplateId = vacancyOrTemplateId;
+    }
+    private String sanitizeInput(String input) {
+        // Example sanitization: Remove potentially dangerous characters or patterns
+        return input.replaceAll("[{}\\[\\]$]", "");
     }
 }
