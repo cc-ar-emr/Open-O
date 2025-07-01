@@ -276,6 +276,8 @@ public class ReportManager {
 
     public Document readXml(String xml) throws Exception {
         SAXBuilder parser = new SAXBuilder();
+        parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        parser.setFeature("http://xml.org/sax/features/external-general-entities", false);
         xml = UtilXML.escapeXML(xml); //escapes anomalies such as "date >= {mydate}" the '>' character
         //xml  UtilXML.escapeAllXML(xml, "<param-list>");  //escapes all markup in <report> tag, otherwise can't retrieve element.getText()
         Document doc = parser.build(new java.io.ByteArrayInputStream(xml.getBytes()));
