@@ -63,7 +63,12 @@ public class UploadTemplates2Action extends ActionSupport {
         String message = "Error: Improper request - Action param missing";
         String xml = "";
         try {
-            byte[] bytes = Files.readAllBytes(templateFile.toPath());
+            File safeDirectory = new File("/path/to/safe/directory").getCanonicalFile();
+            File resolvedFile = templateFile.getCanonicalFile();
+            if (!resolvedFile.toPath().startsWith(safeDirectory.toPath())) {
+                throw new SecurityException("Invalid file path: Access outside the safe directory is not allowed.");
+            }
+            byte[] bytes = Files.readAllBytes(resolvedFile.toPath());
             xml = new String(bytes);
         } catch (IOException ioe) {
             message = "Exception: File Not Found";
