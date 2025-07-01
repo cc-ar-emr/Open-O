@@ -1270,7 +1270,14 @@ public class ProgramManager2Action extends ActionSupport {
         team.setProgramId(program.getId());
 
         if (programManager.teamNameExists(program.getId(), team.getName())) {
-            addActionMessage(getText("program_team.duplicate", team.getName()));
+            if (isValidTeamName(team.getName())) {
+                addActionMessage(getText("program_team.duplicate", team.getName()));
+            } else {
+                addActionMessage(getText("program_team.invalid_name"));
+                this.setTeam(new ProgramTeam());
+                setEditAttributes(request, String.valueOf(program.getId()));
+                return "edit";
+            }
             this.setTeam(new ProgramTeam());
             setEditAttributes(request, String.valueOf(program.getId()));
             return "edit";
@@ -1716,5 +1723,9 @@ public class ProgramManager2Action extends ActionSupport {
 
     public void setVacancyOrTemplateId(String vacancyOrTemplateId) {
         this.vacancyOrTemplateId = vacancyOrTemplateId;
+    }
+    private boolean isValidTeamName(String name) {
+        // Custom validation logic to ensure the name does not contain malicious OGNL expressions
+        return name != null && name.matches("^[a-zA-Z0-9_\\-\\s]+$"); // Example: Allow only alphanumeric, underscores, hyphens, and spaces
     }
 }
