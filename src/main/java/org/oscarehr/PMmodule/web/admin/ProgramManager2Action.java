@@ -485,6 +485,10 @@ public class ProgramManager2Action extends ActionSupport {
     public String delete() {
         String id = request.getParameter("id");
         String name = request.getParameter("name");
+        if (!isValidName(name)) {
+            addActionMessage(getText("program.invalid.name"));
+            return list();
+        }
 
         if (id == null) {
             return list();
@@ -514,7 +518,7 @@ public class ProgramManager2Action extends ActionSupport {
         programManager.removeProgram(id);
         programManager.deleteProgramProviderByProgramId(Long.valueOf(id));
 
-        addActionMessage(getText("program.deleted", name));
+        addActionMessage(getText("program.deleted", escapeName(name)));
 
         LogAction.log("write", "delete program", String.valueOf(program.getId()), request);
 
@@ -1716,5 +1720,14 @@ public class ProgramManager2Action extends ActionSupport {
 
     public void setVacancyOrTemplateId(String vacancyOrTemplateId) {
         this.vacancyOrTemplateId = vacancyOrTemplateId;
+    }
+    private boolean isValidName(String name) {
+        // Validate the name against a whitelist of allowed characters (e.g., letters, numbers, spaces)
+        return name != null && name.matches("^[a-zA-Z0-9\\s]+$");
+    }
+
+    private String escapeName(String name) {
+        // Escape the name to neutralize any potentially harmful OGNL expressions
+        return org.apache.commons.text.StringEscapeUtils.escapeHtml4(name);
     }
 }
