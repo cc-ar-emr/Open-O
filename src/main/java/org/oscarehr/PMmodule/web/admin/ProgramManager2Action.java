@@ -485,6 +485,10 @@ public class ProgramManager2Action extends ActionSupport {
     public String delete() {
         String id = request.getParameter("id");
         String name = request.getParameter("name");
+        if (!isValidInput(name)) {
+            addActionMessage(getText("program.invalid.name"));
+            return list();
+        }
 
         if (id == null) {
             return list();
@@ -1717,4 +1721,9 @@ public class ProgramManager2Action extends ActionSupport {
     public void setVacancyOrTemplateId(String vacancyOrTemplateId) {
         this.vacancyOrTemplateId = vacancyOrTemplateId;
     }
+private boolean isValidInput(String input) {
+    // Custom validation logic to ensure input is safe
+    // Example: Reject null, empty, or inputs containing dangerous characters
+    return input != null && input.matches("^[a-zA-Z0-9_\\-\\s]+$");
+}
 }
