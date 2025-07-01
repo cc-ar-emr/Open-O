@@ -437,9 +437,19 @@ public class SFTPConnector {
 
         byte keyBytes[] = toHex(decryptionKey);
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding", "SunJCE");
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] decode = cipher.doFinal(fileInBytes);
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "SunJCE");
+
+        // Extract IV from the beginning of the file
+        byte[] iv = new byte[12]; // GCM standard IV size is 12 bytes
+        System.arraycopy(fileInBytes, 0, iv, 0, iv.length);
+
+        // Extract the actual encrypted data
+        byte[] encryptedData = new byte[fileInBytes.length - iv.length];
+        System.arraycopy(fileInBytes, iv.length, encryptedData, 0, encryptedData.length);
+
+        // Initialize cipher with IV
+        cipher.init(Cipher.DECRYPT_MODE, key, new javax.crypto.spec.GCMParameterSpec(128, iv));
+        byte[] decode = cipher.doFinal(encryptedData);
 
         return new String(decode);
     }
