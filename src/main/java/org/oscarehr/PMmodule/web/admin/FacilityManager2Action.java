@@ -249,7 +249,7 @@ public class FacilityManager2Action extends ActionSupport {
 
             return list();
         } catch (Exception e) {
-            addActionMessage(getText("duplicateKey", "The name " + facility.getName()));
+            addActionMessage(getText("duplicateKey", "The name " + sanitizeInput(facility.getName())));
             return FORWARD_EDIT;
         }
     }
@@ -287,5 +287,17 @@ public class FacilityManager2Action extends ActionSupport {
 
     public void setRegistrationIntakeForms(List<EForm> registrationIntakeForms) {
         this.registrationIntakeForms = registrationIntakeForms;
+    }
+    /**
+     * Sanitizes user-provided input to prevent OGNL injection or other vulnerabilities.
+     * @param input The user-provided input string.
+     * @return A sanitized version of the input string.
+     */
+    private String sanitizeInput(String input) {
+        if (input == null) {
+            return "";
+        }
+        // Replace potentially harmful characters or patterns
+        return input.replaceAll("[{}\\[\\]$]", "");
     }
 }
