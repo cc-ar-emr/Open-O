@@ -124,7 +124,10 @@ public class UtilXML {
         Document document;
         try {
             InputSource is = new InputSource(new StringReader(xmlInput));
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            Document doc = factory.newDocumentBuilder().parse(is);
             Document document1 = doc;
             return document1;
         } catch (Exception e) {
@@ -136,7 +139,10 @@ public class UtilXML {
     public static Document parseXMLFile(String fileName)
             throws IOException, FileNotFoundException, Exception {
         InputSource is = new InputSource(new FileReader(fileName));
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        Document doc = factory.newDocumentBuilder().parse(is);
         return doc;
     }
 
