@@ -69,19 +69,31 @@ public class SupServiceCodeAssoc2Action extends ActionSupport {
             if (primaryCode == null || "".equals(primaryCode)) {
                 test = false;
                 addActionError(getText("oscar.billing.CA.BC.billingBC.error.nullservicecode", primaryCode));
-            } else if (!per.serviceCodeExists(primaryCode)) {
+            } else if (!isValidServiceCode(primaryCode) || !per.serviceCodeExists(primaryCode)) {
                 test = false;
                 addActionError(getText("oscar.billing.CA.BC.billingBC.error.invalidsvccode", primaryCode));
             }
             if (secondaryCode == null || "".equals(secondaryCode)) {
                 test = false;
                 addActionError(getText("oscar.billing.CA.BC.billingBC.error.nullservicecode", secondaryCode));
-            } else if (!per.serviceCodeExists(secondaryCode)) {
+            } else if (!isValidServiceCode(secondaryCode) || !per.serviceCodeExists(secondaryCode)) {
                 test = false;
                 addActionError(getText("oscar.billing.CA.BC.billingBC.error.invalidsvccode", secondaryCode));
             }
         }
         return test;
+    }
+
+    private boolean isValidServiceCode(String code) {
+        // Add validation logic here. For example:
+        // - Check for null or empty strings
+        // - Ensure the code matches a specific pattern (e.g., alphanumeric)
+        // - Reject any code containing suspicious characters
+        if (code == null || code.trim().isEmpty()) {
+            return false;
+        }
+        // Example pattern: only allow alphanumeric codes
+        return code.matches("^[a-zA-Z0-9]+$");
     }
 
     public static final String MODE_EDIT = "edit";
