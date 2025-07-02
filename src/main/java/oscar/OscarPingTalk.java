@@ -67,13 +67,7 @@ public class OscarPingTalk {
      * Creates a new instance of OscarPingTalk
      */
     public OscarPingTalk() {
-        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            public boolean verify(String urlHostName, SSLSession session) {
-                MiscUtils.getLogger().debug("Warning: URL: " + urlHostName + ", session host "
-                        + session.getPeerHost());
-                return true;
-            }
-        });
+        HttpsURLConnection.setDefaultHostnameVerifier(HttpsURLConnection.getDefaultHostnameVerifier());
     }
 
     public String connect(String username, String password) throws Exception {
