@@ -82,6 +82,7 @@ public class Logout2Action extends ActionSupport {
             for (Cookie cookie : cookies) {
                 cookie.setMaxAge(0);
                 cookie.setPath("/");
+                cookie.setSecure(true);
                 response.addCookie(cookie);
             }
         }
