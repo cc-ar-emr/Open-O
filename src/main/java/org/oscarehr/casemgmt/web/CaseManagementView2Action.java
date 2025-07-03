@@ -1298,6 +1298,8 @@ public class CaseManagementView2Action extends ActionSupport {
             return null;
         }
 
+        System.out.println("Notes: " + notes);
+
         return "listNotes";
     }
 

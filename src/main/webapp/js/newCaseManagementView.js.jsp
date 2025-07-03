@@ -31,7 +31,7 @@
     <%@page import="org.oscarehr.casemgmt.common.Colour"%>
 
     var numNotes = 0;   //How many saved notes do we have?
-    var ctx;        //url context
+    var ctx;            //url context
     var providerNo;
     var demographicNo;
     var case_program_id;
@@ -373,7 +373,16 @@
     /*
 	Loads issue notes: Social History, Medical History, Ongoing Concerns, Reminders
 */
-    function showIssueNotes() {
+    function showIssueNotes() {        
+        <% 
+        String pNo = LoggedInInfo.getLoggedInInfoFromSession(request).getLoggedInProviderNo(); 
+            if (pNo == null) {
+                pNo = "0";
+            } 
+        %>
+
+        providerNo = '<%= pNo %>';
+
         issueNoteUrls = {
             divR1I1: ctx + "/CaseManagementView.do?hc=996633&method=listNotes&providerNo=" + providerNo + "&demographicNo=" + demographicNo + "&issue_code=SocHistory&title=" + socHistoryLabel + "&cmd=divR1I1",
             divR1I2: ctx + "/CaseManagementView.do?hc=996633&method=listNotes&providerNo=" + providerNo + "&demographicNo=" + demographicNo + "&issue_code=MedHistory&title=" + medHistoryLabel + "&cmd=divR1I2",
@@ -383,6 +392,7 @@
         var limit = 5;
 
         for (idx in issueNoteUrls) {
+            console.log("showIssueNotes URLs:", issueNoteUrls[idx])
             loadDiv(idx, issueNoteUrls[idx], limit);
         }
     }
@@ -408,6 +418,8 @@
         }
 
         var limit = 5;
+
+        console.log("showCustomIssueNotes URLs:", issueNoteUrls);   
 
         for (idx in issueNoteUrls) {
             loadDiv('div' + idx, issueNoteUrls[idx], limit);
@@ -435,6 +447,7 @@
     }
 
     function notesLoadAll() {
+        console.log("notesLoadAll executed");
         notesOffset += notesIncrement;
         notesRetrieveOk = false;
         notesCurrentTop = $("encMainDiv").children[0].id;
@@ -688,302 +701,393 @@
     }
 
 // display in place editor
-    function showEdit(e, title, noteId, editors, date, revision, note, url, containerDiv, reloadUrl, noteIssues, noteExts, demoNo) {
-        //Event.extend(e);
-        //e.stop();
+function showEdit(e, title, noteId, editors, date, revision, note, url, containerDiv, reloadUrl, noteIssues, noteExts, demoNo) {
+    // Log parameters for debugging
+    console.log("showEdit parameters:", {
+        title: title,
+        noteId: noteId,
+        editors: editors,
+        date: date,
+        revision: revision,
+        note: note,
+        url: url,
+        containerDiv: containerDiv,
+        reloadUrl: reloadUrl,
+        noteIssues: noteIssues,
+        noteExts: noteExts,
+        demoNo: demoNo 
+    });
 
-        var limit = containerDiv + "threshold";
-        var editElem = "showEditNote";
-        var pgHeight = pageHeight();
+    // Create a threshold element id based on containerDiv
+    var limit = containerDiv + "threshold";
+    var editElem = "showEditNote"; // id of the element containing the editor UI
+    var pgHeight = pageHeight();   // get page height
 
-        var coords = null;
-        if (document.getElementById("measurements_div") == null) {
-            coords = Position.page($("topContent"));
-        } else {
-            coords = Position.positionedOffset($("cppBoxes"));
+    // Calculate coordinates for positioning the editor popup
+    var coords = null;
+    if (document.getElementById("measurements_div") == null) {
+        coords = Position.page($("topContent")); // get position of top content if measurements_div not present
+    } else {
+        coords = Position.positionedOffset($("cppBoxes")); // calculate based on cppBoxes if present
+    }
+    var top = Math.max(coords[1], 0);            // top offset for popup
+    var right = Math.round(coords[0] / 0.66);      // right offset for popup (scaled by factor)
+    var height = $("showEditNote").getHeight();    // current height of the editor element
+    var gutterMargin = 150;                        // minimum right margin
+
+    // Ensure right offset is at least the gutter margin
+    if (right < gutterMargin)
+        right = gutterMargin;
+
+    // Set the current note into the edit textarea
+    $("noteEditTxt").value = note;
+
+    // Build an unordered list of editors if available
+    var editorUl = "<ul style='list-style: none outside none; margin:0;'>";
+    if (editors.length > 0) {
+        var editorArray = editors.split(";");
+        var idx;
+        for (idx = 0; idx < editorArray.length; ++idx) {
+            if (idx % 2 === 0)
+                editorUl += "<li>" + editorArray[idx];
+            else
+                editorUl += "; " + editorArray[idx] + "</li>";
         }
+        // Close list item if they were an even number
+        if (idx % 2 == 0)
+            editorUl += "</li>";
+    }
+    editorUl += "</ul>";
 
-        var top = Math.max(coords[1], 0);
-        var right = Math.round(coords[0] / 0.66);
-        var height = $("showEditNote").getHeight();
-        var gutterMargin = 150;
-
-        if (right < gutterMargin)
-            right = gutterMargin;
-
-
-        $("noteEditTxt").value = note;
-
-        var editorUl = "<ul style='list-style: none outside none; margin:0;'>";
-
-        if (editors.length > 0) {
-            var editorArray = editors.split(";");
-            var idx;
-            for (idx = 0; idx < editorArray.length; ++idx) {
-                if (idx % 2 === 0)
-                    editorUl += "<li>" + editorArray[idx];
-                else
-                    editorUl += "; " + editorArray[idx] + "</li>";
-            }
-
-            if (idx % 2 == 0)
-                editorUl += "</li>";
-        }
-        editorUl += "</ul>";
-
-        var noteIssueUl = "<ul id='issueIdList' style='list-style: none; margin:0;'>";
-
-        if (noteIssues.length > 0) {
-            var issueArray = noteIssues.split(";");
-            var idx, rows;
-            var cppDisplay = "";
-            for (idx = 0, rows = 0; idx < issueArray.length; idx += 3, ++rows) {
-                if (rows % 2 === 0) {
-                    noteIssueUl += "<li><input type='checkbox' id='issueId' name='issue_id' checked value='" + issueArray[idx] + "'>" + issueArray[idx + 2];
-                } else {
-                    noteIssueUl += "&nbsp; <input type='checkbox' id='issueId' name='issue_id' checked value='" + issueArray[idx] + "'>" + issueArray[idx + 2] + "</li>";
-                }
-                if (cppDisplay == "") cppDisplay = getCPP(issueArray[idx + 1]);
-            }
-
+    // Build unordered list for note issues and extract CPP display if needed
+    var noteIssueUl = "<ul id='issueIdList' style='list-style: none; margin:0;'>";
+    if (noteIssues.length > 0) {
+        var issueArray = noteIssues.split(";");
+        var idx, rows;
+        var cppDisplay = "";
+        for (idx = 0, rows = 0; idx < issueArray.length; idx += 3, ++rows) {
             if (rows % 2 === 0) {
-                noteIssueUl += "</li>";
+                noteIssueUl += "<li><input type='checkbox' id='issueId' name='issue_id' checked value='" + issueArray[idx] + "'>" + issueArray[idx + 2];
+            } else {
+                noteIssueUl += "&nbsp; <input type='checkbox' id='issueId' name='issue_id' checked value='" + issueArray[idx] + "'>" + issueArray[idx + 2] + "</li>";
             }
+            // Set CPP display using issue code from the array (second item)
+            if (cppDisplay == "") cppDisplay = getCPP(issueArray[idx + 1]);
         }
-        noteIssueUl += "</ul>";
-
-        var noteInfo = "<div style='width: 50%;text-align: right;float: right;clear: both;'><i>Encounter Date:&nbsp;" + date + "&nbsp;rev<a href='#' onclick='return showHistory(\"" + noteId + "\",event);'>" + revision + "</a></i></div>" +
-            "<div style='width: 50%;text-align:left;'><label>Editors: </label>" + editorUl + "</div><div style='width:100%'>" + noteIssueUl + "</div>";
-
-        $("issueNoteInfo").update(noteInfo);
-        $("frmIssueNotes").action = url;
-        $("reloadUrl").value = reloadUrl;
-        $("containerDiv").value = containerDiv;
-        $("winTitle").update(title);
-
-        $(editElem).style.right = right + "px";
-        $(editElem).style.top = top + "px";
-        if (Prototype.Browser.IE) {
-            //IE6 bug of showing select box
-            $("channel").style.visibility = "hidden";
-            $(editElem).style.display = "block";
-        } else
-            $(editElem).style.display = "table";
-
-        //Prepare Annotation Window & Extra Fields
-        var now = new Date();
-        document.getElementById('annotation_attrib').value = "anno" + now.getTime();
-        var obj = {};
-        Element.observe('anno', 'click', openAnnotation.bindAsEventListener(obj, noteId, cppDisplay, demoNo));
-        prepareExtraFields(cppDisplay, noteExts);
-
-        //Set note position order
-        var elementNum = containerDiv + "num";
-        var numNotes = $F(elementNum);
-        var positionElement = containerDiv + noteId;
-        var position;
-        if (noteId === "") {
-            position = 0;
-        } else {
-            position = $F(positionElement);
+        // Close list item if necessary
+        if (rows % 2 === 0) {
+            noteIssueUl += "</li>";
         }
+    }
+    noteIssueUl += "</ul>";
 
-        var curElem;
-        var numOptions = $("position").length;
-        var max = numNotes > numOptions ? numNotes : numOptions;
-        var optId;
-        var option;
-        var opttxt;
+    // Create note info block with encounter date, revision link and editors list
+    var noteInfo = "<div style='width: 50%;text-align: right;float: right;clear: both;'><i>Encounter Date:&nbsp;" + date +
+        "&nbsp;rev<a href='#' onclick='return showHistory(\"" + noteId + "\",event);'>" + revision + "</a></i></div>" +
+        "<div style='width: 50%;text-align:left;'><label>Editors: </label>" + editorUl + "</div><div style='width:100%'>" + noteIssueUl + "</div>";
 
-        for (curElem = 0; curElem < max; ++curElem) {
+    // Update the note information section with the generated HTML
+    $("issueNoteInfo").update(noteInfo);
+    // Set the form action to the provided URL
+    $("frmIssueNotes").action = url;
+    // Store reload URL and container div for later use in hidden fields
+    $("reloadUrl").value = reloadUrl;
+    $("containerDiv").value = containerDiv;
+    // Update window title with note title
+    $("winTitle").update(title);
 
-            optId = "popt" + curElem;
-            if ($(optId) == null) {
-                option = document.createElement("OPTION");
-                option.id = optId;
-                opttxt = curElem + 1;
-                option.text = "" + opttxt;
-                option.value = curElem;
-                $("position").options.add(option, curElem);
-            }
+    // Position the editor popup using calculated right and top offsets
+    $(editElem).style.right = right + "px";
+    $(editElem).style.top = top + "px";
 
-            if (position == curElem) {
-                $(optId).selected = true;
-            }
-        }
-
-        if (max == numNotes) {
-            optId = "popt" + max;
-            if ($(optId) == null) {
-                option = document.createElement("OPTION");
-                option.id = optId;
-                opttxt = 1 * max + 1;
-                option.text = "" + opttxt;
-                option.value = max;
-                $("position").options.add(option, max);
-            }
-
-        }
-
-        for (curElem = max - 1; curElem > 0; --curElem) {
-
-            optId = "popt" + curElem;
-            if (curElem > numNotes) {
-                Element.remove(optId);
-            }
-        }
-
-
-        $("noteEditTxt").focus();
-
-        return false;
+    // For IE, hide the "channel" element to avoid select box issues, then show the editor
+    if (Prototype.Browser.IE) {
+        $("channel").style.visibility = "hidden";
+        $(editElem).style.display = "block";
+    } else {
+        // For other browsers, display the editor as a table
+        $(editElem).style.display = "table";
     }
 
-    var cppIssues = new Array(7);
-    var cppNames = new Array(7);
-    cppIssues[0] = "SocHistory";
-    cppIssues[1] = "MedHistory";
-    cppIssues[2] = "FamHistory";
-    cppIssues[3] = "Concerns";
-    cppIssues[4] = "RiskFactors";
-    cppIssues[5] = "Reminders";
-    cppIssues[6] = "OMeds";
-    cppNames[0] = "Social History";
-    cppNames[1] = "Medical History";
-    cppNames[2] = "Family History";
-    cppNames[3] = "Ongoing Concerns";
-    cppNames[4] = "Risk Factors";
-    cppNames[5] = "Reminders";
-    cppNames[6] = "Other Meds";
+    // Prepare the annotation window by setting a unique attribute name based on the current time
+    var now = new Date();
+    document.getElementById('annotation_attrib').value = "anno" + now.getTime();
+    var obj = {};
+    // Set up an event listener for opening the annotation window when the 'anno' element is clicked
+    Element.observe('anno', 'click', openAnnotation.bindAsEventListener(obj, noteId, cppDisplay, demoNo));
+    // Prepare additional extra fields based on the CPP display and note extensions provided
+    prepareExtraFields(cppDisplay, noteExts);
 
-    function getCPP(issueCode) {
-        for (var i = 0; i < cppIssues.length; i++) {
-            if (issueCode == cppIssues[i]) {
-                return cppNames[i];
+    // Set note position order: get the current number of notes from a hidden element
+    var elementNum = containerDiv + "num";
+    var numNotes = $F(elementNum);
+    var positionElement = containerDiv + noteId;
+    var position;
+    // Determine the note's current position: if noteId is empty, position is 0; otherwise value from element
+    if (noteId === "") {
+        position = 0;
+    } else {
+        position = $F(positionElement);
+    }
+
+    // Adjust the position selector options based on the total number of notes
+    var curElem;
+    var numOptions = $("position").length;
+    var max = numNotes > numOptions ? numNotes : numOptions;
+    var optId;
+    var option;
+    var opttxt;
+
+    for (curElem = 0; curElem < max; ++curElem) {
+        optId = "popt" + curElem;
+        if ($(optId) == null) {
+            option = document.createElement("OPTION");
+            option.id = optId;
+            opttxt = curElem + 1; // display value is one-based index
+            option.text = "" + opttxt;
+            option.value = curElem;
+            $("position").options.add(option, curElem);
+        }
+        // Set the option as selected if it matches the note's current position
+        if (position == curElem) {
+            $(optId).selected = true;
+        }
+    }
+
+    // If the maximum equals the number of notes, add an option for a new position at the end
+    if (max == numNotes) {
+        optId = "popt" + max;
+        if ($(optId) == null) {
+            option = document.createElement("OPTION");
+            option.id = optId;
+            opttxt = 1 * max + 1;
+            option.text = "" + opttxt;
+            option.value = max;
+            $("position").options.add(option, max);
+        }
+    }
+
+    // Remove any extra options beyond the current number of notes
+    for (curElem = max - 1; curElem > 0; --curElem) {
+        optId = "popt" + curElem;
+        if (curElem > numNotes) {
+            Element.remove(optId);
+        }
+    }
+
+    // Set focus to the note edit text area so the user can start editing immediately
+    $("noteEditTxt").focus();
+
+    return false; // Prevent default action at the end of the function
+}
+
+// Array of CPP issues codes and their names for lookup
+var cppIssues = new Array(7);
+var cppNames = new Array(7);
+cppIssues[0] = "SocHistory";
+cppIssues[1] = "MedHistory";
+cppIssues[2] = "FamHistory";
+cppIssues[3] = "Concerns";
+cppIssues[4] = "RiskFactors";
+cppIssues[5] = "Reminders";
+cppIssues[6] = "OMeds";
+cppNames[0] = "Social History";
+cppNames[1] = "Medical History";
+cppNames[2] = "Family History";
+cppNames[3] = "Ongoing Concerns";
+cppNames[4] = "Risk Factors";
+cppNames[5] = "Reminders";
+cppNames[6] = "Other Meds";
+
+// Return CPP name for a given issue code
+function getCPP(issueCode) {
+    for (var i = 0; i < cppIssues.length; i++) {
+        if (issueCode == cppIssues[i]) {
+            return cppNames[i];
+        }
+    }
+    return "";
+}
+
+// Arrays defining extra fields for additional data and their display keys
+var exFields = new Array(12);
+var exKeys = new Array(12);
+exFields[0] = "startdate";
+exFields[1] = "resolutiondate";
+exFields[2] = "proceduredate";
+exFields[3] = "ageatonset";
+exFields[4] = "treatment";
+exFields[5] = "problemstatus";
+exFields[6] = "exposuredetail";
+exFields[7] = "relationship";
+exFields[8] = "lifestage";
+exFields[9] = "hidecpp";
+exFields[10] = "problemdescription";
+exFields[11] = "procedure";
+exKeys[0] = "Start Date";
+exKeys[1] = "Resolution Date";
+exKeys[2] = "Procedure Date";
+exKeys[3] = "Age at Onset";
+exKeys[4] = "Treatment";
+exKeys[5] = "Problem Status";
+exKeys[6] = "Exposure Details";
+exKeys[7] = "Relationship";
+exKeys[8] = "Life Stage";
+exKeys[9] = "Hide Cpp";
+exKeys[10] = "Problem Description";
+exKeys[11] = "Procedure";
+
+// Configure extra fields display based on CPP type and populate with pre-existing extensions
+function prepareExtraFields(cpp, exts) {
+    console.log("prepare Extra Fields");
+    var rowIDs = new Array(12);
+    // Hide all extra fields by default (starting from index 2)
+    for (var i = 2; i < exFields.length; i++) {
+        console.log(i);
+        rowIDs[i] = "Item" + exFields[i];
+        $(rowIDs[i]).hide();
+    }
+
+    // Reveal specific extra fields based on selected CPP name
+    if (cpp == cppNames[1]) $(rowIDs[2], rowIDs[4], rowIDs[5], rowIDs[8], rowIDs[9], rowIDs[11]).invoke("show");
+    if (cpp == cppNames[2]) $(rowIDs[3], rowIDs[4], rowIDs[7], rowIDs[8], rowIDs[9]).invoke("show");
+    if (cpp == cppNames[3]) $(rowIDs[5], rowIDs[8], rowIDs[9], rowIDs[10]).invoke("show");
+    if (cpp == cppNames[4]) $(rowIDs[3], rowIDs[6], rowIDs[8], rowIDs[9]).invoke("show");
+
+    // Clear current values for extra fields
+    for (var i = 0; i < exFields.length; i++) {
+        $(exFields[i]).value = "";
+    }
+
+    // Split extension string into array and populate fields accordingly
+    var extsArr = exts.split(";");
+    for (var i = 0; i < extsArr.length; i += 2) {
+        for (var j = 0; j < exFields.length; j++) {
+            if (extsArr[i] == exKeys[j]) {
+                $(exFields[j]).value = extsArr[i + 1];
+                continue;
             }
         }
-        return "";
     }
+}
 
-    var exFields = new Array(12);
-    var exKeys = new Array(12);
-
-    exFields[0] = "startdate";
-    exFields[1] = "resolutiondate";
-    exFields[2] = "proceduredate";
-    exFields[3] = "ageatonset";
-    exFields[4] = "treatment";
-    exFields[5] = "problemstatus";
-    exFields[6] = "exposuredetail";
-    exFields[7] = "relationship";
-    exFields[8] = "lifestage";
-    exFields[9] = "hidecpp";
-    exFields[10] = "problemdescription";
-    exFields[11] = "procedure";
-
-    exKeys[0] = "Start Date";
-    exKeys[1] = "Resolution Date";
-    exKeys[2] = "Procedure Date";
-    exKeys[3] = "Age at Onset";
-    exKeys[4] = "Treatment";
-    exKeys[5] = "Problem Status";
-    exKeys[6] = "Exposure Details";
-    exKeys[7] = "Relationship";
-    exKeys[8] = "Life Stage";
-    exKeys[9] = "Hide Cpp";
-    exKeys[10] = "Problem Description";
-    exKeys[11] = "Procedure";
-
-    function prepareExtraFields(cpp, exts) {
-        //commented out..this causes a problem in Firefox
-
-        console.log("prepare Extra Fields");
-        var rowIDs = new Array(12);
-        for (var i = 2; i < exFields.length; i++) {
-            console.log(i);
-            rowIDs[i] = "Item" + exFields[i];
-            $(rowIDs[i]).hide();
-        }
-
-        if (cpp == cppNames[1]) $(rowIDs[2], rowIDs[4], rowIDs[5], rowIDs[8], rowIDs[9], rowIDs[11]).invoke("show");
-        if (cpp == cppNames[2]) $(rowIDs[3], rowIDs[4], rowIDs[7], rowIDs[8], rowIDs[9]).invoke("show");
-        if (cpp == cppNames[3]) $(rowIDs[5], rowIDs[8], rowIDs[9], rowIDs[10]).invoke("show");
-        if (cpp == cppNames[4]) $(rowIDs[3], rowIDs[6], rowIDs[8], rowIDs[9]).invoke("show");
-
-        for (var i = 0; i < exFields.length; i++) {
-            $(exFields[i]).value = "";
-        }
-
-        var extsArr = exts.split(";");
-        for (var i = 0; i < extsArr.length; i += 2) {
-            for (var j = 0; j < exFields.length; j++) {
-                if (extsArr[i] == exKeys[j]) {
-                    $(exFields[j]).value = extsArr[i + 1];
-                    continue;
-                }
-            }
-        }
-
-    }
-
-    function openAnnotation() {
-        var atbname = document.getElementById('annotation_attrib').value;
-        var data = $A(arguments);
-        var addr = ctx + "/annotation/annotation.jsp?atbname=" + atbname + "&table_id=" + data[1] + "&display=" + data[2] + "&demo=" + data[3];
-        window.open(addr, "anwin", "width=400,height=500");
-        Event.stop(data[0]);
-    }
+// Open annotation popup window with proper parameters
+function openAnnotation() {
+    var atbname = document.getElementById('annotation_attrib').value;
+    var data = $A(arguments);
+    // Construct URL with annotation name, note id, CPP display string and demographic number
+    var addr = ctx + "/annotation/annotation.jsp?atbname=" + atbname + "&table_id=" + data[1] + "&display=" + data[2] + "&demo=" + data[3];
+    window.open(addr, "anwin", "width=400,height=500");
+    Event.stop(data[0]);
+}
 
 function updateCPPNote() {
+    // Sanitize the note edit text field to remove any disallowed control characters.
     sanitizeElementByPattern(document.forms["frmIssueNotes"].elements["noteEditTxt"], CONTROL_CHAR_PATTERN_2);
-   var url = $("frmIssueNotes").action;
-   var reloadUrl = $("reloadUrl").value;
-   var div = $("containerDiv").value;
 
-        $('channel').style.visibility = 'visible';
-        $('showEditNote').style.display = 'none';
+    console.log("updateCPPNote called with form data:", $("frmIssueNotes").serialize());
+    
+    // Get the form action URL and parameters required for reloading.
+    var url = $("frmIssueNotes").action;
+    var reloadUrl = $("reloadUrl").value;
+    // Get the target container div's ID where the updated content should be loaded.
+    var div = $("containerDiv").value;
 
-        var curItems = document.forms["frmIssueNotes"].elements["issueId"];
-        if (typeof curItems.length != "undefined") {
-            size = curItems.length;
+    // Make the 'channel' visible and hide the edit note UI.
+    $('channel').style.visibility = 'visible';
+    $('showEditNote').style.display = 'none';
 
-            for (var idx = 0; idx < size; ++idx) {
-                if (!curItems[idx].checked) {
-                    $("issueChange").value = true;
-                    break;
-                }
+    // Check the issue checkboxes; if any is not checked, mark issueChange flag as true.
+    var curItems = document.forms["frmIssueNotes"].elements["issueId"];
+    if (typeof curItems.length != "undefined") {
+        size = curItems.length;
+        for (var idx = 0; idx < size; ++idx) {
+            if (!curItems[idx].checked) {
+                $("issueChange").value = true;
+                break;
             }
-        } else {
-            $("issueChange").value = true;
         }
-
-        var params = $("frmIssueNotes").serialize();
-        var sigId = "sig" + caseNote.substr(13);
-        var objAjax = new Ajax.Request(
-            url,
-            {
-                method: 'post',
-                evalScripts: true,
-                postBody: params,
-                onSuccess: function (request) {
-                    if (request.responseText.length > 0) {
-                        $(div).update(request.responseText);
-                    }
-                    if ($("issueChange").value == "true") {
-                        ajaxUpdateIssues("edit", sigId);
-                        $("issueChange").value = false;
-                    }
-
-                    notifyDivLoaded($(div).id);
-                },
-                onFailure: function (request) {
-                    $(div).innerHTML = "<h3>" + div + "<\/h3>Error: " + request.status;
-                }
-            }
-        );
-        return false;
-
+    } else {
+        $("issueChange").value = true;
     }
+
+    // Serialize the form parameters for submission.
+    var params = $("frmIssueNotes").serialize();
+    // Generate a signature ID using a substring of the note identifier.
+    var sigId = "sig" + caseNote.substr(13);
+    
+    // Initiate an AJAX POST request to update the CPP Note.
+    var objAjax = new Ajax.Request(
+        url,
+        {
+            method: 'post',
+            evalScripts: true,
+            postBody: params,
+            onSuccess: function (request) {
+                // If the response contains any content, update the designated div.
+                if (request.responseText.length > 0) {
+                    $(div).update(request.responseText);
+                } else {
+                    // If an empty response is received, a warning could be logged or handled here.
+                }
+                
+                // If any issue checkbox change was detected, update issues and reset the flag.
+                if ($("issueChange").value == "true") {
+                    ajaxUpdateIssues("edit", sigId);
+                    $("issueChange").value = false;
+                }
+
+                // Notify that the div is loaded and content has been refreshed.
+                notifyDivLoaded($(div).id);
+                
+                // Determine the CPP section (SocHistory, MedHistory, Concerns, or Reminders) based on the div id.
+                var sectionCode = "";
+                if (div.indexOf("R1I1") > -1) {
+                    sectionCode = "SocHistory";
+                } else if (div.indexOf("R1I2") > -1) {
+                    sectionCode = "MedHistory";
+                } else if (div.indexOf("R2I1") > -1) {
+                    sectionCode = "Concerns";
+                } else if (div.indexOf("R2I2") > -1) {
+                    sectionCode = "Reminders";
+                }
+                
+                // If a valid section code is found, reload that specific section to ensure updated display.
+                if (sectionCode !== "") {
+                    var reloadSectionUrl = ctx + "/CaseManagementView.do?hc=996633&method=listNotes&providerNo=" +
+                        providerNo + "&demographicNo=" + demographicNo +
+                        "&issue_code=" + sectionCode + "&cmd=" + div;
+                    
+                    new Ajax.Request(
+                        reloadSectionUrl,
+                        {
+                            method: 'post',
+                            evalScripts: true,
+                            onSuccess: function(innerRequest) {
+                                if (innerRequest.responseText.length > 0) {
+                                    $(div).update(innerRequest.responseText);
+                                }
+                            },
+                            onFailure: function(innerRequest) {
+                                // Handle failure in reloading the section here.
+                            }
+                        }
+                    );
+                }
+                
+                // Prevent default form submission behavior which may cause a page reload.
+                if (window.event) {
+                    window.event.preventDefault();
+                }
+            },
+            onFailure: function (request) {
+                // In case of failure, update the target div with an error message.
+                $(div).innerHTML = "<h3>" + div + "</h3>Error: " + request.status;
+            }
+        }
+    );
+    return false;
+}
 
     function clickLoadDiv(e) {
         var data = $A(arguments);
@@ -1010,10 +1114,21 @@ function updateCPPNote() {
                     $(div).update(request.responseText);
                     //listDisplay(div,100);
                     notifyDivLoaded($(div).id);
-
+                    
+                    // Ensure all forms in this div don't cause page reloads
+                    jQuery('#' + div + ' form').each(function() {
+                        jQuery(this).submit(function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
+                    });
+                    
+                    // Log the content to verify it's being loaded correctly
+                    console.log("Loaded content for " + div + ": " + $(div).innerHTML.substring(0, 100) + "...");
                 },
                 onFailure: function (request) {
                     $(div).innerHTML = "<h3>" + div + "<\/h3>Error: " + request.status + "<br>" + request.responseText;
+                    console.error("Failed to load " + div + ": " + request.status);
                 }
             }
         );
@@ -2333,9 +2448,16 @@ function updateCPPNote() {
 
         var demoNo = demographicNo;
         var encType = "encTypeSelect" + noteId;
+        var encTypeValue = "";
+        if ($(encType)) {
+            encTypeValue = $F(encType);
+        } else if ($("encType")) {
+            // Fall back to the main hidden encType field
+            encTypeValue = $F("encType");
+        }
         var caseMgtEntryfrm = document.forms["caseManagementEntryForm"];
         var url = ctx + "/CaseManagementEntry.do";
-        var params = "nId=" + noteId + issueParams + "&demographicNo=" + demographicNo + "&providerNo=" + providerNo + "&numIssues=" + idx + "&obsDate=" + $F("observationDate") + "&encType=" + encodeURI($F(encType)) + "&noteTxt=" + encodeURI(noteTxt);
+        var params = "nId=" + noteId + issueParams + "&demographicNo=" + demographicNo + "&providerNo=" + providerNo + "&numIssues=" + idx + "&obsDate=" + $F("observationDate") + "&encType=" + encodeURI(encTypeValue) + "&noteTxt=" + encodeURI(noteTxt);
         params += "&" + Form.serialize(caseMgtEntryfrm);
 
         var objAjax = new Ajax.Updater(
@@ -2792,9 +2914,57 @@ function updateCPPNote() {
         var url = ctx + "/CaseManagementEntry.do";
         var p = Form.serialize(frm);
         p.note_edit = '';
+        
+        console.log("Updating issues with method: " + method + " for div: " + div);
+        console.log("Form parameters: " + p);
+        
         ajaxRequest = new Ajax.Updater({success: div}, url, {
-            evalScripts: true, parameters: p, onSuccess: onIssueUpdate,
+            evalScripts: true, 
+            parameters: p, 
+            onSuccess: function(response) {
+                console.log("Issue update successful");
+                onIssueUpdate();
+                
+                // Determine which CPP section we're dealing with
+                var sectionCode = "";
+                var targetDiv = "";
+                
+                if (div.indexOf("MedHistory") > -1 || frm.action.indexOf("MedHistory") > -1) {
+                    sectionCode = "MedHistory";
+                    targetDiv = "divR1I2";
+                } else if (div.indexOf("SocHistory") > -1 || frm.action.indexOf("SocHistory") > -1) {
+                    sectionCode = "SocHistory";
+                    targetDiv = "divR1I1";
+                } else if (div.indexOf("Concerns") > -1 || frm.action.indexOf("Concerns") > -1) {
+                    sectionCode = "Concerns";
+                    targetDiv = "divR2I1";
+                } else if (div.indexOf("Reminders") > -1 || frm.action.indexOf("Reminders") > -1) {
+                    sectionCode = "Reminders";
+                    targetDiv = "divR2I2";
+                }
+                
+                // If this is a CPP note, make sure we only update that specific tab
+                if (sectionCode !== "") {
+                    console.log("Reloading " + sectionCode + " section in div: " + targetDiv);
+                    
+                    // Reload the specific tab with a slight delay to ensure server-side processing is complete
+                    setTimeout(function() {
+                        var sectionUrl = ctx + "/CaseManagementView.do?hc=996633&method=listNotes&providerNo=" + 
+                            providerNo + "&demographicNo=" + demographicNo + 
+                            "&issue_code=" + sectionCode + "&title=" + eval(sectionCode.toLowerCase() + "Label") + "&cmd=" + targetDiv;
+                        
+                        console.log("Reloading URL: " + sectionUrl);
+                        loadDiv(targetDiv, sectionUrl, 5);
+                    }, 500);
+                }
+                
+                // Prevent any form submission that might cause page reload
+                if (window.event) {
+                    window.event.preventDefault();
+                }
+            },
             onFailure: function (response) {
+                console.error("Issue update failed: " + response.status);
                 alert(response.status + " " + updateIssueError);
             }
         });
@@ -3045,6 +3215,7 @@ function autoSave(async) {
  *Pop up window for Showing all notes that have linked to an issue
  */
     function showIssueHistory(demoNo, issueIds) {
+        console.log("showIssueHistory parameters:", { demoNo: demoNo, issueIds: issueIds });
         var rnd = Math.round(Math.random() * 1000);
         win = "win" + rnd;
         var url = ctx + "/CaseManagementEntry.do?method=issuehistory&demographicNo=" + demoNo + "&issueIds=" + issueIds;

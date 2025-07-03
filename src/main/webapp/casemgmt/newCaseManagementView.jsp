@@ -67,9 +67,8 @@
         <!-- social history -->
         <div id="divR1I1" class="topBox">
         </div>
-
+        <!-- medical history -->
         <div id="divR1I2" class="topBox">
-
         </div>
     </div>
 

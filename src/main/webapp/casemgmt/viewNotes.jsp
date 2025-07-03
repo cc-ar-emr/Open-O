@@ -40,7 +40,7 @@
 <%@page import="org.oscarehr.common.model.PartialDate" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
-<%@ page import="java.util.ResourceBundle"%>
+<%@page import="java.util.ResourceBundle"%>
 <%
     String roleName$ = (String) session.getAttribute("userrole") + "," + (String) session.getAttribute("user");
     boolean authed = true;
@@ -54,8 +54,8 @@
         return;
     }
     ResourceBundle bundle = ResourceBundle.getBundle("oscarResources", request.getLocale());
-    String titleParam = request.getParameter("title");
-    String titleMsg = bundle.getString(titleParam);
+    String titleParam    = request.getParameter("title");
+    String titleMsg      = bundle.getString(titleParam);
 %>
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" scope="request"/>
@@ -68,8 +68,8 @@
                 com.quatro.service.security.SecurityManager securityManager = new com.quatro.service.security.SecurityManager();
                 if (securityManager.hasWriteAccess("_" + request.getParameter("issue_code"), roleName$)) {
             %>
-            <a href="javascript:void(0)" title='Add Item' onclick="return showEdit(event,'<%=titleMsg%>','',0,'','','','<%=request.getAttribute("addUrl")%>0', 
-                '<c:out value="${param.cmd}"/>','<%=request.getAttribute("identUrl")%>','<%=request.getAttribute("cppIssue")%>','','<c:out value="${param.demographicNo}"/>');">+</a>
+            <a href="javascript:void(0)" title='Add Item' onclick="return showEdit(event,'<%=StringEscapeUtils.escapeJavaScript(titleMsg)%>','',0,'','','','<%=request.getAttribute("addUrl")%>0', 
+                '<c:out value="${param.cmd}"/>','<%=request.getAttribute("identUrl")%>','<%=StringEscapeUtils.escapeJavaScript(request.getAttribute("cppIssue").toString())%>','','<c:out value="${param.demographicNo}"/>');">+</a>
             <% } else { %>
             &nbsp;
             <% } %>
@@ -77,8 +77,10 @@
     </div>
     <div class="nav-menu-title">
         <h3>
-            <a href="javascript:void(0)" onclick="return showIssueHistory('<c:out
+            <!-- this is where the title is build and the button url is set --> 
+            <a href="javascript:void(0)" onclick="= showIssueHistory('<c:out
                     value="${param.demographicNo}"/>','<%=request.getAttribute("issueIds")%>');"><%=titleMsg%></a>
+            <%-- <button type="submit" title="Add Note">+</button> --%>
         </h3>
     </div>
 </div>
@@ -93,9 +95,12 @@
 
 <ul>
     <c:forEach var="note" items="${Notes}" varStatus="status">
-        <c:set var="noteId" value="${note.id}" />
+        <c:set var="noteId" value="${note.id}"/>
         <c:set var="backgroundColor" value="${status.index % 2 == 0 ? '#F3F3F3' : '#FFFFFF'}" />
-        
+        <script>
+            console.log('Note ${status.index} - Full Object:', ${note});
+            console.log('Note ${status.index} - Stringified:', JSON.stringify(${note}, null, 2));
+        </script>
         <li class="cpp" style="background-color: ${backgroundColor};">
             <span id="spanListNote${noteId}">
                 <c:choose>
@@ -103,22 +108,49 @@
                         <a class="links" onmouseover="this.className='linkhover'" onmouseout="this.className='links'"
                            title="Rev:${note.revision} - Last update:${note.update_date}"
                            id="listNote${noteId}" href="javascript:void(0)"
-                           onclick="showEdit(event,'${titleMsg}','${noteId}','${editors}','${note.observation_date}','${note.revision}','${note.note}','${addUrl}${noteId}','${param.cmd}','${identUrl}','${noteIssues}','${noteExts}','${param.demographicNo}');return false;">
-                            ${htmlNoteTxt}
+                           onclick="showEdit(
+                           event,
+                           '${titleMsg}',
+                           '${noteId}',
+                           '${editors}',
+                           '${note.observation_date}',
+                           '${note.revision}',
+                           '${note.note}',
+                           '${addUrl}${noteId}',
+                           '${param.cmd}',
+                           '${identUrl}',
+                           '${noteIssues}',
+                           '${noteExts}',
+                           '${param.demographicNo}');return false;">
+                            ${fn:escapeXml(note.note)}
                         </a>
                     </c:when>
                     <c:otherwise>
                         <a class="topLinks" onmouseover="this.className='topLinkhover'" onmouseout="this.className='topLinks'"
                            title="Rev:${note.revision} - Last update:${note.update_date}"
                            id="listNote${noteId}" href="javascript:void(0)"
-                           onclick="showEdit(event,'${titleMsg}','${noteId}','${editors}','${note.observation_date}','${note.revision}','${note.note}','${addUrl}${noteId}','${param.cmd}','${identUrl}','${noteIssues}','${noteExts}','${param.demographicNo}');return false;">
-                            ${htmlNoteTxt}
+                           onclick="showEdit(
+                           event,
+                           '${titleMsg}',
+                           '${noteId}',
+                           '${editors}',
+                           '${note.observation_date}',
+                           '${note.revision}',
+                           '${note.note}',
+                           '${addUrl}${noteId}',
+                           '${param.cmd}',
+                           '${identUrl}',
+                           '${noteIssues}',
+                           '${noteExts}',
+                           '${param.demographicNo}');return false;">
+                            ${fn:escapeXml(note.note)}
                         </a>
                     </c:otherwise>
                 </c:choose>
             </span>
         </li>
     </c:forEach>
+
 
     <!-- Handling remoteNotes -->
     <c:if test="${not empty remoteNotes}">
@@ -128,7 +160,7 @@
                 <a class="links" onmouseover="this.className='linkhover'" onmouseout="this.className='links'"
                    title="${remoteNote.location} by ${remoteNote.providerName} on ${remoteNote.observationDate}"
                    href="javascript:void(0)"
-                   onclick="showIntegratedNote('${titleMsg}', '${remoteNote.note}', '${remoteNote.location}', '${remoteNote.providerName}', '${remoteNote.observationDate}');">
+                   onclick="showIntegratedNote('<%=StringEscapeUtils.escapeJavaScript(titleMsg)%>', '${remoteNote.note}', '${remoteNote.location}', '${remoteNote.providerName}', '${remoteNote.observationDate}');">
                     ${remoteNote.note}
                 </a>
             </li>

@@ -110,6 +110,17 @@ public class CaseManagementEntry2Action extends ActionSupport {
             return null;
         }
         String method = request.getParameter("method");
+        // Check for alternate parameter names used by Struts 2
+        if (method == null) {
+            method = request.getParameter("action");
+        }
+        if (method == null) {
+            method = request.getParameter("dispatch");
+        }
+        if (method == null) {
+            method = request.getParameter("parameterValue");
+        }
+        
         if ("setUpMainEncounter".equals(method)) {
             return setUpMainEncounter();
         } else if ("isNoteEdited".equals(method)) {
@@ -935,13 +946,22 @@ public class CaseManagementEntry2Action extends ActionSupport {
         Set<CaseManagementIssue> issueSet = new HashSet<CaseManagementIssue>();
         Set<CaseManagementNote> noteSet = new HashSet<CaseManagementNote>();
         String[] issue_id = request.getParameterValues("issue_id");
-        CheckBoxBean[] existingCaseIssueList = sessionFrm.getIssueCheckList();
         ArrayList<CheckBoxBean> caseIssueList = new ArrayList<CheckBoxBean>();
-
-        // copy existing issues for sessionfrm
-        for (int idx = 0; idx < existingCaseIssueList.length; ++idx) {
-            caseIssueList.add(existingCaseIssueList[idx]);
+        CheckBoxBean[] existingCaseIssueList = null;
+        
+        if (sessionFrm != null) {
+           existingCaseIssueList = sessionFrm.getIssueCheckList();
         }
+
+
+if (existingCaseIssueList != null) {
+    // copy existing issues for sessionfrm
+    for (CheckBoxBean bean : existingCaseIssueList) {
+        caseIssueList.add(bean);
+    }
+} else {
+    logger.info("No existingCaseIssueList found in session form — proceeding with empty list.");
+}     
 
         // first we check if any notes have been removed
         Set<CaseManagementIssue> noteIssues = note.getIssues();
@@ -3243,6 +3263,7 @@ public class CaseManagementEntry2Action extends ActionSupport {
         String separator = "\n-----[[" + d + "]]-----\n";
         for (CaseManagementIssue issue : issueSet) {
             String code = issue.getIssue().getCode();
+            text = new StringBuilder(); // Reset text for each issue
             if (code.equals("OMeds")) {
                 text.append(cpp.getFamilyHistory());
                 text.append(separator);

@@ -605,17 +605,34 @@
     </div>
     <!-- hovering divs -->
     <div id="showEditNote" class="showEdContent">
-        <form id="frmIssueNotes" action="" method="post"
-              onsubmit="return updateCPPNote();">
-            <input type="hidden" id="reloadUrl" name="reloadUrl" value="">
-            <input type="hidden" id="containerDiv" name="containerDiv" value="">
-            <input type="hidden" id="issueChange" name="issueChange" value="">
-            <input type="hidden" id="archived" name="archived" value="false">
-            <input type="hidden" id="annotation_attrib" name="annotation_attrib">
-            <h3 id="winTitle"></h3>
+    <form id="frmIssueNotes"
+            action=""  
+            method="post"
+            onsubmit="return updateCPPNote();">
 
-            <textarea cols="50" rows="15" id="noteEditTxt"
-                      name="value" class="boxsizingBorder"></textarea>
+    <!-- Injected by your showEdit(...) call -->
+    <input type="hidden"
+           id="containerDiv"
+           name="containerDiv"
+           value="" />
+
+    <input type="hidden"
+           id="reloadUrl"
+           name="reloadUrl"
+           value="" />
+
+    <!-- other fields -->
+    <input type="hidden" id="issueChange" name="issueChange" value="">
+    <input type="hidden" id="archived"    name="archived"    value="false">
+    <input type="hidden" id="annotation_attrib" name="annotation_attrib">
+
+    <h3 id="winTitle"></h3>
+
+            <textarea id="noteEditTxt"
+              name="value"
+              cols="50"
+              rows="15"
+              class="boxsizingBorder"></textarea>
             <br>
 
             <table>
@@ -712,38 +729,70 @@
                 </tr>
             </table>
             <div class="control-panel">
+                <!-- these two should already be present, set by showEdit(...) -->
+                <input type="hidden" id="containerDiv" name="containerDiv" value="${param.containerDiv}"/>
+                <input type="hidden" id="reloadUrl"    name="reloadUrl"    value="${param.reloadUrl}"/>
+
+                <!-- other hidden fields -->
                 <input type="hidden" id="startTag" value='<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.startTime"/>'>
-                <input type="hidden" id="endTag" value='<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.endTime"/>'>
-                <br> <span style="float: right; margin-right: 10px;">
-				<input
-                        type="image"
-                        src="<c:out value="${ctx}/oscarEncounter/graphics/copy.png"/>"
-                        title='<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.btnCopy"/>'
-                        onclick="copyCppToCurrentNote(); return false;"> <input
+                <input type="hidden" id="endTag"   value='<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.endTime"/> '>
+                <input type="hidden" id="issueChange"        name="issueChange"        value=""/>
+                <input type="hidden" id="archived"           name="archived"           value="false"/>
+                <input type="hidden" id="annotation_attrib"  name="annotation_attrib"  value=""/>
+
+                <br>
+                <span style="float: right; margin-right: 10px;">
+                    <!-- Copy -->
+                    <input
                     type="image"
-                    src="<c:out value="${ctx}/oscarEncounter/graphics/annotation.png"/>"
-                    title='<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.btnAnnotation"/>'
-                    id="anno" style="padding-right: 10px;"> <input type="image"
-                                                                   src="<c:out value="${ctx}/oscarEncounter/graphics/edit-cut.png"/>"
-                                                                   title='<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.btnArchive"/>'
-                                                                   onclick="$('archived').value='true';"
-                                                                   style="padding-right: 10px;">
-				<input type="image"
-                       src="<c:out value="${ctx}/oscarEncounter/graphics/note-save.png"/>"
-                       title='<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.btnSignSave"/>'
-                       onclick="$('archived').value='false';" style="padding-right: 10px;">
-				<input type="image"
-                       src="<c:out value="${ctx}/oscarEncounter/graphics/system-log-out.png"/>"
-                       title='<fmt:setBundle basename="oscarResources"/><fmt:message key="global.btnExit"/>'
-                       onclick="this.focus();$('channel').style.visibility ='visible';$('showEditNote').style.display='none';return false;">
-			</span>
+                    src="<c:out value='${ctx}/oscarEncounter/graphics/copy.png'/>"
+                    title="<fmt:message key='oscarEncounter.Index.btnCopy'/>"
+                    onclick="copyCppToCurrentNote(); return false;"
+                    />
+
+                    <!-- Annotation -->
+                    <input
+                    type="image"
+                    src="<c:out value='${ctx}/oscarEncounter/graphics/annotation.png'/>"
+                    title="<fmt:message key='oscarEncounter.Index.btnAnnotation'/>"
+                    id="anno"
+                    style="padding-right: 10px;"
+                    />
+
+                    <!-- Archive -->
+                    <input
+                    type="image"
+                    src="<c:out value='${ctx}/oscarEncounter/graphics/edit-cut.png'/>"
+                    title="<fmt:message key='oscarEncounter.Index.btnArchive'/>"
+                    onclick="document.getElementById('archived').value='true'; return false;"
+                    style="padding-right: 10px;"
+                    />
+
+                    <!-- **Save** (now a true submit) -->
+                    <input
+                    type="image"
+                    src="<c:out value='${ctx}/oscarEncounter/graphics/note-save.png'/>"
+                    title="<fmt:message key='oscarEncounter.Index.btnSignSave'/>"
+                    onclick="document.getElementById('archived').value='false';"
+                    style="padding-right: 10px;"
+                    />
+
+                    <!-- **Cancel** -->
+                    <input
+                    type="image"
+                    src="<c:out value='${ctx}/oscarEncounter/graphics/system-log-out.png'/>"
+                    title="<fmt:message key='global.btnExit'/>"
+                    onclick="document.getElementById('showEditNote').style.display='none'; return false;"
+                    />
+                </span>
+
                 <label for="position">
-                    <fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.btnPosition"/>
+                    <fmt:message key="oscarEncounter.Index.btnPosition"/>
                 </label>
                 <select id="position" name="position">
                     <option id="popt0" value="0">1</option>
                 </select>
-            </div>
+                </div>
             <div id="issueNoteInfo"></div>
             <div id="issueListCPP"
                  style="background-color: #FFFFFF; height: 200px; width: 350px; position: absolute; z-index: 1; display: none; overflow: auto;">
@@ -762,6 +811,19 @@
                     src="<c:out value="${ctx}/oscarEncounter/graphics/busy.gif"/>"
                     alt="<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.Index.btnWorking"/>"></span>
             </div>
+<fmt:setBundle basename="oscarResources"/>
+
+<c:set var="formKey" value="caseManagementEntryForm${demographicNo}" />
+<c:set var="sessionFrm" value="${sessionScope[formKey]}" />
+
+<c:forEach var="checkbox" items="${sessionFrm.issueCheckList}">
+    <input type="checkbox"
+           name="issue_id"
+           value="${checkbox.issue.issue_id}"
+           <c:if test="${checkbox.checked == 'on'}">checked</c:if> />
+    ${checkbox.issue.description}
+</c:forEach>
+
         </form>
     </div>
     <div id="printOps" class="printOps">
