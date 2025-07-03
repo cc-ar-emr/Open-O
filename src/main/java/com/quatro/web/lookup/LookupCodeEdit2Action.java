@@ -139,7 +139,11 @@ public class LookupCodeEdit2Action extends ActionSupport {
             if ("SHL,OGN".indexOf(tableDef.getTableId()) >= 0) {
                 int clientCount = lookupManager.getCountOfActiveClient(tableDef.getTableId().substring(0, 1) + code);
                 if (clientCount > 0)
-                    addActionMessage(getText("error.lookup.client", tableDef.getDescription()));
+                    if (isValidDescription(tableDef.getDescription())) {
+                        addActionMessage(getText("error.lookup.client", tableDef.getDescription()));
+                    } else {
+                        addActionMessage(getText("error.lookup.invalidDescription"));
+                    }
             }
         }
         if (!getActionMessages().isEmpty()) {
@@ -198,5 +202,10 @@ public class LookupCodeEdit2Action extends ActionSupport {
 
     public void setErrMsg(String errMsg) {
         this.errMsg = errMsg;
+    }
+    private boolean isValidDescription(String description) {
+        // Custom validation logic to ensure the description is safe.
+        // For example, check for unexpected characters or patterns.
+        return description != null && description.matches("[a-zA-Z0-9\\s]+");
     }
 }
