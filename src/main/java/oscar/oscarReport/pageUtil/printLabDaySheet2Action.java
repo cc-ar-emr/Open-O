@@ -67,6 +67,9 @@ public class printLabDaySheet2Action extends ActionSupport {
         HashMap parameters = new HashMap();
         parameters.put("input_date", request.getParameter("input_date"));
         String xmlStyleFile = request.getParameter("xmlStyle");
+        if (xmlStyleFile == null || xmlStyleFile.contains("..") || xmlStyleFile.contains("/") || xmlStyleFile.contains("\\")) {
+            throw new IllegalArgumentException("Invalid xmlStyle parameter");
+        }
         ServletOutputStream sos = null;
         InputStream ins = null;
 
