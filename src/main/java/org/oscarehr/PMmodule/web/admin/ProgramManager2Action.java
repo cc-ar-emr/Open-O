@@ -454,7 +454,8 @@ public class ProgramManager2Action extends ActionSupport {
         }
 
         programManager.saveProgramProvider(pp);
-        addActionMessage(getText("program.saved", program.getName()));
+        String sanitizedProgramName = sanitizeInput(program.getName());
+        addActionMessage(getText("program.saved", sanitizedProgramName));
 
         LogAction.log("write", "edit program - assign team", String.valueOf(program.getId()), request);
         this.setProvider(new ProgramProvider());
@@ -1716,5 +1717,12 @@ public class ProgramManager2Action extends ActionSupport {
 
     public void setVacancyOrTemplateId(String vacancyOrTemplateId) {
         this.vacancyOrTemplateId = vacancyOrTemplateId;
+    }
+    private String sanitizeInput(String input) {
+        if (input == null) {
+            return "";
+        }
+        // Remove any potentially dangerous characters or patterns
+        return input.replaceAll("[^a-zA-Z0-9\\s]", "").trim();
     }
 }
