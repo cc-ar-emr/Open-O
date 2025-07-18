@@ -257,10 +257,10 @@
             if (n > 1) {
                 for (i = 0; i < n; i++) {
 
-                    $('#modalItems').append(preventions[i] + "<br>");
+                    $('#modalItems').append($('<div>').text(preventions[i]));
                 }
             } else {
-                $('#modalItems').append(bin.val() + "<br>");
+                $('#modalItems').append($('<div>').text(bin.val()));
             }
         } else {
             $('#modalItems').html("Make all preventions available.");
