@@ -26,7 +26,7 @@
 
 package oscar.oscarSecurity;
 
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.zip.Adler32;
 
 import javax.servlet.http.Cookie;
@@ -35,7 +35,7 @@ public class CookieSecurity {
     public static String providerCookie = "oscprvid";
 
     public Cookie GiveMeACookie(String cookieName) {
-        Random rndGenerator = new Random();
+        SecureRandom rndGenerator = new SecureRandom();
         Adler32 adler32 = new Adler32();
         String cookieVal = "";
         for (int i = 0; i < 32; i++) {

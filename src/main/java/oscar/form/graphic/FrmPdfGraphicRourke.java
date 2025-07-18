@@ -153,8 +153,8 @@ public class FrmPdfGraphicRourke extends FrmPdfGraphic {
 
             MiscUtils.getLogger().debug("sday, eday " + sday + ", " + eday);
 
-            smonth += (sday / startDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-            emonth += (eday / curDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+            smonth += (sday / (float) startDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+            emonth += (eday / (float) curDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 
             //don't forget to add years
             switch (xDateScale) {
@@ -191,8 +191,8 @@ public class FrmPdfGraphicRourke extends FrmPdfGraphic {
 
             if (xyProp.containsKey(String.valueOf(xcoord))) {
                 StringBuilder yvalue = new StringBuilder(xyProp.getProperty(String.valueOf(xcoord)));
-                yvalue = yvalue.append(",");
-                yvalue = yvalue.append(String.valueOf(ycoord));
+                yvalue.append(",");
+                yvalue.append(String.valueOf(ycoord));
                 xyProp.setProperty(String.valueOf(xcoord), yvalue.toString());
             } else {
                 xyProp.setProperty(String.valueOf(xcoord), String.valueOf(ycoord));

@@ -90,6 +90,9 @@ public class MoveMOHFiles2Action extends ActionSupport {
         String filePath = file.getCanonicalPath();
         for(EDTFolder folder : EDTFolder.values()) {
             String edtFolderPath = new File(folder.getPath()).getCanonicalPath();
+            if (!edtFolderPath.endsWith(File.separator)) {
+                edtFolderPath += File.separator;
+            }
             if (filePath.startsWith(edtFolderPath)) {
                 result = true;
             }

@@ -117,7 +117,7 @@ public final class SendingUtils {
         HttpPost httpPost = new HttpPost(url);
         httpPost.setEntity(multipartEntity);
 
-        HttpClient httpClient = getTrustAllHttpClient();
+        HttpClient httpClient = getHttpClient();
         httpClient.getParams().setParameter("http.connection.timeout", CONNECTION_TIME_OUT);
         HttpResponse httpResponse = httpClient.execute(httpPost);
         int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -125,25 +125,9 @@ public final class SendingUtils {
         return (statusCode);
     }
 
-    private static HttpClient getTrustAllHttpClient() {
-        try {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            TrustManager[] temp = new TrustManager[1];
-            temp[0] = new CxfClientUtilsOld.TrustAllManager();
-            sslContext.init(null, temp, null);
-
-            SSLSocketFactory sslSocketFactory = new SSLSocketFactory(sslContext);
-            sslSocketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-            HttpClient httpClient = new DefaultHttpClient();
-            ClientConnectionManager connectionManager = httpClient.getConnectionManager();
-            SchemeRegistry schemeRegistry = connectionManager.getSchemeRegistry();
-            schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
-            return (new DefaultHttpClient(connectionManager, httpClient.getParams()));
-        } catch (Exception e) {
-            logger.error("Unexpected error", e);
-            return (null);
-        }
+    private static HttpClient getHttpClient() {
+        // Use default HttpClient with proper SSL certificate validation
+        return new DefaultHttpClient();
     }
 
     private static byte[] encryptEncryptionKey(SecretKey senderSecretKey, PublicKey receiverOscarKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {

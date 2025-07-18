@@ -232,18 +232,16 @@ public final class MiscUtils {
         }
     }
 
+    /**
+     * @deprecated This method is insecure as it disables SSL certificate validation,
+     * making the application vulnerable to man-in-the-middle attacks. 
+     * Use proper SSL certificate validation instead.
+     */
+    @Deprecated
     public static void setJvmDefaultSSLSocketFactoryAllowAllCertificates() throws NoSuchAlgorithmException, KeyManagementException {
-        TrustAllManager[] tam = new TrustAllManager[]{new TrustAllManager()};
-        SSLContext ctx = SSLContext.getInstance("TLS");
-        ctx.init((KeyManager[]) null, tam, new SecureRandom());
-        SSLSocketFactory sslSocketFactory = ctx.getSocketFactory();
-        HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
-        HostnameVerifier hostNameVerifier = new HostnameVerifier() {
-            public boolean verify(String host, SSLSession sslSession) {
-                return true;
-            }
-        };
-        HttpsURLConnection.setDefaultHostnameVerifier(hostNameVerifier);
+        throw new UnsupportedOperationException("This method has been disabled for security reasons. " +
+            "Disabling SSL certificate validation makes the application vulnerable to man-in-the-middle attacks. " +
+            "Please configure proper SSL certificates or use a secure trust manager implementation.");
     }
 
     public static boolean soundex(String s1, String s2) throws EncoderException {

@@ -1290,7 +1290,7 @@ public class EFormUtil {
         Matcher m_return = null;
         if (StringUtils.isBlank(key) || StringUtils.isBlank(htmlTag)) return m_return;
 
-        Pattern p = Pattern.compile("\\b[^\\s'\"=>]+[ ]*=[ ]*\"[^\"]*\"|\\b[^\\s'\"=>]+[ ]*=[ ]*'[^']*'|\\b[^\\s'\"=>]+[ ]*=[ ]*[^ >]*|\\b[^\\s>]+", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("\\b[^\\s'\"=>]+\\s*=\\s*\"[^\"]*\"|\\b[^\\s'\"=>]+\\s*=\\s*'[^']*'|\\b[^\\s'\"=>]+\\s*=\\s*[^\\s>]*|\\b[^\\s>]+", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(htmlTag);
 
         while (m.find()) {

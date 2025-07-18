@@ -121,8 +121,8 @@ public class CourseManager2Action extends ActionSupport {
             programDao.saveProgram(p);
             result = "Course sucessfully created.";
         } catch (Exception e) {
-            logger.error("Error", e);
-            result = "Error Occured: " + e.getMessage();
+            logger.error("Error creating course", e);
+            result = "Error occurred while creating course. Please contact system administrator.";
         }
 
         response.getWriter().print(result);

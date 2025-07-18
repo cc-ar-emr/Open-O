@@ -318,7 +318,7 @@ public class ClinicaidCommunication {
             }
             in.close();
 
-            Pattern p = Pattern.compile(".*\"nonce\":\"([a-zA-Z0-9-]*)\".*");
+            Pattern p = Pattern.compile("\"nonce\":\"([a-zA-Z0-9-]+)\"");
             Matcher m = p.matcher(output);
 
             if (!m.matches()) {

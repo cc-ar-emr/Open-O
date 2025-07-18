@@ -26,10 +26,10 @@
 
 package org.oscarehr.phr;
 
+import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,7 +58,12 @@ public final class RegistrationHelper {
     private static DemographicDao demographicDao = (DemographicDao) SpringUtils.getBean(DemographicDao.class);
     private static ProviderDao providerDao = (ProviderDao) SpringUtils.getBean(ProviderDao.class);
     private static PropertyDao propertyDao = (PropertyDao) SpringUtils.getBean(PropertyDao.class);
-    private static Random random = new Random();
+    private static final SecureRandom random;
+    
+    static {
+        random = new SecureRandom();
+        random.nextBytes(new byte[1]); // Force seeding
+    }
 
     public static String getDefaultUserName(int demographicId) {
         Demographic demographic = demographicDao.getDemographicById(demographicId);
@@ -101,7 +106,9 @@ public final class RegistrationHelper {
      */
     private static Object getRandomPasswordDigit() {
         // generate 0 to 7, then add 2, this will skip 0 and 1 so there's no ambiguity between 0/O and 1/I/l
-        int i = random.nextInt(6);
+        byte[] randomBytes = new byte[1];
+        random.nextBytes(randomBytes);
+        int i = Math.abs(randomBytes[0]) % 8;
         return (i + 2);
     }
 
@@ -109,7 +116,9 @@ public final class RegistrationHelper {
      * @return a lower case letter excluding i/l,o to prevent ambiguity with 1,0 respectively
      */
     private static char getRandomPasswordLetter() {
-        int i = random.nextInt('z' - 'a');
+        byte[] randomBytes = new byte[1];
+        random.nextBytes(randomBytes);
+        int i = Math.abs(randomBytes[0]) % ('z' - 'a');
         i = i + 'a';
 
         if (i == 'i' || i == 'l' || i == 'o') return (getRandomPasswordLetter());

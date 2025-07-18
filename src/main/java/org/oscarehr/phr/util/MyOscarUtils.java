@@ -27,8 +27,8 @@ package org.oscarehr.phr.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -199,7 +199,8 @@ public final class MyOscarUtils {
      * that's already stored in the db as the password record.
      */
     public static String deterministicallyMangle(String s) {
-        Random random = new Random(s.length());
+        SecureRandom random = new SecureRandom();
+        random.setSeed(s.length());
 
         StringBuilder sb = new StringBuilder();
 

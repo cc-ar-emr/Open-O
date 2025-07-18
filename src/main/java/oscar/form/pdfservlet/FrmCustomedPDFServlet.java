@@ -198,13 +198,12 @@ public class FrmCustomedPDFServlet extends HttpServlet {
                 sos.flush();
             }
         } catch (DocumentException dex) {
+            logger.error("PDF generation failed", dex);
             res.setContentType("text/html");
             PrintWriter writer = res.getWriter();
-            writer.println("Exception from: " + this.getClass().getName() + " " + dex.getClass().getName() + "<br>");
-            writer.println("<pre>");
-            writer.println(dex.getMessage());
-            writer.println("</pre>");
+            writer.println("An error occurred while generating the PDF document. Please contact support if the problem persists.");
         } catch (java.io.FileNotFoundException dex) {
+            logger.error("File not found during PDF generation", dex);
             res.setContentType("text/html");
             PrintWriter writer = res.getWriter();
             writer.println("<script>alert('Signature not found. Please sign the prescription.');</script>");

@@ -596,16 +596,16 @@ public class RxUtil {
                 frequency = changeToStandardFrequencyCode(frequency);
                 String origFrequency = (instructions.substring(matcher.start(), matcher.end())).trim();
 
-                Pattern p2 = Pattern.compile("\\s*\\d*\\.*\\d+\\s+" + origFrequency); //allow to detect decimal number.
+                Pattern p2 = Pattern.compile("\\s*\\d+(?:\\.\\d+)?\\s+" + origFrequency); //allow to detect decimal number.
                 Matcher m2 = p2.matcher(instructions);
 
-                Pattern p4 = Pattern.compile("\\s*\\d*\\.*\\d+-\\s*\\d*\\.*\\d+\\s+" + frequency); //use * after the first \s because "1 OD", 1 doesn't have a space in front.
+                Pattern p4 = Pattern.compile("\\s*\\d+(?:\\.\\d+)?-\\s*\\d+(?:\\.\\d+)?\\s+" + Pattern.quote(frequency)); //use * after the first \s because "1 OD", 1 doesn't have a space in front.
                 Matcher m4 = p4.matcher(instructions);
                 //     p("here11", instructions);
                 //since "\\s+[0-9]+-[0-9]+\\s+" is a case in "\\s+[0-9]+\\s+", check the latter regex first.
                 if (m4.find()) {
                     String str2 = instructions.substring(m4.start(), m4.end());
-                    Pattern p5 = Pattern.compile("\\d*\\.*\\d+-\\s*\\d*\\.*\\d+");
+                    Pattern p5 = Pattern.compile("\\d+(?:\\.\\d*)?-\\s*\\d+(?:\\.\\d*)?");
                     Matcher m5 = p5.matcher(str2);
                     if (m5.find()) {
                         String str3 = str2.substring(m5.start(), m5.end());
@@ -615,7 +615,7 @@ public class RxUtil {
                     }
                 } else if (m2.find()) {
                     String str = instructions.substring(m2.start(), m2.end());
-                    Pattern p3 = Pattern.compile("\\d*\\.*\\d+");
+                    Pattern p3 = Pattern.compile("\\d+(?:\\.\\d+)?");
                     Matcher m3 = p3.matcher(str);
                     //     p("here22", str);
                     if (m3.find()) {
@@ -664,20 +664,20 @@ public class RxUtil {
                 p("must be here");
                 method = instructions.substring(m.start(), m.end());
 
-                Pattern p2 = Pattern.compile(method + "\\s*\\d*\\.*\\d+\\s+");
+                Pattern p2 = Pattern.compile(method + "\\s*\\d+(?:\\.\\d+)?\\s+");
                 Matcher m2 = p2.matcher(instructions);
 
                 Pattern pF1 = Pattern.compile(method + "\\s*\\d*\\/*\\d+\\s+");
                 Matcher mF1 = pF1.matcher(instructions);
 
-                Pattern p4 = Pattern.compile(method + "\\s*\\d*\\.*\\d+-\\s*\\d*\\.*\\d+\\s+");
+                Pattern p4 = Pattern.compile(Pattern.quote(method) + "\\s*\\d+(?:\\.\\d+)?-\\s*\\d+(?:\\.\\d+)?\\s+");
                 Matcher m4 = p4.matcher(instructions);
 
                 //since "\\s+[0-9]+-[0-9]+\\s+" is a case in "\\s+[0-9]+\\s+", check the latter regex first.
                 if (m4.find()) {
                     p("else if 1");
                     String str2 = instructions.substring(m4.start(), m4.end());
-                    Pattern p5 = Pattern.compile("\\d*\\.*\\d+-\\s*\\d*\\.*\\d+");
+                    Pattern p5 = Pattern.compile("\\d+(?:\\.\\d*)?-\\s*\\d+(?:\\.\\d*)?");
                     Matcher m5 = p5.matcher(str2);
                     if (m5.find()) {
                         String str3 = str2.substring(m5.start(), m5.end());
@@ -689,7 +689,7 @@ public class RxUtil {
                     p("if 1");
                     String str = instructions.substring(m2.start(), m2.end());
                     p("str1 ", str);
-                    Pattern p3 = Pattern.compile("\\d*\\.*\\d+");
+                    Pattern p3 = Pattern.compile("\\d+(?:\\.\\d+)?");
                     Matcher m3 = p3.matcher(str);
                     if (m3.find()) {
                         p("found1");
@@ -983,7 +983,7 @@ public class RxUtil {
 
     public static boolean isStringToNumber(String s) {//see if string contains decimal or integer
         boolean retBool = false;
-        Pattern p1 = Pattern.compile("\\d*\\.*\\d+");
+        Pattern p1 = Pattern.compile("\\d+(?:\\.\\d*)?");
         Matcher m1 = p1.matcher(s);
         if (m1.find()) {
             String numStr = s.substring(m1.start(), m1.end());
@@ -1005,7 +1005,7 @@ public class RxUtil {
         }
 
         //remove Qty:num
-        String regex1 = "Qty:\\s*[0-9]*\\.?[0-9]*\\s*";
+        String regex1 = "Qty:\\s*(?:[0-9]+(?:\\.[0-9]+)?|[0-9]*\\.[0-9]+)?\\s*";
         String unitName = rx.getUnitName();
         if (unitName != null && special.indexOf(unitName) != -1) {
             regex1 += "\\Q" + unitName + "\\E";
@@ -1015,7 +1015,7 @@ public class RxUtil {
         special = m.replaceAll("");
 
         //remove Repeats:num from special
-        String regex2 = "Repeats:\\s*[0-9]*\\.?[0-9]*\\s*";
+        String regex2 = "Repeats:\\s*[0-9]+(?:\\.[0-9]+)?\\s*";
         p = Pattern.compile(regex2);
         m = p.matcher(special);
         special = m.replaceAll("");
@@ -1255,21 +1255,21 @@ public class RxUtil {
         Pattern p;
         Matcher m;
         MiscUtils.getLogger().debug("in removeQuantityMitteRepeat s=" + s);
-        String regex2 = "Repeats:\\s*[0-9]*\\.?[0-9]*\\s*";
+        String regex2 = "Repeats:\\s*[0-9]+(?:\\.[0-9]+)?\\s*";
         p = Pattern.compile(regex2);
         m = p.matcher(s);
         s = m.replaceAll("");
         MiscUtils.getLogger().debug("in removeQuantityMitteRepeat regex=" + regex2);
         MiscUtils.getLogger().debug("in removeQuantityMitteRepeat after remove repeat s=" + s);
 
-        String regex1 = "Qty:\\s*[0-9]*\\.?[0-9]*\\s*\\w*";
+        String regex1 = "Qty:\\s*[0-9]+(?:\\.[0-9]+)?\\s*\\w*";
         p = Pattern.compile(regex1);
         m = p.matcher(s);
         s = m.replaceAll("");
         MiscUtils.getLogger().debug("in removeQuantityMitteRepeat regex=" + regex1);
         MiscUtils.getLogger().debug("in removeQuantityMitteRepeat after remove quantity =" + s);
 
-        String regex6 = "Mitte:\\s*[0-9]*\\.?[0-9]*\\s*\\w*";
+        String regex6 = "Mitte:\\s*[0-9]+(?:\\.[0-9]+)?\\s*\\w*";
         p = Pattern.compile(regex6);
         m = p.matcher(s);
         s = m.replaceAll("");
