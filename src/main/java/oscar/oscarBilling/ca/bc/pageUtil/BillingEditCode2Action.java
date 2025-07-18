@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.dao.BillingServiceDao;
 import org.oscarehr.common.model.BillingService;
 import org.oscarehr.util.MiscUtils;
@@ -68,12 +69,12 @@ public final class BillingEditCode2Action extends ActionSupport {
         billingServiceDao.merge(itemCode);
 
         Map map = new HashMap();
-        map.put("id", id);
-        map.put("val", val);
-        map.put("billService", billingServiceDate);
-        map.put("termDate", termDate);
+        map.put("id", StringEscapeUtils.escapeHtml4(id));
+        map.put("val", StringEscapeUtils.escapeHtml4(val));
+        map.put("billService", StringEscapeUtils.escapeHtml4(billingServiceDate));
+        map.put("termDate", StringEscapeUtils.escapeHtml4(termDate));
         JSONObject jsonObject = JSONObject.fromObject(itemCode);  //(JSONObject) JSONSerializer.toJSON(itemCode);//
-        jsonObject = jsonObject.accumulate("id", id);
+        jsonObject = jsonObject.accumulate("id", StringEscapeUtils.escapeHtml4(id));
         MiscUtils.getLogger().debug(jsonObject.toString());
         response.getOutputStream().write(jsonObject.toString().getBytes());
         return null;

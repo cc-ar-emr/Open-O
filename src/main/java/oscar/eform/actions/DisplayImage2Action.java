@@ -167,7 +167,9 @@ public class DisplayImage2Action extends ActionSupport {
             throw new Exception("Could not open file " + file.getName() + " wrong file extension, ", e);
         }
         response.setContentType(contentType);
-        response.setHeader("Content-disposition", "inline; filename=" + fileName);
+        // Sanitize filename to prevent HTTP response splitting attacks
+        String sanitizedFileName = fileName.replaceAll("[\r\n\u0000]", "");
+        response.setHeader("Content-disposition", "inline; filename=" + sanitizedFileName);
 
         InputStream fileStream = new FileInputStream(file);
         return new StreamData(fileStream, contentType);

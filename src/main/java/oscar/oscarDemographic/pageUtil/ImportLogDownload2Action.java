@@ -56,7 +56,13 @@ public class ImportLogDownload2Action extends ActionSupport {
         OutputStream out = response.getOutputStream();
 
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + importLogFile.getName() + "\"");
+        
+        // Sanitize filename to prevent HTTP response splitting
+        String sanitizedFilename = importLogFile.getName()
+            .replaceAll("[\r\n\t]", "") // Remove control characters that could cause header splitting
+            .replaceAll("[\"\\\\]", "_"); // Replace quotes and backslashes that could break the header format
+        
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + sanitizedFilename + "\"");
 
         byte[] buf = new byte[1024];
         int len;

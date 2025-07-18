@@ -41,6 +41,7 @@ import org.oscarehr.managers.SecurityInfoManager;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import oscar.oscarPrevention.reports.FollowupManagement;
 import oscar.util.UtilDateUtilities;
@@ -76,7 +77,7 @@ public class EctAddShortMeasurement2Action extends ActionSupport {
             FollowupManagement fup = new FollowupManagement();
             MiscUtils.getLogger().debug("followUpType:" + followUpType + " followUpValue: " + followUpValue + " demos:" + demos + " providerNo:" + providerNo + " comment:" + comment);
             fup.markFollowupProcedure(followUpType, followUpValue, demos, providerNo, new Date(), comment);
-            response.getWriter().print("id=" + id + "&followupValue=" + followUpValue + "&Date=" + UtilDateUtilities.DateToString(new Date()));
+            response.getWriter().print("id=" + StringEscapeUtils.escapeHtml4(id) + "&followupValue=" + StringEscapeUtils.escapeHtml4(followUpValue) + "&Date=" + UtilDateUtilities.DateToString(new Date()));
         }
         return null;
     }

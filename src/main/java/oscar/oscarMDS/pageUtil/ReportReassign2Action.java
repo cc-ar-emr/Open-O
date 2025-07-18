@@ -207,7 +207,7 @@ public class ReportReassign2Action extends ActionSupport {
                 PrintWriter out = response.getWriter();
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                out.print(jsonResponse);
+                out.print(jsonResponse.toString());
                 out.flush();
             } catch (IOException e) {
                 MiscUtils.getLogger().error("Error with JSON response ", e);

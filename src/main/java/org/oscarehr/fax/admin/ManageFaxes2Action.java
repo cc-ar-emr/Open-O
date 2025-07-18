@@ -226,7 +226,8 @@ public class ManageFaxes2Action extends ActionSupport {
             if (showAs != null && showAs.equals("image")) {
                 outfile = faxManager.getFaxPreviewImage(loggedInInfo, faxFilePath, page);
                 response.setContentType("image/pnsg");
-                response.setHeader("Content-Disposition", "attachment;filename=" + outfile.getFileName().toString());
+                String sanitizedFilename = outfile.getFileName().toString().replaceAll("[\r\n]", "");
+                response.setHeader("Content-Disposition", "attachment;filename=" + sanitizedFilename);
             } else {
                 outfile = Paths.get(faxFilePath);
                 response.setContentType("application/pdf");

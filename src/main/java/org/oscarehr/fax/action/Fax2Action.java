@@ -169,7 +169,8 @@ public class Fax2Action extends ActionSupport {
             if (showAs != null && showAs.equals("image")) {
                 outfile = faxManager.getFaxPreviewImage(loggedInInfo, faxFilePath, page);
                 response.setContentType("image/pnsg");
-                response.setHeader("Content-Disposition", "attachment;filename=" + outfile.getFileName().toString());
+                String sanitizedFilename = sanitizeFilename(outfile.getFileName().toString());
+                response.setHeader("Content-Disposition", "attachment;filename=" + sanitizedFilename);
             } else {
                 outfile = Paths.get(faxFilePath);
                 response.setContentType("application/pdf");
@@ -332,5 +333,16 @@ public class Fax2Action extends ActionSupport {
 
     public void setLetterheadFax(String letterheadFax) {
         this.letterheadFax = letterheadFax;
+    }
+
+    /**
+     * Sanitize filename to prevent HTTP header injection attacks
+     */
+    private String sanitizeFilename(String filename) {
+        if (filename == null) {
+            return "file";
+        }
+        // Remove characters that could be used for header injection
+        return filename.replaceAll("[\\r\\n\\t]", "").trim();
     }
 }

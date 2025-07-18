@@ -69,9 +69,91 @@ public class OscarPingTalk {
     public OscarPingTalk() {
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
             public boolean verify(String urlHostName, SSLSession session) {
-                MiscUtils.getLogger().debug("Warning: URL: " + urlHostName + ", session host "
-                        + session.getPeerHost());
-                return true;
+                try {
+                    // Get the peer certificates
+                    java.security.cert.Certificate[] certs = session.getPeerCertificates();
+                    if (certs.length == 0) {
+                        MiscUtils.getLogger().warn("No peer certificates found for hostname: " + urlHostName);
+                        return false;
+                    }
+                    
+                    // Check if it's an X509 certificate
+                    if (!(certs[0] instanceof java.security.cert.X509Certificate)) {
+                        MiscUtils.getLogger().warn("Certificate is not X509 for hostname: " + urlHostName);
+                        return false;
+                    }
+                    
+                    java.security.cert.X509Certificate x509Cert = (java.security.cert.X509Certificate) certs[0];
+                    
+                    // Check Subject Alternative Names first
+                    java.util.Collection<java.util.List<?>> altNames = x509Cert.getSubjectAlternativeNames();
+                    if (altNames != null) {
+                        for (java.util.List<?> altName : altNames) {
+                            if (altName.size() >= 2) {
+                                Integer type = (Integer) altName.get(0);
+                                String name = (String) altName.get(1);
+                                // Type 2 is DNS name
+                                if (type == 2 && matchesHostname(urlHostName, name)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Check Common Name in subject
+                    String subjectDN = x509Cert.getSubjectX500Principal().getName();
+                    String cn = extractCommonName(subjectDN);
+                    if (cn != null && matchesHostname(urlHostName, cn)) {
+                        return true;
+                    }
+                    
+                    MiscUtils.getLogger().warn("Hostname verification failed for: " + urlHostName + 
+                                             " against certificate subject: " + subjectDN);
+                    return false;
+                    
+                } catch (Exception e) {
+                    MiscUtils.getLogger().error("Error during hostname verification for: " + urlHostName, e);
+                    return false;
+                }
+            }
+            
+            private boolean matchesHostname(String hostname, String certName) {
+                if (hostname == null || certName == null) {
+                    return false;
+                }
+                
+                // Convert to lowercase for comparison
+                hostname = hostname.toLowerCase();
+                certName = certName.toLowerCase();
+                
+                // Exact match
+                if (hostname.equals(certName)) {
+                    return true;
+                }
+                
+                // Wildcard match (*.example.com matches subdomain.example.com)
+                if (certName.startsWith("*.")) {
+                    String domain = certName.substring(2);
+                    return hostname.endsWith("." + domain);
+                }
+                
+                return false;
+            }
+            
+            private String extractCommonName(String subjectDN) {
+                if (subjectDN == null) {
+                    return null;
+                }
+                
+                // Parse CN from subject DN (e.g., "CN=example.com, O=Organization, ...")
+                String[] parts = subjectDN.split(",");
+                for (String part : parts) {
+                    part = part.trim();
+                    if (part.toUpperCase().startsWith("CN=")) {
+                        return part.substring(3);
+                    }
+                }
+                return null;
             }
         });
     }

@@ -95,7 +95,10 @@ public class GenericDownload extends HttpServlet {
             setContentType = contentType;
         }
         res.setContentType(setContentType);
-        res.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
+        
+        // Sanitize filename to prevent HTTP response splitting attacks
+        String sanitizedFilename = filename.replaceAll("[\\r\\n\\t]", "").replaceAll("[^\\w\\.\\-]", "_");
+        res.setHeader("Content-Disposition", "attachment;filename=\"" + sanitizedFilename + "\"");
         File directory = new File(dir);
         File curfile = new File(directory, filename);
         FileInputStream fis = new FileInputStream(curfile);

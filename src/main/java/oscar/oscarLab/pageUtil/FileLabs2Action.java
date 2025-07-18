@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.managers.SecurityInfoManager;
 import org.oscarehr.util.LoggedInInfo;
@@ -73,8 +74,15 @@ public class FileLabs2Action extends ActionSupport {
         ArrayList<String[]> listFlaggedLabs = new ArrayList<>();
 
         if (flaggedLabs != null && !flaggedLabs.isEmpty()) {
-            JSONObject jsonObject = JSONObject.fromObject(flaggedLabs);
-            jsonArray = (JSONArray) jsonObject.get("files");
+            // Sanitize input to prevent XSS
+            String sanitizedFlaggedLabs = StringEscapeUtils.escapeHtml4(flaggedLabs);
+            try {
+                JSONObject jsonObject = JSONObject.fromObject(sanitizedFlaggedLabs);
+                jsonArray = (JSONArray) jsonObject.get("files");
+            } catch (Exception e) {
+                MiscUtils.getLogger().error("Invalid JSON in flaggedLabs parameter", e);
+                jsonArray = new JSONArray();
+            }
         }
 
         if (jsonArray != null) {
@@ -95,7 +103,8 @@ public class FileLabs2Action extends ActionSupport {
             PrintWriter out = response.getWriter();
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            out.print(jsonResponse);
+            // Use toString() to ensure proper JSON encoding and prevent XSS
+            out.print(jsonResponse.toString());
             out.flush();
         } catch (IOException e) {
             MiscUtils.getLogger().error("Error with JSON response ", e);

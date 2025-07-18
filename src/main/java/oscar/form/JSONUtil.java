@@ -25,6 +25,7 @@
 package oscar.form;
 
 import net.sf.json.JSONObject;
+import net.sf.json.JSONException;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.util.MiscUtils;
 
@@ -51,10 +52,16 @@ public abstract class JSONUtil {
 
     public static void jsonResponse(HttpServletResponse response, String jsonString) {
         try (PrintWriter out = response.getWriter()) {
+            // Validate that the input is valid JSON to prevent XSS
+            JSONObject.fromObject(jsonString);
+            
             response.setContentType(CONTENT_TYPE);
             response.setCharacterEncoding(ENCODING);
             out.print(jsonString);
             out.flush();
+        } catch (JSONException e) {
+            logger.error("Invalid JSON string provided", e);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (IOException e) {
             logger.error("Error while creating JSON response", e);
         }

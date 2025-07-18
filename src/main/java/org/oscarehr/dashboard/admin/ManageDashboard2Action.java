@@ -190,7 +190,8 @@ public class ManageDashboard2Action extends ActionSupport {
         if (indicatorName == null || indicatorName.isEmpty()) {
             indicatorName = "indicator_template-" + System.currentTimeMillis() + ".xml";
         } else {
-            indicatorName = indicatorName + ".xml";
+            // Sanitize filename to prevent header injection attacks
+            indicatorName = indicatorName.replaceAll("[\\r\\n\\t]", "").trim() + ".xml";
         }
 
         xmlTemplate = dashboardManager.exportIndicatorTemplate(loggedInInfo, Integer.parseInt(indicator));

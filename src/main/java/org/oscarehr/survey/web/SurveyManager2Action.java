@@ -859,7 +859,14 @@ public class SurveyManager2Action extends ActionSupport {
         }
 
         response.setContentType("text/xml");
-        response.setHeader("Content-disposition", "attachement;filename=" + survey.getSurvey().getName() + ".xml");
+        String sanitizedName = survey.getSurvey().getName()
+            .replaceAll("[\\r\\n\\t]", "") // Remove line breaks and tabs
+            .replaceAll("[^a-zA-Z0-9._-]", "_") // Replace unsafe characters with underscore
+            .trim();
+        if (sanitizedName.isEmpty()) {
+            sanitizedName = "survey";
+        }
+        response.setHeader("Content-disposition", "attachment;filename=" + sanitizedName + ".xml");
         try {
             XmlOptions options = new XmlOptions();
             options.setSavePrettyPrint();

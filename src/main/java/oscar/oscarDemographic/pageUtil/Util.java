@@ -207,7 +207,9 @@ public class Util {
             if (rsp == null) return;
 
             rsp.setContentType("application/octet-stream");
-            rsp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            // Sanitize fileName to prevent HTTP response splitting
+            String sanitizedFileName = fileName.replaceAll("[\r\n]", "");
+            rsp.setHeader("Content-Disposition", "attachment; filename=\"" + sanitizedFileName + "\"");
             InputStream in = new FileInputStream(dirName + fileName);
             OutputStream out = rsp.getOutputStream();
             byte[] buf = new byte[1024];

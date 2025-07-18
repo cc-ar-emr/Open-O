@@ -79,8 +79,10 @@ public class BillingInvoice2Action extends ActionSupport {
 
 
         if (invoiceNo != null) {
+            // Sanitize invoiceNo to prevent header injection attacks
+            String sanitizedInvoiceNo = invoiceNo.replaceAll("[\\r\\n\\t]", "");
             response.setContentType("application/pdf"); // octet-stream
-            response.setHeader("Content-Disposition", "attachment; filename=\"BillingInvoice" + invoiceNo + "_" + UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss") + ".pdf\"");
+            response.setHeader("Content-Disposition", "attachment; filename=\"BillingInvoice" + sanitizedInvoiceNo + "_" + UtilDateUtilities.getToday("yyyy-MM-dd.hh.mm.ss") + ".pdf\"");
             boolean bResult = processPrintPDF(Integer.parseInt(invoiceNo), request.getLocale(), response.getOutputStream());
             if (bResult) {
                 actionResult = "success";

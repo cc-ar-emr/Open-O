@@ -238,12 +238,9 @@ public final class MiscUtils {
         ctx.init((KeyManager[]) null, tam, new SecureRandom());
         SSLSocketFactory sslSocketFactory = ctx.getSocketFactory();
         HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
-        HostnameVerifier hostNameVerifier = new HostnameVerifier() {
-            public boolean verify(String host, SSLSession sslSession) {
-                return true;
-            }
-        };
-        HttpsURLConnection.setDefaultHostnameVerifier(hostNameVerifier);
+        // Use the default hostname verifier for proper security
+        // HttpsURLConnection.setDefaultHostnameVerifier() is not called
+        // to maintain the default secure hostname verification
     }
 
     public static boolean soundex(String s1, String s2) throws EncoderException {

@@ -72,6 +72,8 @@ public class ExportResults2Action extends ActionSupport {
         if (indicatorName == null || indicatorName.isEmpty()) {
             indicatorName = "indicator_data-" + System.currentTimeMillis() + ".csv";
         } else {
+            // Sanitize indicatorName to prevent HTTP response splitting
+            indicatorName = indicatorName.replaceAll("[\\r\\n\\t]", "").replaceAll("[^a-zA-Z0-9._-]", "_");
             indicatorName = indicatorName + System.currentTimeMillis() + ".csv";
         }
 

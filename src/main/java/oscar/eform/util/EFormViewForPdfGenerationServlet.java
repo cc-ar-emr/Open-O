@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.EFormValueDao;
 import org.oscarehr.common.model.EFormValue;
@@ -92,6 +93,7 @@ public final class EFormViewForPdfGenerationServlet extends HttpServlet {
         eForm.setNowDateTime();
 
         response.setContentType("text/html");
-        response.getOutputStream().write(eForm.getFormHtml().getBytes(Charset.forName("UTF-8")));
+        String sanitizedHtml = StringEscapeUtils.escapeHtml4(eForm.getFormHtml());
+        response.getOutputStream().write(sanitizedHtml.getBytes(Charset.forName("UTF-8")));
     }
 }

@@ -43,6 +43,7 @@ import org.oscarehr.util.SpringUtils;
 
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.ServletActionContext;
+import org.apache.commons.text.StringEscapeUtils;
 
 public class UploadEFormAttachment2Action extends ActionSupport {
     HttpServletRequest request = ServletActionContext.getRequest();
@@ -86,7 +87,7 @@ public class UploadEFormAttachment2Action extends ActionSupport {
             ctlDocumentDao.persist(ctlDocument);
 
 
-            String successMsg = "<div id=\"status\">success</div> <div id=\"message\">Uploaded Successfully</div> <div id=\"fileName\">" + docFileName + "</div> <div id=\"docId\">" + document.getId() + "</div>";
+            String successMsg = "<div id=\"status\">success</div> <div id=\"message\">Uploaded Successfully</div> <div id=\"fileName\">" + StringEscapeUtils.escapeHtml4(docFileName) + "</div> <div id=\"docId\">" + document.getId() + "</div>";
             response.getOutputStream().write(successMsg.getBytes());
             response.getOutputStream().flush();
             response.getOutputStream().close();

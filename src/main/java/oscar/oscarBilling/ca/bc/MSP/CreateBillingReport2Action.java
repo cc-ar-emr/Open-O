@@ -291,8 +291,28 @@ public class CreateBillingReport2Action extends ActionSupport {
             mimeType = "application/csv";
         }
         response.setContentType(mimeType);
+        
+        // Sanitize docName to prevent HTTP response splitting
+        String sanitizedDocName = sanitizeFilename(docName);
         response.setHeader("Content-Disposition",
-                "attachment;filename=" + docName + "." + docType);
+                "attachment;filename=" + sanitizedDocName + "." + docType);
+    }
+    
+    /**
+     * Sanitizes filename to prevent HTTP response splitting attacks
+     * 
+     * @param filename String
+     * @return String sanitized filename
+     */
+    private String sanitizeFilename(String filename) {
+        if (filename == null) {
+            return "report";
+        }
+        // Remove or replace characters that could be used for header injection
+        // Remove CR, LF, and other control characters
+        return filename.replaceAll("[\\r\\n\\x00-\\x1f\\x7f-\\x9f]", "")
+                      .replaceAll("[\"\\\\]", "_")  // Replace quotes and backslashes
+                      .trim();
     }
 
 

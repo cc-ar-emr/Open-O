@@ -67,7 +67,10 @@ public class ManageEForm2Action extends ActionSupport {
         MiscUtils.getLogger().debug("fid: " + fid);
         response.setContentType("application/zip");  //octet-stream
         EForm eForm = new EForm(fid, "1");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + eForm.getFormName().replaceAll("\\s", fid) + ".zip\"");
+        String sanitizedFormName = eForm.getFormName().replaceAll("\\s", fid)
+            .replaceAll("[\\r\\n\\t]", "")  // Remove carriage return, newline, tab
+            .replaceAll("[\\x00-\\x1F\\x7F]", "");  // Remove other control characters
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + sanitizedFormName + ".zip\"");
         EFormExportZip eFormExportZip = new EFormExportZip();
         List<EForm> eForms = new ArrayList<EForm>();
         eForms.add(eForm);

@@ -32,6 +32,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.dao.ScratchPadDao;
 import org.oscarehr.common.model.ScratchPad;
 import org.oscarehr.util.MiscUtils;
@@ -108,7 +109,10 @@ public class Scratch2Action extends ActionSupport {
                 }
 
             }
-            response.getWriter().print("id=" + URLEncoder.encode(returnId, "utf-8") + "&text=" + URLEncoder.encode(returnText, "utf-8") + "&windowId=" + URLEncoder.encode(windowId, "utf-8"));
+            String safeReturnId = StringEscapeUtils.escapeHtml4(URLEncoder.encode(returnId, "utf-8"));
+            String safeReturnText = StringEscapeUtils.escapeHtml4(URLEncoder.encode(returnText, "utf-8"));
+            String safeWindowId = StringEscapeUtils.escapeHtml4(URLEncoder.encode(windowId, "utf-8"));
+            response.getWriter().print("id=" + safeReturnId + "&text=" + safeReturnText + "&windowId=" + safeWindowId);
 
         } else {
             MiscUtils.getLogger().error("Scratch pad trying to save data for user " + pNo + " but session user is " + providerNo);
