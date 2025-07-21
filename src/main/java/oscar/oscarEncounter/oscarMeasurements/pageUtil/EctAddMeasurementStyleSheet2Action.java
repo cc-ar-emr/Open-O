@@ -106,11 +106,20 @@ public class EctAddMeasurementStyleSheet2Action extends ActionSupport {
                 uploadPath += "/";
             }
 
-            // Build the full path for the file
-            String destinationPath = uploadPath + fileName;
+            // Validate the fileName to prevent path traversal
+            if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+                throw new IllegalArgumentException("Invalid file name: " + fileName);
+            }
+
+            // Build the full path for the file and ensure it stays within the upload directory
+            Path uploadDir = Paths.get(uploadPath).normalize().toAbsolutePath();
+            Path destinationPath = uploadDir.resolve(fileName).normalize();
+            if (!destinationPath.startsWith(uploadDir)) {
+                throw new IllegalArgumentException("Invalid file path: " + destinationPath);
+            }
 
             // Write the file to the destination
-            Files.copy(new FileInputStream(file), Paths.get(destinationPath));
+            Files.copy(new FileInputStream(file), destinationPath);
 
         } catch (IOException e) {
             MiscUtils.getLogger().error("Error saving file", e);
