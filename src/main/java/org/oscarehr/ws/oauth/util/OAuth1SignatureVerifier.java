@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
-import oscar.login.AppOAuth1Config;
+import org.oscarehr.app.AppOAuth1Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +41,7 @@ public class OAuth1SignatureVerifier {
         // 2) Build the ScribeJava service with our private API class
         OAuth10aService service = new ServiceBuilder(cfg.getConsumerKey())
             .apiSecret(cfg.getConsumerSecret())
-            .build(new GenericApi(cfg.getBaseUrl()));
+            .build(new GenericApi(cfg.getBaseURL()));
 
         // 3) Retrieve the stored token secret
         String tokenSecret = dataProvider.getTokenSecret(token);
@@ -108,22 +108,22 @@ public class OAuth1SignatureVerifier {
      * Private DefaultApi10a implementation, so we don’t need a public helper.
      */
     private static class GenericApi extends DefaultApi10a {
-        private final String baseUrl;
-        GenericApi(String baseUrl) { this.baseUrl = baseUrl; }
+        private final String baseURL;
+        GenericApi(String baseURL) { this.baseURL = baseURL; }
 
         @Override
         public String getRequestTokenEndpoint() {
-            return baseUrl + "/oauth/request_token";
+            return baseURL + "/oauth/request_token";
         }
 
         @Override
         public String getAccessTokenEndpoint() {
-            return baseUrl + "/oauth/access_token";
+            return baseURL + "/oauth/access_token";
         }
 
         @Override
         public String getAuthorizationBaseUrl() {
-            return baseUrl + "/oauth/authorize";
+            return baseURL + "/oauth/authorize";
         }
     }
 }
