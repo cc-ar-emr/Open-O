@@ -33,13 +33,14 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.model.LabPatientPhysicianInfo;
 import org.oscarehr.common.model.LabTestResults;
 import org.oscarehr.common.model.MdsMSH;
 import org.oscarehr.common.model.MdsOBX;
 import org.oscarehr.common.model.MdsZRG;
 import org.oscarehr.common.model.PatientLabRouting;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -345,7 +346,7 @@ public class PatientLabRoutingDaoImpl extends AbstractDaoImpl<PatientLabRouting>
 
         StringBuilder sb = new StringBuilder();
         for (String t : labTypes) {
-            sb.append("'" + StringEscapeUtils.escapeSql(t) + "'");
+            sb.append("'" + SqlEscapeUtil.escapeSql(t) + "'");
         }
 
         String query = "select x from " + this.modelClass.getName() + " x where x.labNo=?1 and x.labType in (" + sb.toString()

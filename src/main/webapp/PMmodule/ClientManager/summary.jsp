@@ -27,7 +27,7 @@
 <%@page import="java.util.List" %>
 <%@page import="oscar.util.DateUtils" %>
 <%@page import="org.oscarehr.PMmodule.model.Program" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.common.model.Admission" %>
 <%@page import="org.oscarehr.common.model.Demographic" %>
 <%@page import="org.oscarehr.PMmodule.model.ClientReferral" %>
@@ -55,7 +55,7 @@
 
 
 <%@page import="org.oscarehr.caisi_integrator.ws.CachedFacility" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 <%@page import="org.oscarehr.caisi_integrator.ws.ConsentState" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@page import="org.oscarehr.util.MiscUtils" %>
@@ -580,7 +580,7 @@
     <tr>
         <td width="20%">CDS : <%=ClientManagerAction.getCdsProgramDisplayString(cdsClientForm)%>
         </td>
-        <td><%=StringEscapeUtils.escapeHtml(DateUtils.formatDateTime(cdsClientForm.getCreated(), request.getLocale()))%>
+        <td><%=StringEscapeUtils.escapeHtml4(DateUtils.formatDateTime(cdsClientForm.getCreated(), request.getLocale()))%>
         </td>
         <td><%=ClientManagerAction.getEscapedProviderDisplay(cdsClientForm.getProviderNo())%>
         </td>
@@ -765,7 +765,7 @@
     <tr>
         <td width="20%"><b>CBI :</b> <%=ClientManagerAction.getCbiProgramDisplayString(cbiForm)%>
         </td>
-        <td><%=StringEscapeUtils.escapeHtml(DateUtils.formatDateTime(cbiForm.getCreated(), request.getLocale()))%>
+        <td><%=StringEscapeUtils.escapeHtml4(DateUtils.formatDateTime(cbiForm.getCreated(), request.getLocale()))%>
         </td>
         <td><%=ClientManagerAction.getEscapedProviderDisplay(cbiForm.getProviderNo())%>
         </td>

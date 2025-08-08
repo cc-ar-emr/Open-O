@@ -43,7 +43,7 @@
 %>
 
 <%@page import="oscar.oscarEncounter.data.*,java.net.*" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 
 <jsp:useBean id="providerBean" class="java.util.Properties"
              scope="session"/>
@@ -202,7 +202,7 @@
                                 <tr>
                                     <td class="TableWithBorder" valign="top" style="text-align: left">
                                         <pre name='enTextarea'
-                                             style="font-size: 8pt;"><%=StringEscapeUtils.escapeHtml(bean.encounter)%></pre>
+                                             style="font-size: 8pt;"><%=StringEscapeUtils.escapeHtml4(bean.encounter)%></pre>
                                     </td>
                                 </tr>
                             </table>

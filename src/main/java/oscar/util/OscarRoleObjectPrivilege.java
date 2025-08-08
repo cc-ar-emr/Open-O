@@ -31,7 +31,7 @@ import java.util.Vector;
 
 import javax.servlet.jsp.PageContext;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.dao.SecObjPrivilegeDao;
 import org.oscarehr.common.model.SecObjPrivilege;
 import org.oscarehr.util.SpringUtils;

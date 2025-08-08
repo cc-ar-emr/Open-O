@@ -37,7 +37,7 @@
 <%@page import="org.oscarehr.myoscar_server.ws.MessageTransfer3" %>
 <%@page import="org.oscarehr.myoscar.utils.MyOscarLoggedInInfo" %>
 <%@page import="oscar.util.DateUtils" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.common.model.Demographic" %>
 <%@page import="org.oscarehr.phr.web.MyOscarMessagesHelper" %>
 <%@page import="org.oscarehr.phr.model.PHRAction" %>
@@ -566,7 +566,7 @@
                             }
                         %>
                         <a href="<%=request.getContextPath()%>/phr/PhrMessage.do?&method=read&comingfrom=viewMessages&messageId=<%=message.getId()%><%=demographicLink%>">
-                            <%=StringEscapeUtils.escapeHtml(senderString)%>
+                            <%=StringEscapeUtils.escapeHtml4(senderString)%>
                         </a>
                         <%
                             if (demographic != null) {
@@ -591,7 +591,7 @@
                                     }
                                 }
                             %>
-                            <%=StringEscapeUtils.escapeHtml(recipientString)%>
+                            <%=StringEscapeUtils.escapeHtml4(recipientString)%>
                             <%
                                 if (demographic != null) {
                             %>
@@ -602,7 +602,7 @@
                     </td>
                     <td bgcolor="#EEEEFF">
                         <a href="<%=request.getContextPath()%>/phr/PhrMessage.do?&method=read&comingfrom=viewMessages&messageId=<%=message.getId()%><%=demographicLink%>">
-                            <%=StringEscapeUtils.escapeHtml(subject)%>
+                            <%=StringEscapeUtils.escapeHtml4(subject)%>
                         </a>
                     </td>
                     <td bgcolor="#EEEEFF">

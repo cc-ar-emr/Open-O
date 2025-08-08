@@ -35,7 +35,7 @@
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@page import="java.text.SimpleDateFormat" %>
 <%@page import="java.util.List" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.common.dao.DrugDao,org.oscarehr.common.model.Drug,org.oscarehr.util.MiscUtils,org.oscarehr.util.SpringUtils,org.oscarehr.PMmodule.dao.ProviderDao,org.oscarehr.common.dao.DemographicDao" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 

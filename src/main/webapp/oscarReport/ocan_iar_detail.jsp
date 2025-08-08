@@ -48,7 +48,7 @@
 <%@page import="org.oscarehr.PMmodule.dao.*" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="java.text.DateFormatSymbols" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.web.*" %>
 
 <%@ include file="/taglibs.jsp" %>

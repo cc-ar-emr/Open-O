@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.oscarehr.common.dao.BatchBillingDAO;
 import org.oscarehr.common.dao.BillingONCHeader1Dao;
 import org.oscarehr.common.model.BatchBilling;

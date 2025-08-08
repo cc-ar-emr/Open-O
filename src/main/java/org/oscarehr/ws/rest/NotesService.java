@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
 
 import com.quatro.dao.security.SecroleDao;
 import com.quatro.model.security.Secrole;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.PMmodule.dao.ProgramAccessDAO;
 import org.oscarehr.PMmodule.dao.ProgramProviderDAO;
@@ -356,7 +356,7 @@ public class NotesService extends AbstractServiceImpl {
         }
 
         String noteTxt = note.getNote();
-        noteTxt = org.apache.commons.lang.StringUtils.trimToNull(noteTxt);
+        noteTxt = org.apache.commons.lang3.StringUtils.trimToNull(noteTxt);
         if (noteTxt == null || noteTxt.equals("")) return null;
 
         caseMangementNote.setNote(noteTxt);
@@ -658,7 +658,7 @@ public class NotesService extends AbstractServiceImpl {
         }
 
         String noteTxt = note.getNote();
-        noteTxt = org.apache.commons.lang.StringUtils.trimToNull(noteTxt);
+        noteTxt = org.apache.commons.lang3.StringUtils.trimToNull(noteTxt);
         if (noteTxt == null || noteTxt.equals("")) return null;
 
         caseMangementNote.setNote(noteTxt);

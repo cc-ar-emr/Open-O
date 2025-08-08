@@ -23,7 +23,7 @@
 
 --%>
 <%@page import="org.oscarehr.util.WebUtils" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="java.util.Calendar" %>
 <%@page import="oscar.util.DateUtils" %>
 <%@page import="org.oscarehr.PMmodule.web.CdsForm4" %>

@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONArray;
 
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.oscarehr.common.dao.AbstractCodeSystemDao;
 import org.oscarehr.common.model.AbstractCodeSystemModel;
 import org.oscarehr.util.SpringUtils;

@@ -27,7 +27,7 @@
 <%@ page import="org.oscarehr.util.SpringUtils" %>
 <%@ page import="org.oscarehr.common.model.Facility" %>
 <%@ page import="org.oscarehr.util.LoggedInInfo" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@ page import="org.caisi.service.InfirmBedProgramManager" %>
 <%@ page import="oscar.util.LabelValueBean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -61,7 +61,7 @@
                         for (LabelValueBean program : programs) {
                             String selected = (Integer.parseInt(program.getValue()) == defaultprogramId) ? " selected=\"selected\" " : "";
                 %>
-                <option value="<%=program.getValue()%>" <%=selected%>><%=StringEscapeUtils.escapeHtml(program.getLabel())%>
+                <option value="<%=program.getValue()%>" <%=selected%>><%=StringEscapeUtils.escapeHtml4(program.getLabel())%>
                 </option>
                 <% }
                 }

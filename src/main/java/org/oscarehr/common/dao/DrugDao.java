@@ -33,7 +33,7 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.NativeSql;
 import org.oscarehr.common.model.Drug;
 import org.oscarehr.util.MiscUtils;

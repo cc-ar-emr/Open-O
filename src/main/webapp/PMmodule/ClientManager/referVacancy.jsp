@@ -38,7 +38,7 @@
     String vacancyId = request.getParameter("vacancyId");
 %>
 
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 <%@page import="org.oscarehr.util.WebUtils" %>
 <script>
 

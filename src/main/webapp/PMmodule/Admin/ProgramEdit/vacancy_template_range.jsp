@@ -24,7 +24,7 @@
 
 --%>
 
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.PMmodule.model.VacancyTemplate" %>
 <%@page import="org.oscarehr.PMmodule.model.Criteria" %>
 <%@page import="org.oscarehr.PMmodule.model.CriteriaType" %>

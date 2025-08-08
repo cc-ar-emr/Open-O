@@ -25,8 +25,8 @@
 package org.oscarehr.common.web;
 
 import com.opensymphony.xwork2.ActionSupport;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.struts2.ServletActionContext;
 import org.oscarehr.common.dao.DemographicArchiveDao;
@@ -39,12 +39,15 @@ import org.oscarehr.managers.SecurityInfoManager;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
-import oscar.form.JSONUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 
@@ -245,8 +248,9 @@ public class Demographic2Action extends ActionSupport {
 
             }
 
-            response.getWriter().print(JSONArray.fromObject(items));
-
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(items);
+            response.getWriter().print(json);
         }
 
 
@@ -263,13 +267,16 @@ public class Demographic2Action extends ActionSupport {
         List<Demographic> duplicateList = demographicDao.getDemographicWithLastFirstDOBExact(lastName, firstName,
                 yearOfBirth, monthOfBirth, dayOfBirth);
 
-        JSONObject result = new JSONObject();
-        result.put("hasDuplicates", false);
-        if (duplicateList.size() > 0) {
-            result.put("hasDuplicates", true);
-        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("hasDuplicates", !duplicateList.isEmpty());
 
-        JSONUtil.jsonResponse(response, JSONObject.fromObject(result));
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        try {
+            new ObjectMapper().writeValue(response.getWriter(), result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return null;
     }

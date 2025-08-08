@@ -30,7 +30,7 @@
 <%@page import="org.oscarehr.PMmodule.service.VacancyTemplateManager" %>
 <%@page import="org.oscarehr.PMmodule.model.Program" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="java.util.List" %>
 <%@ include file="/taglibs.jsp" %>
 

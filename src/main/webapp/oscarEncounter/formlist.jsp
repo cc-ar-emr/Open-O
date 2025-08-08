@@ -24,6 +24,7 @@
 
 --%>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
+<%@page import="org.oscarehr.util.SqlEscapeUtil" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <%@ taglib uri="/WEB-INF/security.tld" prefix="security" %>
@@ -127,7 +128,7 @@
                 for (int j = 0; j < forms.length; j++) {
                     EctFormData.Form frm = forms[j];
                     String table = frm.getFormTable();
-                    table = org.apache.commons.lang.StringEscapeUtils.escapeSql(table);
+                    table = org.oscarehr.util.SqlEscapeUtil.escapeSql(table);
 
                     EctFormData.PatientForm[] pforms;
                     if (table.length() == 0) {

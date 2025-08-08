@@ -40,7 +40,7 @@
 %>
 
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 <%@page import="org.oscarehr.PMmodule.caisi_integrator.CaisiIntegratorManager" %>
 <%@page import="org.oscarehr.caisi_integrator.ws.CachedFacility" %>
 <%@page import="java.util.List" %>

@@ -24,7 +24,7 @@
 
 --%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="java.util.List, org.apache.commons.lang.StringUtils" %>
+<%@ page import="java.util.List, org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.oscarehr.common.web.Contact2Action" %>
 <%@ page import="org.oscarehr.util.SpringUtils" %>
 <%@ page import="org.oscarehr.common.model.Provider" %>

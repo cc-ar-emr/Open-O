@@ -32,7 +32,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.model.Clinic;
 import org.oscarehr.common.model.Demographic;

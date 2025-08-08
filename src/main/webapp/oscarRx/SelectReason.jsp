@@ -34,7 +34,7 @@
         import="org.oscarehr.common.dao.DxresearchDAO,org.oscarehr.common.model.Dxresearch,org.oscarehr.common.dao.Icd9Dao,org.oscarehr.common.model.Icd9" %>
 <%@ page import="org.oscarehr.util.MiscUtils" %>
 <%@page import="org.oscarehr.managers.CodingSystemManager" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%
     CodingSystemManager codingSystemManager = SpringUtils.getBean(CodingSystemManager.class);
 %>
@@ -301,9 +301,9 @@
                                         <td>
                                             <%
                                                 String descr = codingSystemManager.getCodeDescription(drugReason.getCodingSystem(), drugReason.getCode());
-                                                descr = org.apache.commons.lang.StringUtils.trimToEmpty(descr);
+                                                descr = org.apache.commons.lang3.StringUtils.trimToEmpty(descr);
                                             %>
-                                            <%=StringEscapeUtils.escapeHtml(descr) %>
+                                            <%=StringEscapeUtils.escapeHtml4(descr) %>
                                         </td>
                                         <td><%=drugReason.getComments() %>
                                         </td>

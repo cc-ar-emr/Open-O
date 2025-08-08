@@ -30,9 +30,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.util.Log;
-import org.opensaml.xml.signature.P;
+import org.opensaml.xmlsec.signature.Signature;
 import org.oscarehr.common.dao.EFormDao;
 import org.oscarehr.common.dao.EncounterFormDao;
 import org.oscarehr.common.dao.ProviderPreferenceDao;

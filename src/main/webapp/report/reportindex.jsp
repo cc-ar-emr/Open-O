@@ -39,7 +39,7 @@
     }
 %>
 
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%
     String country = request.getLocale().getCountry();
 

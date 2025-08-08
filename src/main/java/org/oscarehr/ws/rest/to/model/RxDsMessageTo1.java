@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.oscarehr.util.MiscUtils;
 
 

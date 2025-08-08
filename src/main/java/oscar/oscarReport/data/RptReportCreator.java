@@ -36,9 +36,10 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.oscarehr.util.MiscUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import oscar.login.DBHelp;
 
@@ -57,7 +58,7 @@ public final class RptReportCreator {
             String caption = DBHelp.getString(rs, "caption");
             ret.append((ret.length() < 8 ? " " : ", ") + DBHelp.getString(rs, "table_name") + "." + DBHelp.getString(rs, "name"));
             if (caption != null && caption.length() > 0) {
-                ret.append(" as '" + StringEscapeUtils.escapeSql(DBHelp.getString(rs, "caption")) + "'");
+                ret.append(" as '" + SqlEscapeUtil.escapeSql(DBHelp.getString(rs, "caption")) + "'");
             }
         }
         rs.close();

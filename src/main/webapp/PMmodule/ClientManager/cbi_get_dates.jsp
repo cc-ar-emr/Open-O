@@ -32,7 +32,7 @@
 <%@page import="org.oscarehr.PMmodule.model.ClientReferral" %>
 <%@page import="org.oscarehr.PMmodule.dao.ClientReferralDAO" %>
 <%@page import="java.util.List" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 
 <% AdmissionDao admissionDao = (AdmissionDao) SpringUtils.getBean(AdmissionDao.class);
     String currentDemographicId = (String) request.getParameter("demographicId");

@@ -98,7 +98,7 @@
 <%@page
         import="oscar.oscarEncounter.oscarMeasurements.*,oscar.oscarResearch.oscarDxResearch.bean.*,oscar.util.*" %>
 <%@page
-        import="oscar.eform.*, org.apache.commons.lang.StringEscapeUtils" %>
+        import="oscar.eform.*, org.apache.commons.text.StringEscapeUtils" %>
 
 <% java.util.Properties oscarVariables = oscar.OscarProperties.getInstance(); %>
 
@@ -289,7 +289,7 @@
            for(int j=0; j<bean.templateNames.size(); j++) {
               String encounterTmp = bean.templateNames.get(j);
               encounterTmp = StringUtils.maxLenString(encounterTmp, MaxLen, TruncLen, ellipses);
-              encounterTmp = StringEscapeUtils.escapeJavaScript(encounterTmp);
+              encounterTmp = StringEscapeUtils.escapeEcmaScript(encounterTmp);
             %>
             autoCompleted["<%=encounterTmp%>"] = "ajaxInsertTemplate('<%=encounterTmp%>')";
             autoCompList.push("<%=encounterTmp%>");

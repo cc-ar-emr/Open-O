@@ -35,9 +35,9 @@
 package oscar.oscarLab.ca.all.upload;
 
 import org.apache.logging.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
 import org.oscarehr.util.MiscUtils;
 import oscar.oscarLab.ca.all.upload.handlers.DefaultHandler;
 import oscar.oscarLab.ca.all.upload.handlers.MessageHandler;

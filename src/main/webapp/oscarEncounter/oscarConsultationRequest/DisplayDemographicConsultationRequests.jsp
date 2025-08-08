@@ -46,7 +46,7 @@
 
 <%@page
         import="oscar.oscarEncounter.pageUtil.*,oscar.oscarEncounter.data.*" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 
 <%
     String demo = request.getParameter("de");

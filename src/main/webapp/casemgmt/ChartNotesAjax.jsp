@@ -32,7 +32,7 @@
 <%@page import="java.util.Enumeration" %>
 <%@page import="oscar.oscarEncounter.pageUtil.NavBarDisplayDAO" %>
 <%@page import="java.util.Arrays,java.util.Properties,java.util.List,java.util.Set,java.util.ArrayList,java.util.Enumeration,java.util.HashSet,java.util.Iterator,java.text.SimpleDateFormat,java.util.Calendar,java.util.Date,java.text.ParseException" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.common.model.UserProperty,org.oscarehr.casemgmt.model.*,org.oscarehr.casemgmt.service.* " %>
 <%@page import="org.oscarehr.casemgmt.web.formbeans.*" %>
 <%@page import="org.oscarehr.PMmodule.model.*" %>
@@ -298,7 +298,7 @@
                 }
             }
 
-            noteStr = StringEscapeUtils.escapeHtml(noteStr);
+            noteStr = StringEscapeUtils.escapeHtml4(noteStr);
             // for remote notes, the full text is always shown.
             fulltxt = fullTxtFormat.get(pos) || note.getRemoteFacilityId() != null;
             --pos;
@@ -587,7 +587,7 @@
             } else if (note.isInvoice()) {
                 String winName = "invoice" + demographicNo;
                 int hash = Math.abs(winName.hashCode());
-                String url = "popupPage(700,800,'" + hash + "','" + request.getContextPath() + StringEscapeUtils.escapeHtml(((NoteDisplayNonNote) note).getLinkInfo()) + "'); return false;";
+                String url = "popupPage(700,800,'" + hash + "','" + request.getContextPath() + StringEscapeUtils.escapeHtml4(((NoteDisplayNonNote) note).getLinkInfo()) + "'); return false;";
             %>
             <div class="view-links"
                  style="<%=(note.isDocument()||note.isCpp()||note.isEformData()||note.isEncounterForm()||note.isInvoice())?(bgColour):""%>">
@@ -607,7 +607,7 @@
                 String url = "popupPage(700,800,'"
                         + hash + "started" + "','"
                         + request.getContextPath()
-                        + StringEscapeUtils.escapeHtml("/form/forwardshortcutname.do?formname=" + formEntry.getNote())
+                        + StringEscapeUtils.escapeHtml4("/form/forwardshortcutname.do?formname=" + formEntry.getNote())
                         + "&demographic_no=" + demographicNo
                         + "&formId=" + formEntry.getNoteId()
                         + "'); return false;";
@@ -946,7 +946,7 @@
 
     <%if (!bean.oscarMsg.equals(""))
              {%>
-    $(caseNote).value += "\n\n<%=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(bean.oscarMsg)%>";
+    $(caseNote).value += "\n\n<%=org.apache.commons.text.StringEscapeUtils.escapeEcmaScript(bean.oscarMsg)%>";
     <%bean.reason = "";
                  bean.oscarMsg = "";
              }
@@ -955,7 +955,7 @@
              {
                  String noteBody = request.getParameter("noteBody");
                  noteBody = noteBody.replaceAll("<br>|<BR>", "\n");%>
-    $(caseNote).value += "\n\n<%=org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(noteBody)%>";
+    $(caseNote).value += "\n\n<%=org.apache.commons.text.StringEscapeUtils.escapeEcmaScript(noteBody)%>";
     <%}
 
              if (found != true)
@@ -997,7 +997,7 @@
 			{
 				String encounterTmp = bean.templateNames.get(j);
 				encounterTmp = oscar.util.StringUtils.maxLenString(encounterTmp, MaxLen, TruncLen, ellipses);
-				encounterTmp = org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(encounterTmp);%>
+				encounterTmp = org.apache.commons.text.StringEscapeUtils.escapeEcmaScript(encounterTmp);%>
     autoCompleted["<%=encounterTmp%>"] = "ajaxInsertTemplate('<%=encounterTmp%>')";
     autoCompList.push("<%=encounterTmp%>");
     itemColours["<%=encounterTmp%>"] = "99CCCC";
@@ -1067,7 +1067,7 @@
             encounterText = "\n[" + apptDate + " .: " + reason + "]\n";
         }
 
-        encounterText = org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(encounterText);
+        encounterText = org.apache.commons.text.StringEscapeUtils.escapeEcmaScript(encounterText);
         return encounterText;
     }
 

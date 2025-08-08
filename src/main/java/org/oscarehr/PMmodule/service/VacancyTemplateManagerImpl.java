@@ -31,8 +31,8 @@ package org.oscarehr.PMmodule.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.PMmodule.dao.CriteriaDao;
 import org.oscarehr.PMmodule.dao.CriteriaSelectionOptionDao;
 import org.oscarehr.PMmodule.dao.CriteriaTypeDao;

@@ -27,7 +27,7 @@ package org.oscarehr.rx.dispensary;
 import java.util.Date;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 public class LotBean {
 

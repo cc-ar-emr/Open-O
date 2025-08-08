@@ -338,7 +338,7 @@ public class CaseManagementEntryFormBean {
     }
 
     public String getTrimmedNoteText() {
-        return org.apache.commons.lang.StringUtils.trimToNull(this.getCaseNote_note());
+        return org.apache.commons.lang3.StringUtils.trimToNull(this.getCaseNote_note());
     }
 
     public Integer getHourOfEncounterTime() {

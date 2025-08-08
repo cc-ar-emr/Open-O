@@ -23,7 +23,7 @@
 
 package org.oscarehr.PMmodule.web.adapter;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.PMmodule.model.Intake;
 import org.oscarehr.PMmodule.model.IntakeNode;
 

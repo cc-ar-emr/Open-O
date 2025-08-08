@@ -47,8 +47,8 @@ import java.util.TreeMap;
 
 import javax.persistence.PersistenceException;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -79,6 +79,7 @@ import org.oscarehr.integration.hl7.generators.HL7A04Generator;
 import org.oscarehr.util.DbConnectionFilter;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.oscarehr.ws.rest.to.model.DemographicSearchRequest;
 import org.oscarehr.ws.rest.to.model.DemographicSearchRequest.SEARCHMODE;
 import org.oscarehr.ws.rest.to.model.DemographicSearchRequest.SORTMODE;
@@ -1864,13 +1865,13 @@ public class DemographicDaoImpl extends HibernateDaoSupport implements Applicati
 
         if (bean.getFirstName() != null && bean.getFirstName().length() > 0) {
             firstName = bean.getFirstName();
-            // firstName = StringEscapeUtils.escapeSql(firstName);
+            // firstName = SqlEscapeUtil.escapeSql(firstName);
             firstNameL = firstName + "%";
         }
 
         if (bean.getLastName() != null && bean.getLastName().length() > 0) {
             lastName = bean.getLastName();
-            // lastName = StringEscapeUtils.escapeSql(lastName);
+            // lastName = SqlEscapeUtil.escapeSql(lastName);
             lastNameL = lastName + "%";
         }
 
@@ -2000,13 +2001,13 @@ public class DemographicDaoImpl extends HibernateDaoSupport implements Applicati
 
         if (bean.getFirstName() != null && bean.getFirstName().length() > 0) {
             firstName = bean.getFirstName();
-            firstName = StringEscapeUtils.escapeSql(firstName);
+            firstName = SqlEscapeUtil.escapeSql(firstName);
             firstNameL = "%" + firstName + "%";
         }
 
         if (bean.getLastName() != null && bean.getLastName().length() > 0) {
             lastName = bean.getLastName();
-            lastName = StringEscapeUtils.escapeSql(lastName);
+            lastName = SqlEscapeUtil.escapeSql(lastName);
             lastNameL = "%" + lastName + "%";
         }
 

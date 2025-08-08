@@ -28,7 +28,7 @@ package org.oscarehr.sharingcenter.util;
 
 import java.io.StringReader;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;

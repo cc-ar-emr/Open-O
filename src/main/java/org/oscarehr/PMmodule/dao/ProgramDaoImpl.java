@@ -29,11 +29,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.PMmodule.model.Program;
 import org.oscarehr.common.dao.AbstractDaoImpl;
 import org.oscarehr.util.MiscUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
@@ -465,7 +466,7 @@ public class ProgramDaoImpl extends AbstractDaoImpl<Program> implements ProgramD
         List<Predicate> predicates = new ArrayList<>();
 
         if (program.getName() != null && !program.getName().isEmpty()) {
-            String programName = StringEscapeUtils.escapeSql(program.getName());
+            String programName = SqlEscapeUtil.escapeSql(program.getName());
 
             // Create SOUNDEX expression for the program name
             Expression<String> soundexProgramName = cb.function("SOUNDEX", String.class, cb.literal(programName));
@@ -572,7 +573,7 @@ public class ProgramDaoImpl extends AbstractDaoImpl<Program> implements ProgramD
 
         // Filter by name
         if (program.getName() != null && !program.getName().isEmpty()) {
-            String programName = StringEscapeUtils.escapeSql(program.getName());
+            String programName = SqlEscapeUtil.escapeSql(program.getName());
             // Create SOUNDEX expression for the program name
             Expression<String> soundexProgramName = cb.function("SOUNDEX", String.class, cb.literal(programName));
             Expression<String> soundexName = cb.function("SOUNDEX", String.class, root.get("name"));

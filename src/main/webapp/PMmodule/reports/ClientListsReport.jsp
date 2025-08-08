@@ -26,7 +26,7 @@
 <%@page import="org.oscarehr.PMmodule.model.*" %>
 <%@page import="org.oscarehr.PMmodule.dao.*" %>
 <%@page import="org.oscarehr.common.dao.*" %>
-<%@page import="org.apache.commons.lang.time.*" %>
+<%@page import="org.apache.commons.lang3.time.*" %>
 <%@ include file="/taglibs.jsp" %>
 
 <div class="h4">

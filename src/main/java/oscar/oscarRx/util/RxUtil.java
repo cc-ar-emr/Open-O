@@ -1298,7 +1298,7 @@ public class RxUtil {
             p("else2");
             if (rx.getBrandName() != null && rx.getBrandName().length() > 1) {
                 p("if2");
-                //String sql2 = "SELECT * FROM drugs WHERE BN='" + StringEscapeUtils.escapeSql(rx.getBrandName()) + "' order by written_date desc"; //most recent is the first.
+                //String sql2 = "SELECT * FROM drugs WHERE BN='" + SqlEscapeUtil.escapeSql(rx.getBrandName()) + "' order by written_date desc"; //most recent is the first.
 
                 Drug drug = dao.findByBrandNameDemographicAndProvider(rx.getBrandName(), rx.getDemographicNo(), rx.getProviderNo());
 

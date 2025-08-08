@@ -47,7 +47,7 @@ import javax.ws.rs.core.MediaType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.app.AppOAuth1Config;
 import org.oscarehr.app.OAuth1Utils;

@@ -26,7 +26,7 @@
 
 package org.oscarehr.ws.transfer_objects;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.oscarehr.common.model.Demographic;
 import org.springframework.beans.BeanUtils;
 

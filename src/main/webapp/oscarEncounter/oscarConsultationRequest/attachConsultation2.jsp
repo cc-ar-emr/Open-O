@@ -39,7 +39,7 @@
         import="java.math.*, java.util.*, java.io.*, java.sql.*, oscar.*, oscar.util.*, java.net.*,oscar.MyDateFormat, oscar.oscarEncounter.oscarConsultationRequest.pageUtil.ConsultationAttachDocs" %>
 <%@ page import="oscar.oscarLab.ca.on.*" %>
 <%@ page import="oscar.oscarLab.ca.all.Hl7textResultsData" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.util.SessionConstants" %>
 <%@ page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="org.oscarehr.hospitalReportManager.dao.HRMDocumentDao" %>
@@ -325,7 +325,7 @@
                                 String onClick = "";
 
                                 if (curDoc.isPDF()) {
-                                    onClick = "javascript:previewPDF('" + curDoc.getDocId() + "','" + StringEscapeUtils.escapeJavaScript(url) + "');";
+                                    onClick = "javascript:previewPDF('" + curDoc.getDocId() + "','" + StringEscapeUtils.escapeEcmaScript(url) + "');";
                                 } else if (curDoc.isImage()) {
                                     onClick = "javascript:previewImage('" + url + "');";
                                 } else {

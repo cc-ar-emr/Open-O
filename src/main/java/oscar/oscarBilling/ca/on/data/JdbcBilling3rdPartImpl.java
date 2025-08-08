@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.billing.CA.ON.model.Billing3rdPartyAddress;
 import org.oscarehr.common.dao.Billing3rdPartyAddressDao;
 import org.oscarehr.common.dao.BillingONExtDao;
@@ -36,6 +36,7 @@ import org.oscarehr.common.dao.BillingPaymentTypeDao;
 import org.oscarehr.common.model.BillingONExt;
 import org.oscarehr.common.model.BillingPaymentType;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.oscarehr.common.dao.ClinicDAO;
 import org.oscarehr.common.model.Clinic;
 
@@ -96,14 +97,14 @@ public class JdbcBilling3rdPartImpl {
     // 3rd bill ins. address
     public int addOne3rdAddrRecord(Properties val) {
         Billing3rdPartyAddress b = new Billing3rdPartyAddress();
-        b.setAttention(StringEscapeUtils.escapeSql(val.getProperty("attention", "")));
-        b.setCompanyName(StringEscapeUtils.escapeSql(val.getProperty("company_name", "")));
-        b.setAddress(StringEscapeUtils.escapeSql(val.getProperty("address", "")));
-        b.setCity(StringEscapeUtils.escapeSql(val.getProperty("city", "")));
-        b.setProvince(StringEscapeUtils.escapeSql(val.getProperty("province", "")));
-        b.setPostalCode(StringEscapeUtils.escapeSql(val.getProperty("postcode", "")));
-        b.setTelephone(StringEscapeUtils.escapeSql(val.getProperty("telephone", "")));
-        b.setFax(StringEscapeUtils.escapeSql(val.getProperty("fax", "")));
+        b.setAttention(SqlEscapeUtil.escapeSql(val.getProperty("attention", "")));
+        b.setCompanyName(SqlEscapeUtil.escapeSql(val.getProperty("company_name", "")));
+        b.setAddress(SqlEscapeUtil.escapeSql(val.getProperty("address", "")));
+        b.setCity(SqlEscapeUtil.escapeSql(val.getProperty("city", "")));
+        b.setProvince(SqlEscapeUtil.escapeSql(val.getProperty("province", "")));
+        b.setPostalCode(SqlEscapeUtil.escapeSql(val.getProperty("postcode", "")));
+        b.setTelephone(SqlEscapeUtil.escapeSql(val.getProperty("telephone", "")));
+        b.setFax(SqlEscapeUtil.escapeSql(val.getProperty("fax", "")));
 
         dao.persist(b);
 
@@ -131,14 +132,14 @@ public class JdbcBilling3rdPartImpl {
         BillingONExt b = new BillingONExt();
         b.setBillingNo(Integer.parseInt(billingNo));
         b.setDemographicNo(Integer.parseInt(demoNo));
-        b.setKeyVal(StringEscapeUtils.escapeSql(key));
+        b.setKeyVal(SqlEscapeUtil.escapeSql(key));
         b.setDateTime(new Date());
         b.setStatus(ACTIVE.toCharArray()[0]);
 
         if (value == null && extDao.isNumberKey(key)) {
             value = "0.00";
         }
-        b.setValue(StringEscapeUtils.escapeSql(value));
+        b.setValue(SqlEscapeUtil.escapeSql(value));
 
         extDao.persist(b);
 
@@ -147,7 +148,7 @@ public class JdbcBilling3rdPartImpl {
 
     public boolean keyExists(String billingNo, String key) {
         List<BillingONExt> results = extDao.findByBillingNoAndKey(Integer.parseInt(billingNo),
-                StringEscapeUtils.escapeSql(key));
+                SqlEscapeUtil.escapeSql(key));
         if (results.isEmpty())
             return false;
         return true;
@@ -155,7 +156,7 @@ public class JdbcBilling3rdPartImpl {
 
     public boolean updateKeyStatus(String billingNo, String key, String status) {
         List<BillingONExt> results = extDao.findByBillingNoAndKey(Integer.parseInt(billingNo),
-                StringEscapeUtils.escapeSql(key));
+                SqlEscapeUtil.escapeSql(key));
         for (BillingONExt result : results) {
             result.setStatus(status.toCharArray()[0]);
             extDao.merge(result);
@@ -168,9 +169,9 @@ public class JdbcBilling3rdPartImpl {
      */
     public boolean updateKeyValue(String billingNo, String key, String value) {
         List<BillingONExt> results = extDao.findByBillingNoAndKey(Integer.parseInt(billingNo),
-                StringEscapeUtils.escapeSql(key));
+                SqlEscapeUtil.escapeSql(key));
         for (BillingONExt result : results) {
-            result.setValue(StringEscapeUtils.escapeSql(value));
+            result.setValue(SqlEscapeUtil.escapeSql(value));
             result.setStatus('1');
             extDao.merge(result);
         }

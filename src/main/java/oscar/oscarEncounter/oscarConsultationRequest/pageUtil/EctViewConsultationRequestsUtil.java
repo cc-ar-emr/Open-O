@@ -31,7 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.oscarehr.PMmodule.dao.ProviderDao;
 import org.oscarehr.common.dao.ConsultationRequestDao;
 import org.oscarehr.common.dao.ConsultationRequestExtDao;

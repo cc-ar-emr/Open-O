@@ -41,7 +41,7 @@
 
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@ page
-        import="org.apache.commons.lang.StringUtils,org.apache.commons.lang.StringEscapeUtils,java.util.*,oscar.oscarReport.data.*,oscar.util.*,oscar.oscarDB.*,java.sql.*,oscar.oscarDemographic.data.*,oscar.eform.*,org.oscarehr.common.model.Provider,org.oscarehr.managers.ProviderManager2,org.oscarehr.util.SpringUtils" %>
+        import="org.apache.commons.lang3.StringUtils,org.apache.commons.text.StringEscapeUtils,java.util.*,oscar.oscarReport.data.*,oscar.util.*,oscar.oscarDB.*,java.sql.*,oscar.oscarDemographic.data.*,oscar.eform.*,org.oscarehr.common.model.Provider,org.oscarehr.managers.ProviderManager2,org.oscarehr.util.SpringUtils" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 
@@ -169,7 +169,7 @@
                                     }
                                 %>
 
-                        ><%=StringEscapeUtils.escapeHtml(provider.getFormattedName())%>
+                        ><%=StringEscapeUtils.escapeHtml4(provider.getFormattedName())%>
                         </option>
                         <%
                             }

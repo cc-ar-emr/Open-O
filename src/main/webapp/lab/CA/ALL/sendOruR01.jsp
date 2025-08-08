@@ -45,7 +45,7 @@
 <%@page import="org.oscarehr.common.model.ProfessionalSpecialist" %>
 <%@page import="org.oscarehr.common.model.Demographic" %>
 <%@page import="org.oscarehr.common.Gender" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <html>
 <head>
     <title>Send eData</title>

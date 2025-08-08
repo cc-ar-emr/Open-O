@@ -33,7 +33,7 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.model.LabPatientPhysicianInfo;
 import org.oscarehr.common.model.LabTestResults;
 import org.oscarehr.common.model.MdsMSH;

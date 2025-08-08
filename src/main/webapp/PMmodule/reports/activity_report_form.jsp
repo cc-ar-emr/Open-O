@@ -37,7 +37,7 @@
 <%@page import="org.oscarehr.common.dao.FunctionalCentreDao" %>
 <%@page import="org.oscarehr.common.model.FunctionalCentre" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 
 
 <%
@@ -68,7 +68,7 @@
                     <%
                         for (FunctionalCentre functionalCentre : functionalCentres) {
                     %>
-                    <option value="<%=functionalCentre.getAccountId()%>"><%=functionalCentre.getAccountId() + ", " + StringEscapeUtils.escapeHtml(functionalCentre.getDescription())%>
+                    <option value="<%=functionalCentre.getAccountId()%>"><%=functionalCentre.getAccountId() + ", " + StringEscapeUtils.escapeHtml4(functionalCentre.getDescription())%>
                     </option>
                     <%
                         }

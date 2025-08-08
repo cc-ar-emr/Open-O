@@ -31,7 +31,7 @@ import java.util.List;
 
 import javax.persistence.TypedQuery;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.PMmodule.model.AccessType;
 import org.oscarehr.PMmodule.model.ProgramAccess;

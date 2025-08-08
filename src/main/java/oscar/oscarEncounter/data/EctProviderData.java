@@ -25,7 +25,7 @@
 
 package oscar.oscarEncounter.data;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.oscarehr.PMmodule.dao.ProviderDao;
 import org.oscarehr.util.SpringUtils;
 

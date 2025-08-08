@@ -25,7 +25,7 @@ package org.oscarehr.PMmodule.web;
 
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.dao.CdsClientFormDao;
 import org.oscarehr.common.dao.CdsClientFormDataDao;
 import org.oscarehr.common.model.CdsClientForm;

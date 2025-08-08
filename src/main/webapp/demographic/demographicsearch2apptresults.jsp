@@ -53,8 +53,8 @@
 <%@page import="org.oscarehr.caisi_integrator.ws.CachedProvider" %>
 <%@page import="org.oscarehr.caisi_integrator.ws.FacilityIdStringCompositePk" %>
 <%@page import="org.oscarehr.PMmodule.caisi_integrator.CaisiIntegratorManager" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="oscar.util.DateUtils" %>
 <%@page import="org.oscarehr.caisi_integrator.ws.DemographicTransfer" %>
 <%@page import="org.oscarehr.caisi_integrator.ws.MatchingDemographicTransferScore" %>

@@ -56,7 +56,7 @@
 <%@page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%@page import="org.oscarehr.common.model.Site" %>
 
-<%@ page import="org.apache.commons.lang.StringEscapeUtils,oscar.oscarProvider.data.ProviderBillCenter" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils,oscar.oscarProvider.data.ProviderBillCenter" %>
 
 <%@ page import="org.oscarehr.util.SpringUtils" %>
 <%@ page import="org.oscarehr.common.model.Provider" %>

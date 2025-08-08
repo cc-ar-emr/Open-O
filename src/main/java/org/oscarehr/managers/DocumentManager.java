@@ -40,7 +40,7 @@ import java.util.List;
 
 import com.itextpdf.text.DocumentException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.oscarehr.common.dao.*;

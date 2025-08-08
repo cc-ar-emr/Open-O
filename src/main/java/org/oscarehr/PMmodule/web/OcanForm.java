@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.oscarehr.PMmodule.dao.ClientReferralDAO;
 import org.oscarehr.PMmodule.model.ClientReferral;
 import org.oscarehr.common.dao.AdmissionDao;
@@ -392,7 +392,7 @@ public class OcanForm {
         else sb.append(DateFormatUtils.ISO_DATE_FORMAT.format(admission.getDischargeDate()));
         sb.append(" )");
 
-        return (StringEscapeUtils.escapeHtml(sb.toString()));
+        return (StringEscapeUtils.escapeHtml4(sb.toString()));
     }
 
 
@@ -415,7 +415,7 @@ public class OcanForm {
 
         sb.append("<option value=\"\">Select an answer</option>");
         for (OcanFormOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
             //String lengthLimitedEscapedName=limitLengthAndEscape(option.getOcanDataCategoryName());
             String selected = null;
             if (!clientForm)
@@ -423,7 +423,7 @@ public class OcanForm {
             else
                 selected = (OcanStaffFormData.containsAnswer(existingClientAnswers, option.getOcanDataCategoryValue()) ? "selected=\"selected\"" : "");
 
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
         }
 
         return (sb.toString());
@@ -446,14 +446,14 @@ public class OcanForm {
 
         sb.append("<option value=\"\">Select an answer</option>");
         for (OcanConnexOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOrgName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOrgName());
 
             String selected = null;
 
             //selected=(OcanStaffFormData.containsAnswer(existingStaffAnswers, option.getOrgName())?"selected=\"selected\"":"");
-            //sb.append("<option "+selected+" value=\""+StringEscapeUtils.escapeHtml(option.getOrgName())+"\" title=\""+htmlEscapedName+"\">"+htmlEscapedName+"</option>");
+            //sb.append("<option "+selected+" value=\""+StringEscapeUtils.escapeHtml4(option.getOrgName())+"\" title=\""+htmlEscapedName+"\">"+htmlEscapedName+"</option>");
             selected = String.valueOf(option.getId()).equalsIgnoreCase(actualOrgName) ? "selected=\"selected\"" : "";
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(String.valueOf(option.getId())) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(String.valueOf(option.getId())) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
         }
 
         return (sb.toString());
@@ -476,7 +476,7 @@ public class OcanForm {
 
         sb.append("<option value=\"\">Select an answer</option>");
         for (OcanConnexOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getProgramName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getProgramName());
 
             String selected = null;
             if (!clientForm)
@@ -484,7 +484,7 @@ public class OcanForm {
             else
                 selected = (OcanStaffFormData.containsAnswer(existingClientAnswers, option.getProgramName()) ? "selected=\"selected\"" : "");
 
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(option.getProgramName()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(option.getProgramName()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
         }
 
         return (sb.toString());
@@ -516,10 +516,10 @@ public class OcanForm {
         StringBuilder sb = new StringBuilder();
 
         for (Integer key : optionsMap.keySet()) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(optionsMap.get(key));
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(optionsMap.get(key));
             String selected = (OcanStaffFormData.containsAnswer(existingAnswers, optionsMap.get(key)) ? "selected=\"selected\"" : "");
 
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(optionsMap.get(key)) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(optionsMap.get(key)) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
 
         }
 
@@ -535,11 +535,11 @@ public class OcanForm {
         StringBuilder sb = new StringBuilder();
 
         for (OcanFormOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
             //String lengthLimitedEscapedName=limitLengthAndEscape(option.getOcanDataCategoryName());
             String selected = province.equals(option.getOcanDataCategoryValue()) ? "selected=\"selected\"" : "";
 
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
         }
 
         return (sb.toString());
@@ -553,11 +553,11 @@ public class OcanForm {
         StringBuilder sb = new StringBuilder();
 
         for (OcanFormOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
             //String lengthLimitedEscapedName=limitLengthAndEscape(option.getOcanDataCategoryName());
             String selected = assessmentStatus.equals(option.getOcanDataCategoryValue()) ? "selected=\"selected\"" : "";
 
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
         }
 
         return (sb.toString());
@@ -583,11 +583,11 @@ public class OcanForm {
                 }
             }
 
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
             //String lengthLimitedEscapedName=limitLengthAndEscape(option.getOcanDataCategoryName());
             String selected = (OcanStaffFormData.containsAnswer(existingAnswers, option.getOcanDataCategoryValue()) ? "selected=\"selected\"" : "");
 
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
         }
 
         return (sb.toString());
@@ -609,7 +609,7 @@ public class OcanForm {
         StringBuilder sb = new StringBuilder();
         sb.append("<option value=\"\">Select an answer</option>");
         for (OcanFormOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
             //String lengthLimitedEscapedName=limitLengthAndEscape(option.getOcanDataCategoryName());
             String selected = "";
             if (!useDefaultValue)
@@ -620,7 +620,7 @@ public class OcanForm {
                 }
             }
 
-            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
+            sb.append("<option " + selected + " value=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "\" title=\"" + htmlEscapedName + "\">" + htmlEscapedName + "</option>");
         }
 
         return (sb.toString());
@@ -756,11 +756,11 @@ public class OcanForm {
         StringBuilder sb = new StringBuilder();
 
         for (OcanFormOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
             //String lengthLimitedEscapedName=limitLengthAndEscape(option.getOcanDataCategoryName());
             String checked = (OcanStaffFormData.containsAnswer(existingAnswers, option.getOcanDataCategoryValue()) ? "checked=\"checked\"" : "");
 
-            sb.append("<div title=\"" + htmlEscapedName + "\"><input type=\"checkBox\" " + checked + " name=\"" + question + "\" value=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "\" /> " + htmlEscapedName + "</div>");
+            sb.append("<div title=\"" + htmlEscapedName + "\"><input type=\"checkBox\" " + checked + " name=\"" + question + "\" value=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "\" /> " + htmlEscapedName + "</div>");
         }
 
         return (sb.toString());
@@ -811,10 +811,10 @@ public class OcanForm {
     }
 
     public static void renderSingleCheckbox(OcanFormOption option, StringBuilder sb, String question, List<OcanStaffFormData> existingAnswers) {
-        String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+        String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
         String checked = (OcanStaffFormData.containsAnswer(existingAnswers, option.getOcanDataCategoryValue()) ? "checked=\"checked\"" : "");
 
-        sb.append("<div title=\"" + htmlEscapedName + "\"><input type=\"checkBox\" " + checked + " name=\"" + question + "\" value=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "\" /> " + htmlEscapedName + "</div>");
+        sb.append("<div title=\"" + htmlEscapedName + "\"><input type=\"checkBox\" " + checked + " name=\"" + question + "\" value=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "\" /> " + htmlEscapedName + "</div>");
     }
 
     public static String renderAsHiddenField(Integer ocanStaffFormId, String question, int prepopulationLevel) {
@@ -873,7 +873,7 @@ public class OcanForm {
 		sb.append("<tr><td></td><td>Past 6 Months</td><td>Ever</td></tr>");
 		for (OcanFormOption option : options)
 		{
-			String htmlEscapedName=StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+			String htmlEscapedName=StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
 			String value = option.getOcanDataCategoryValue(); //drug id
 			
 			List<OcanStaffFormData> freqMnthAnswer = getStaffAnswers(ocanStaffFormId, value+"_freq_6months", prepopulationLevel);
@@ -882,7 +882,7 @@ public class OcanForm {
 			String checked2=((freqMnthAnswer.size()>0)?"checked=\"checked\"":"");
 			String checked3=((freqEverAnswer.size()>0)?"checked=\"checked\"":"");
 				
-			sb.append("<tr><td>"+htmlEscapedName+"</td><td><input drugfreq=\"true\" type=\"checkBox\" "+checked2+" name=\""+StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue())+"_freq_6months\" value=\"true\" /></td><td><input drugfreq=\"true\" type=\"checkBox\" "+checked3+" name=\""+StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue())+"_freq_ever\" value=\true\" /></td></tr>");
+			sb.append("<tr><td>"+htmlEscapedName+"</td><td><input drugfreq=\"true\" type=\"checkBox\" "+checked2+" name=\""+StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue())+"_freq_6months\" value=\"true\" /></td><td><input drugfreq=\"true\" type=\"checkBox\" "+checked3+" name=\""+StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue())+"_freq_ever\" value=\true\" /></td></tr>");
 		}
 		
 		sb.append(renderAsDrugInjectionCheckBoxOptions(ocanStaffFormId,question,options,prepopulationLevel,clientForm));
@@ -920,7 +920,7 @@ public class OcanForm {
         sb.append("<table width=\"100%\">");
         sb.append("<tr><td></td><td>Past 6 Months</td><td>Ever</td></tr>");
         for (OcanFormOption option : options) {
-            String htmlEscapedName = StringEscapeUtils.escapeHtml(option.getOcanDataCategoryName());
+            String htmlEscapedName = StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryName());
             String value = option.getOcanDataCategoryValue(); //drug id
 
             List<OcanStaffFormData> freqMnthAnswer = getStaffAnswers(ocanStaffFormId, value + "_freq_6months", prepopulationLevel);
@@ -937,7 +937,7 @@ public class OcanForm {
 				checked3=((data.getAnswer().equals("6"))?"checked":"");
 			}	
 			*/
-            sb.append("<tr><td>" + htmlEscapedName + "</td><td><input type=\"checkbox\" " + checked2 + " id=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "_freq_6months\" name=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "_freq_6months\" value=\"5\" /></td><td><input type=\"checkbox\" " + checked3 + " id=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "_freq_ever\" name=\"" + StringEscapeUtils.escapeHtml(option.getOcanDataCategoryValue()) + "_freq_ever\" value=\"6\" /></td></tr>");
+            sb.append("<tr><td>" + htmlEscapedName + "</td><td><input type=\"checkbox\" " + checked2 + " id=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "_freq_6months\" name=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "_freq_6months\" value=\"5\" /></td><td><input type=\"checkbox\" " + checked3 + " id=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "_freq_ever\" name=\"" + StringEscapeUtils.escapeHtml4(option.getOcanDataCategoryValue()) + "_freq_ever\" value=\"6\" /></td></tr>");
         }
 
         sb.append(renderAsDrugInjectionCheckBoxOptions(ocanStaffFormId, question, options, prepopulationLevel, clientForm));

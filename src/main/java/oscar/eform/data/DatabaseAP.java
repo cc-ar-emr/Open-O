@@ -28,7 +28,9 @@ package oscar.eform.data;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
+
+import org.oscarehr.util.SqlEscapeUtil;
 
 public class DatabaseAP {
     private String apName;
@@ -169,7 +171,7 @@ public class DatabaseAP {
         if (inSql) sql = dbap.getApInSQL();
         else sql = dbap.getApSQL();
 
-        var = StringEscapeUtils.escapeSql(var);
+        var = SqlEscapeUtil.escapeSql(var);
 
         sql = DatabaseAP.parserReplace(name, var, sql);
 

@@ -49,7 +49,7 @@ import org.oscarehr.util.MiscUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import oscar.util.UtilDateUtilities;
 
 public interface OscarAppointmentDao extends AbstractDao<Appointment> {

@@ -26,7 +26,7 @@
 package org.oscarehr.phr.web;
 
 import com.opensymphony.xwork2.ActionSupport;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.oscarehr.PMmodule.caisi_integrator.ConformanceTestHelper;

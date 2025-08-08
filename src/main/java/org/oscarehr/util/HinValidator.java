@@ -22,7 +22,7 @@
  */
 package org.oscarehr.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class HinValidator {
     /**

@@ -25,7 +25,7 @@
 --%>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@page import="org.oscarehr.casemgmt.web.formbeans.CaseManagementEntryFormBean, org.oscarehr.common.model.Facility" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.PMmodule.model.Program" %>
 <%@page import="org.oscarehr.PMmodule.dao.ProgramDao" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>

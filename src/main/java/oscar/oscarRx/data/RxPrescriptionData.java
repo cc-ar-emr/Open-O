@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.DrugDao;
 import org.oscarehr.common.dao.FavoriteDao;
@@ -46,6 +46,7 @@ import org.oscarehr.common.model.IndivoDocs;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import oscar.oscarProvider.data.ProSignatureData;
 import oscar.oscarRx.util.RxUtil;
@@ -1636,7 +1637,7 @@ public class RxPrescriptionData {
             if (getSpecial() == null || getSpecial().length() < 6)
                 logger.warn("drug special appears to be null or empty : " + getSpecial());
 
-            String escapedSpecial = StringEscapeUtils.escapeSql(this.getSpecial());
+            String escapedSpecial = SqlEscapeUtil.escapeSql(this.getSpecial());
 
             if (escapedSpecial == null || escapedSpecial.length() < 6)
                 logger.warn("drug special after escaping appears to be null or empty : " + escapedSpecial);

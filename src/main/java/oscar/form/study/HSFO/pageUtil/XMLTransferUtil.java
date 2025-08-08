@@ -28,6 +28,7 @@ package oscar.form.study.HSFO.pageUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -164,10 +165,13 @@ import noNamespace.HsfoHbpsDataDocument.HsfoHbpsData.Site.SitePatient.TxtPostalC
 import noNamespace.HsfoHbpsDataDocument.HsfoHbpsData.Site.SitePatient.TxtSurname;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.Logger;
 import org.apache.xmlbeans.XmlCalendar;
 import org.apache.xmlbeans.XmlException;
@@ -1433,9 +1437,9 @@ public class XMLTransferUtil {
         userId = userId.replaceAll("&", "&amp;");
         passwd = passwd.replaceAll("&", "&amp;");
 
-        PostMethod post = new PostMethod(defaultweb);
-        post.setRequestHeader("SOAPAction", actionString);
-        post.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+        HttpPost post = new HttpPost(defaultweb);
+        post.setHeader("SOAPAction", actionString);
+        post.setHeader("Content-Type", "text/xml; charset=utf-8");
 
         String soapMsg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><soap-env:Envelope xmlns:soap-env=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
                 + "<soap-env:Header/><soap-env:Body><UploadToCDV xmlns=\""
@@ -1455,42 +1459,41 @@ public class XMLTransferUtil {
                 + "</FileAsBinary>"
                 + "</UploadToCDV></soap-env:Body></soap-env:Envelope>";
 
-        RequestEntity re = new StringRequestEntity(soapMsg, "text/xml", "utf-8");
+        StringEntity entity = new StringEntity(soapMsg, "UTF-8");
+        entity.setContentType("text/xml");
+        post.setEntity(entity);
 
-        post.setRequestEntity(re);
-
-        HttpClient httpclient = new HttpClient();
         // Execute request
-        try {
-            int result = httpclient.executeMethod(post);
-            // Display status code
+        try (CloseableHttpClient httpclient = HttpClients.createDefault();
+            CloseableHttpResponse response = httpclient.execute(post)) {
+
+            int result = response.getStatusLine().getStatusCode();
 
             if (result != 200) {
-                ArrayList rList = new ArrayList();
-                rList.add(new Integer(result).toString());
+                ArrayList<String> rList = new ArrayList<>();
+                rList.add(Integer.toString(result));
                 rList.add("Fail to upload patient data to " + soaplink);
                 return rList;
-
             }
-            String rsXml = post.getResponseBodyAsString();
+
+            String rsXml = null;
+            HttpEntity responseEntity = response.getEntity();
+            if (responseEntity != null) {
+                rsXml = EntityUtils.toString(responseEntity, StandardCharsets.UTF_8);
+            }
 
             int p = rsXml.indexOf("<UploadToCDVResult>");
             int q = rsXml.indexOf("</UploadToCDVResult>");
-            String code = rsXml
-                    .substring(p + "<UploadToCDVResult>".length(), q);
+            String code = rsXml.substring(p + "<UploadToCDVResult>".length(), q);
 
             p = rsXml.indexOf("<MessageForResult>");
             q = rsXml.indexOf("</MessageForResult>");
-            String message = rsXml.substring(p + "<MessageForResult>".length(),
-                    q);
+            String message = rsXml.substring(p + "<MessageForResult>".length(), q);
 
-            ArrayList reList = new ArrayList();
+            ArrayList<String> reList = new ArrayList<>();
             reList.add(code);
             reList.add(message);
             return reList;
-        } finally {
-            // Release current connection to the connection pool
-            post.releaseConnection();
         }
     }
 

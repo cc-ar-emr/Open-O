@@ -34,7 +34,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.dao.DemographicCustDao;
 import org.oscarehr.common.model.Demographic;
 import org.oscarehr.common.model.DemographicCust;

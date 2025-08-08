@@ -16,7 +16,7 @@
 <%@ page errorPage="../appointment/errorpage.jsp"
          import="java.util.*, oscar.oscarReport.data.*" %>
 <%@ page import="oscar.login.*" %>
-<%@ page import="org.apache.commons.lang.*" %>
+<%@ page import="org.apache.commons.lang3.*" %>
 <%
     String reportId = request.getParameter("id") != null ? request.getParameter("id") : "0";
     String tableName = request.getParameter("tableName") != null ? request.getParameter("tableName") : "";
@@ -118,8 +118,8 @@
                             String fieldCaption = "";
                             String action = " Add ";
                             if (strTemp.length > 1) {
-                                fieldName = StringEscapeUtils.escapeHtml(strTemp[1]);
-                                fieldCaption = StringEscapeUtils.escapeHtml(strTemp[0].trim());
+                                fieldName = StringEscapeUtils.escapeHtml4(strTemp[1]);
+                                fieldCaption = StringEscapeUtils.escapeHtml4(strTemp[0].trim());
                             }
                             if (fieldCaption.length() > 1) {
                                 color = "gold";

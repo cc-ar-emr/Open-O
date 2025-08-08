@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.dao.MeasurementDao;
 import org.oscarehr.common.dao.OscarAppointmentDao;
 import org.oscarehr.common.model.Appointment;
@@ -132,7 +132,7 @@ public class MeasurementData2Action extends ActionSupport {
             Measurement value = measurementMap.get(key);
             if ((freshMap.get(key) == null) || (freshMap.get(key) != null && value.getAppointmentNo() == Integer.parseInt(appointmentNo))) {
                 //script.append("jQuery(\"[measurement='"+key+"']\").val(\""+value.getDataField().replace("\n", "\\n")+"\").attr({itemtime: \"" + value.getCreateDate().getTime() + "\", appointment_no: \"" + value.getAppointmentNo() + "\"});\n");
-                script.append("jQuery(\"[measurement='" + key + "']\").val(\"" + StringEscapeUtils.escapeJavaScript(value.getDataField()) + "\").attr({itemtime: \"" + value.getCreateDate().getTime() + "\", appointment_no: \"" + value.getAppointmentNo() + "\"});\n");
+                script.append("jQuery(\"[measurement='" + key + "']\").val(\"" + StringEscapeUtils.escapeEcmaScript(value.getDataField()) + "\").attr({itemtime: \"" + value.getCreateDate().getTime() + "\", appointment_no: \"" + value.getAppointmentNo() + "\"});\n");
                 if (apptNo > 0 && apptNo == value.getAppointmentNo()) {
                     script.append("jQuery(\"[measurement='" + key + "']\").addClass('examfieldwhite');\n");
                 }

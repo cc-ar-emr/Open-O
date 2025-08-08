@@ -1,6 +1,6 @@
 <%@page import="org.oscarehr.util.WebUtils"%>
 <%@page import="org.oscarehr.util.WebUtils"%>
-<%@page import="org.apache.commons.lang.StringEscapeUtils"%>
+<%@page import="org.apache.commons.text.StringEscapeUtils"%>
 
 <%@ include file="/taglibs.jsp"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" scope="request"/>
@@ -72,7 +72,7 @@
 					for (String error : errors)
 					{
 						%>
-							<li><%=StringEscapeUtils.escapeHtml(error)%></li>
+							<li><%=StringEscapeUtils.escapeHtml4(error)%></li>
 						<%
 					}
 				%>

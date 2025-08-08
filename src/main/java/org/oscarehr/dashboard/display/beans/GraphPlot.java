@@ -24,7 +24,7 @@
  */
 package org.oscarehr.dashboard.display.beans;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 public class GraphPlot {
 

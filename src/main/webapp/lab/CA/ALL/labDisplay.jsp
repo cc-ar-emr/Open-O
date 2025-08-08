@@ -34,7 +34,7 @@
 <%@ page import="org.oscarehr.common.model.PatientLabRouting" %>
 <%@ page import="org.oscarehr.myoscar.utils.MyOscarLoggedInInfo" %>
 <%@ page import="java.net.URLEncoder" %>
-<%@ page import="org.apache.commons.lang.builder.ReflectionToStringBuilder" %>
+<%@ page import="org.apache.commons.lang3.builder.ReflectionToStringBuilder" %>
 <%@ page import="org.oscarehr.util.MiscUtils" %>
 <%@ page import="org.w3c.dom.Document" %>
 <%@ page import="org.oscarehr.caisi_integrator.ws.CachedDemographicLabResult" %>
@@ -55,7 +55,7 @@
 <%@ page import="org.oscarehr.common.model.MeasurementMap, org.oscarehr.common.dao.MeasurementMapDao" %>
 <%@ page import="org.oscarehr.common.model.Tickler" %>
 <%@ page import="org.oscarehr.managers.TicklerManager" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page
         import="org.oscarehr.casemgmt.service.CaseManagementManager, org.oscarehr.common.dao.Hl7TextMessageDao, org.oscarehr.common.model.Hl7TextMessage,org.oscarehr.common.dao.Hl7TextInfoDao,org.oscarehr.common.model.Hl7TextInfo" %>
 <jsp:useBean id="oscarVariables" class="java.util.Properties" scope="session"/>

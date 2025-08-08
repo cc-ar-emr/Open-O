@@ -32,9 +32,10 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.model.Contact;
 import org.oscarehr.util.MiscUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -60,7 +61,7 @@ public class ContactDaoImpl extends AbstractDaoImpl<Contact> implements ContactD
                 paramList.add(temp[0] + "%");
             }
         } else {
-            where.append("c." + StringEscapeUtils.escapeSql(searchMode) + " like ?1");
+            where.append("c." + SqlEscapeUtil.escapeSql(searchMode) + " like ?1");
             paramList.add(keyword + "%");
         }
         String sql = "SELECT c from Contact c where " + where.toString() + " order by " + orderBy;

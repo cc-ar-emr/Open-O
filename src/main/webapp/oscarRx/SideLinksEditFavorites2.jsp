@@ -28,7 +28,7 @@
 <%@page import="oscar.oscarRx.data.RxPatientData" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="org.oscarehr.managers.CodingSystemManager" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.casemgmt.service.CaseManagementManager" %>
 <%@page import="org.oscarehr.casemgmt.model.Issue" %>
 <%@page import="org.oscarehr.casemgmt.model.CaseManagementNote" %>
@@ -96,7 +96,7 @@
 
                 if (codeDescr != null) {
         %>
-        <p class="PropSheetMenuItemLevel1"><%=StringEscapeUtils.escapeHtml(codeDescr)%>
+        <p class="PropSheetMenuItemLevel1"><%=StringEscapeUtils.escapeHtml4(codeDescr)%>
         </p>
         <%
                 }
@@ -120,7 +120,7 @@
                 if (!note.isLocked() && !note.isArchived()) {
 
         %>
-        <p class="PropSheetMenuItemLevel1"><%=StringEscapeUtils.escapeHtml(note.getNote()) %>
+        <p class="PropSheetMenuItemLevel1"><%=StringEscapeUtils.escapeHtml4(note.getNote()) %>
         </p>
         <%
                 }

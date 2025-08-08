@@ -26,7 +26,7 @@
 
 package oscar.oscarEncounter.pageUtil;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.documentManager.EDoc;
 import org.oscarehr.documentManager.EDocUtil;
 import org.oscarehr.documentManager.EDocUtil.EDocSort;
@@ -132,12 +132,12 @@ public class EctDisplayPhotosAction extends EctDisplayAction {
                 if (inboxflag) {
                     String path = oscar.util.plugin.IsPropertiesOn.getProperty("DOCUMENT_DIR");
                     url = "popupPage(700,800,'" + hash + "', '" + request.getContextPath() +
-                            "/mod/docmgmtComp/FillARForm.do?method=showInboxDocDetails&path=" + path + "&demoNo=" + bean.demographicNo + "&name=" + StringEscapeUtils.escapeJavaScript(dispFilename) + "');";
+                            "/mod/docmgmtComp/FillARForm.do?method=showInboxDocDetails&path=" + path + "&demoNo=" + bean.demographicNo + "&name=" + StringEscapeUtils.escapeEcmaScript(dispFilename) + "');";
                 }
                 item.setLinkTitle(title + serviceDateStr);
                 item.setTitle(title);
                 key = StringUtils.maxLenString(curDoc.getDescription(), MAX_LEN_KEY, CROP_LEN_KEY, ELLIPSES) + "(" + serviceDateStr + ")";
-                key = StringEscapeUtils.escapeJavaScript(key);
+                key = StringEscapeUtils.escapeEcmaScript(key);
 
                 if (inboxflag) {
                     if (!EDocUtil.getDocReviewFlag(dispDocNo))

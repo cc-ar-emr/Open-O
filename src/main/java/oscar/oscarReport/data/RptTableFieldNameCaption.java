@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.EncounterFormDao;
 import org.oscarehr.common.dao.ReportTableFieldCaptionDao;
@@ -44,6 +44,7 @@ import org.oscarehr.common.model.EncounterForm;
 import org.oscarehr.common.model.ReportTableFieldCaption;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import oscar.login.DBHelp;
 
@@ -63,7 +64,7 @@ public class RptTableFieldNameCaption {
     public boolean insertOrUpdateRecord() {
         boolean ret;
         String sql = "select id from reportTableFieldCaption where table_name = '"
-                + StringEscapeUtils.escapeSql(table_name) + "' and name='" + StringEscapeUtils.escapeSql(name) + "'";
+                + SqlEscapeUtil.escapeSql(table_name) + "' and name='" + SqlEscapeUtil.escapeSql(name) + "'";
         try {
             ResultSet rs = DBHelp.searchDBRecord(sql);
             if (rs.next()) {
@@ -119,7 +120,7 @@ public class RptTableFieldNameCaption {
     public Properties getNameCaptionProp(String tableName) {
         Properties ret = new Properties();
         String sql = "select name, caption from reportTableFieldCaption where table_name = '"
-                + StringEscapeUtils.escapeSql(tableName) + "'";
+                + SqlEscapeUtil.escapeSql(tableName) + "'";
         try {
             ResultSet rs = DBHelp.searchDBRecord(sql);
             while (rs.next()) {

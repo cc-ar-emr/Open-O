@@ -24,7 +24,7 @@
  */
 package org.oscarehr.ws.rest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.oscarehr.common.model.Document;
 import org.oscarehr.managers.DocumentManager;

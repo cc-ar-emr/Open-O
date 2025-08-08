@@ -26,7 +26,7 @@
 
 <%@ page import="org.oscarehr.PMmodule.web.formbean.*" %>
 <%@ page import="org.oscarehr.PMmodule.model.Program" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ taglib uri="/WEB-INF/security.tld" prefix="security" %>
 
 <form action="${pageContext.request.contextPath}/PMmodule/ProgramManager.do" method="post">

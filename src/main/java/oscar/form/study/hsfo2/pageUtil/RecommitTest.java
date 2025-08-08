@@ -28,10 +28,13 @@ package oscar.form.study.hsfo2.pageUtil;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 import oscar.form.study.hsfo2.pageUtil.XMLTransferUtil.SoapElementKey;
 
@@ -58,9 +61,9 @@ public class RecommitTest {
         final String passwd = "first9candy";
         int fileType = 18;
 
-        PostMethod post = new PostMethod(webUrl);
+        HttpPost post = new HttpPost(webUrl);
 //    post.setRequestHeader( "SOAPAction", getDataDateRangeAction );    //don't set soap action
-        post.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+        post.setHeader("Content-Type", "text/xml; charset=utf-8");
 
         String soapMsg =
                 "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:dat=\"https://www.clinforma.net/P-Prompt/DataReceiveWS/\">"
@@ -88,23 +91,29 @@ public class RecommitTest {
          + "</soap:Envelope>";
          **/
         // Execute request
-        try {
-            RequestEntity re = new StringRequestEntity(soapMsg, "text/xml", "utf-8");
-            post.setRequestEntity(re);
-            HttpClient httpclient = new HttpClient();
+        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+            StringEntity entity = new StringEntity(soapMsg, "UTF-8");
+            entity.setContentType("text/xml");
+            post.setEntity(entity);
 
-            Map<SoapElementKey, Object> output = new HashMap<SoapElementKey, Object>();
-            int result = httpclient.executeMethod(post);
+            try (CloseableHttpResponse response = httpclient.execute(post)) {
+                int result = response.getStatusLine().getStatusCode();
 
-            String rsXml = post.getResponseBodyAsString();
+                String rsXml = null;
+                HttpEntity responseEntity = response.getEntity();
+                if (responseEntity != null) {
+                    rsXml = EntityUtils.toString(responseEntity, "UTF-8");
+                }
 
-            log("http response code: " + result);
-            log("result: " + XMLTransferUtil.getElementValue(rsXml, "GetDataDateRangeResult"));
-            log("response: " + rsXml);
+                Map<SoapElementKey, Object> output = new HashMap<>();
+                output.put(SoapElementKey.responseStatusCode, result);
+
+                log("http response code: " + result);
+                log("result: " + XMLTransferUtil.getElementValue(rsXml, "GetDataDateRangeResult"));
+                log("response: " + rsXml);
+            }
         } catch (Exception e) {
-            ;
-        } finally {
-            post.releaseConnection();
+            e.printStackTrace();
         }
     }
 

@@ -51,7 +51,7 @@
 <%@page import="org.springframework.web.context.WebApplicationContext" %>
 <%@page import="org.oscarehr.caisi_integrator.ws.DemographicWs" %>
 <%@page import="org.oscarehr.PMmodule.caisi_integrator.IntegratorFallBackManager" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 
 <%@ page import="java.util.*, java.sql.*, java.net.*, oscar.*, oscar.oscarDB.*" errorPage="/errorpage.jsp" %>
 <%@ page
@@ -60,7 +60,7 @@
 <%@ page import="org.oscarehr.common.model.CachedAppointmentComparator" %>
 
 <%@page import="oscar.util.DateUtils" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.util.MiscUtils" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 

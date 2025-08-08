@@ -59,7 +59,7 @@
 <%@ page import="org.oscarehr.common.dao.SiteDao" %>
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%@ page import="org.oscarehr.common.model.Site" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="oscar.OscarProperties" %>
 <%@ page import="org.oscarehr.common.Gender" %>
 <%

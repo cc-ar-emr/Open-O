@@ -33,7 +33,7 @@ import java.util.SortedSet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.PMmodule.service.GenericIntakeManager;
 import org.oscarehr.PMmodule.utility.DateTimeFormatUtils;
 import org.oscarehr.common.model.ReportStatistic;

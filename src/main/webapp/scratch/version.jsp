@@ -24,7 +24,7 @@
 
 --%>
 <html>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@ page import="org.oscarehr.common.model.ScratchPad" %>
 <%@ page import="oscar.util.DateUtils" %>
 <%@ page import="oscar.oscarProvider.data.ProviderColourUpdater" %>

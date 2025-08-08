@@ -28,7 +28,7 @@ package org.oscarehr.web;
 
 import com.opensymphony.xwork2.ActionSupport;
 import net.sf.json.JSONArray;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.jfree.chart.ChartFactory;

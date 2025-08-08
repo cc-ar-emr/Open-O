@@ -35,7 +35,7 @@
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@ page import="oscar.oscarDemographic.data.DemographicData" %>
 <%@ page import="java.util.Enumeration,org.oscarehr.documentManager.EDoc,org.oscarehr.documentManager.EDocUtil" %>
-<%@ page import="org.oscarehr.util.SpringUtils,org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.oscarehr.util.SpringUtils,org.apache.commons.text.StringEscapeUtils" %>
 <%@ page import="org.oscarehr.common.dao.Hl7TextInfoDao,org.oscarehr.common.model.Hl7TextInfo" %>
 
 
@@ -96,7 +96,7 @@
 </head>
 <body onload="onloadd()">
 
-<div class="page-header" style="margin:5px"><h4>Send to <%=StringEscapeUtils.escapeHtml(demographicName)%>'s PHR -
+<div class="page-header" style="margin:5px"><h4>Send to <%=StringEscapeUtils.escapeHtml4(demographicName)%>'s PHR -
     Preview</h4></div>
 <div class="container">
     <form action="<%=request.getContextPath()%>/SendToPhr.do" method="POST">

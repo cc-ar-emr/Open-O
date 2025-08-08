@@ -26,7 +26,7 @@ package org.oscarehr.PMmodule.web.forms;
 
 import java.util.Date;
 
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.oscarehr.common.model.IntegratorProgress;
 
 public class IntegratorPushItem {

@@ -39,11 +39,11 @@
 %>
 
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 <%@page import="java.text.SimpleDateFormat" %>
 <%@page import="org.oscarehr.PMmodule.model.Program" %>
 <%@page import="java.util.HashSet" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.PMmodule.service.ProgramManager" %>
 <%@page import="org.oscarehr.common.model.Provider" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
@@ -52,7 +52,7 @@
 <%@page import="java.util.List" %>
 <%@page import="org.oscarehr.common.model.CdsFormOption" %>
 <%@page import="org.oscarehr.web.Cds4ReportUIBean" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%
     LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
     ProviderManager2 providerManager = (ProviderManager2) SpringUtils.getBean(ProviderManager2.class);
@@ -110,14 +110,14 @@
 <%
     if (providerIdList != null) {
 %>
-<span style="font-weight:bold">Providers : </span><%=StringEscapeUtils.escapeHtml(providerNamesList.toString())%>
+<span style="font-weight:bold">Providers : </span><%=StringEscapeUtils.escapeHtml4(providerNamesList.toString())%>
 <br/>
 <%
     }
 
     if (programIds != null) {
 %>
-<span style="font-weight:bold">Programs : </span><%=StringEscapeUtils.escapeHtml(programNamesList.toString())%>
+<span style="font-weight:bold">Programs : </span><%=StringEscapeUtils.escapeHtml4(programNamesList.toString())%>
 <br/>
 <%
     }
@@ -146,9 +146,9 @@
             int[] dataRow = cds4ReportUIBean.getDataRow(cdsFormOption);
     %>
     <tr>
-        <td><%=StringEscapeUtils.escapeHtml(cdsFormOption.getCdsDataCategory())%>
+        <td><%=StringEscapeUtils.escapeHtml4(cdsFormOption.getCdsDataCategory())%>
         </td>
-        <td><%=StringEscapeUtils.escapeHtml(cdsFormOption.getCdsDataCategoryName())%>
+        <td><%=StringEscapeUtils.escapeHtml4(cdsFormOption.getCdsDataCategoryName())%>
         </td>
         <%
             for (int dataElement : dataRow) {

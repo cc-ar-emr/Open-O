@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.oscarehr.PMmodule.dao.ProgramAccessDAO;
 import org.oscarehr.PMmodule.dao.ProgramProviderDAO;
@@ -68,6 +68,7 @@ import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
 import org.oscarehr.util.VelocityUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -625,7 +626,7 @@ public class TicklerManagerImpl implements TicklerManager {
 
         String date = service_date;
         if (date != null && !date.equals("now()")) { // Just a hack for now.
-            date = "'" + StringEscapeUtils.escapeSql(service_date) + "'";
+            date = "'" + SqlEscapeUtil.escapeSql(service_date) + "'";
         }
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");

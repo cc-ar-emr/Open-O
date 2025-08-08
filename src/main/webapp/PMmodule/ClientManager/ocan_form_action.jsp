@@ -33,8 +33,8 @@
 <%@page import="java.util.Map" %>
 <%@page import="java.util.Date" %>
 <%@page import="java.util.List" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
-<%@page import="org.apache.commons.lang.ArrayUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
+<%@page import="org.apache.commons.lang3.ArrayUtils" %>
 <%@page import="org.oscarehr.util.MiscUtils" %>
 
 <%

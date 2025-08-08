@@ -13,7 +13,7 @@ package oscar.oscarLab.ca.on;
 
 import java.util.*;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.model.Demographic;
 import org.oscarehr.hospitalReportManager.HRMReport;

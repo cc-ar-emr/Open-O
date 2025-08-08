@@ -37,7 +37,7 @@
 <%@page import="org.oscarehr.myoscar.utils.MyOscarLoggedInInfo" %>
 <%@page import="org.oscarehr.myoscar.client.ws_manager.MyOscarLoggedInInfoInterface" %>
 <%@page import="org.oscarehr.phr.util.MyOscarUtils" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.common.model.Provider" %>
 <%@page import="org.oscarehr.phr.RegistrationHelper" %>
 <%@page import="org.oscarehr.myoscar_server.ws.PersonTransfer3" %>
@@ -370,7 +370,7 @@
                 <label class="checkbox">
                     <input type="checkbox"
                            name="enable_primary_relation_<%=curProviderID%>" <%=RegistrationHelper.getCheckedString(session, "enable_primary_relation_" + curProviderID)%> />
-                    <strong><%=StringEscapeUtils.escapeHtml(curProviderUserName + " (" + curProvider.getFormattedName() + ')')%>
+                    <strong><%=StringEscapeUtils.escapeHtml4(curProviderUserName + " (" + curProvider.getFormattedName() + ')')%>
                     </strong>
                 </label>
             </td>
@@ -382,7 +382,7 @@
             <%} else { %>
             <td>&nbsp</td>
             <td class="error">
-                <!--  %=StringEscapeUtils.escapeHtml(curProviderUserName+" ("+curProvider.getFormattedName()+')')%>--></td>
+                <!--  %=StringEscapeUtils.escapeHtml4(curProviderUserName+" ("+curProvider.getFormattedName()+')')%>--></td>
             <td class="error">Not Found on Server</td>
             <%} %>
         </tr>
@@ -402,7 +402,7 @@
                 <label class="checkbox">
                     <input type="checkbox"
                            name="enable_primary_relation_<%=providerMyOscarId%>" <%=RegistrationHelper.getCheckedString(session, "enable_primary_relation_" + providerMyOscarId)%> />
-                    <strong><%=StringEscapeUtils.escapeHtml(entry.getKey() + " (" + entry.getValue().getFormattedName() + ')')%>
+                    <strong><%=StringEscapeUtils.escapeHtml4(entry.getKey() + " (" + entry.getValue().getFormattedName() + ')')%>
                     </strong>
                 </label>
             </td>
@@ -413,7 +413,7 @@
             </td>
             <%} else { %>
             <td>&nbsp</td>
-            <td class="error"><%=StringEscapeUtils.escapeHtml(entry.getKey() + " (" + entry.getValue().getFormattedName() + ')')%>
+            <td class="error"><%=StringEscapeUtils.escapeHtml4(entry.getKey() + " (" + entry.getValue().getFormattedName() + ')')%>
             </td>
             <td class="error">Not Found on Server</td>
             <%} %>

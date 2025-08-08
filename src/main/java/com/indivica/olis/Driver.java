@@ -39,9 +39,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.CMSProcessableByteArray;
@@ -114,9 +111,6 @@ public class Driver {
             String olisRequestURL = OscarProperties.getInstance().getProperty("olis_request_url", "https://olis.ssha.ca/ssha.olis.webservices.ER7/OLIS.asmx");
             OLISStub olis = new OLISStub(olisRequestURL);
 
-            if (OscarProperties.getInstance().getProperty("olis_simulate", "no").equals("no")) {
-                olis._getServiceClient().getOptions().setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER, new Protocol("https", (ProtocolSocketFactory) new OLISProtocolSocketFactory(), 443));
-            }
             olisRequest.getHIALRequest().setClientTransactionID(message.getTransactionId());
             olisRequest.getHIALRequest().setSignedRequest(new HIALRequestSignedRequest());
 

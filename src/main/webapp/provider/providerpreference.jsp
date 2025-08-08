@@ -49,7 +49,7 @@
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@page import="org.oscarehr.web.PrescriptionQrCodeUIBean" %>
 <%@page import="org.oscarehr.common.model.EForm" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.common.model.EncounterForm" %>
 <%@page import="org.oscarehr.common.dao.CtlBillingServiceDao" %>
 <%@page import="org.oscarehr.common.model.CtlBillingService" %>
@@ -439,7 +439,7 @@
                             List<EncounterForm> encounterForms = ProviderPreferencesUIBean.getAllEncounterForms();
                             Collection<String> checkedEncounterFormNames = ProviderPreferencesUIBean.getCheckedEncounterFormNames(providerNo);
                             for (EncounterForm encounterForm : encounterForms) {
-                                String nameEscaped = StringEscapeUtils.escapeHtml(encounterForm.getFormName());
+                                String nameEscaped = StringEscapeUtils.escapeHtml4(encounterForm.getFormName());
                                 String checkedString = (checkedEncounterFormNames.contains(encounterForm.getFormName()) ? "checked=\"checked\"" : "");
                         %>
                         <input type="checkbox" name="encounterFormName"
@@ -472,7 +472,7 @@
 
                         %>
                         <input type="checkbox" name="eformId"
-                               value="<%=eform.getId()%>" <%=checkedString%> /> <%=StringEscapeUtils.escapeHtml(eform.getFormName())%>
+                               value="<%=eform.getId()%>" <%=checkedString%> /> <%=StringEscapeUtils.escapeHtml4(eform.getFormName())%>
                         <br/>
                         <%
                             }
@@ -491,9 +491,9 @@
                             for (ProviderPreference.QuickLink quickLink : quickLinks) {
                         %>
                         <input type="button" value="<fmt:setBundle basename="oscarResources"/><fmt:message key="REMOVE"/>"
-                               onclick="document.location='providerPreferenceQuickLinksAction.jsp?action=remove&name='+escape('<%=StringEscapeUtils.escapeHtml(quickLink.getName())%>')"/>
-                        <%=StringEscapeUtils.escapeHtml(quickLink.getName())%>
-                        : <%=StringEscapeUtils.escapeHtml(quickLink.getUrl())%>
+                               onclick="document.location='providerPreferenceQuickLinksAction.jsp?action=remove&name='+escape('<%=StringEscapeUtils.escapeHtml4(quickLink.getName())%>')"/>
+                        <%=StringEscapeUtils.escapeHtml4(quickLink.getName())%>
+                        : <%=StringEscapeUtils.escapeHtml4(quickLink.getUrl())%>
                         <br/>
                         <%
                             }

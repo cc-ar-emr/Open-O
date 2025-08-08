@@ -39,7 +39,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.PMmodule.dao.ProviderDao;
 import org.oscarehr.casemgmt.dao.CaseManagementNoteDAO;
@@ -248,20 +248,20 @@ public class Eyeform2Action extends ActionSupport {
         request.setAttribute("re_demoNo", demo);
 /*
 		   if(cppFromMeasurements) {
-			   request.setAttribute("currentHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Current History:", "cpp_currentHis", Integer.parseInt(demo), appNo, false)));
-			   request.setAttribute("pastOcularHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Past Ocular History:", "cpp_pastOcularHis", Integer.parseInt(demo), appNo, true)));
-			   request.setAttribute("diagnosticNotes",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Diagnostic Notes:", "cpp_diagnostics", Integer.parseInt(demo), appNo, true)));
-			   request.setAttribute("medicalHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Medical History:", "cpp_medicalHis", Integer.parseInt(demo), appNo, true)));
-			   request.setAttribute("familyHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Family History:", "cpp_familyHis", Integer.parseInt(demo), appNo, true)));
-			   request.setAttribute("ocularMedication",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Ocular Medications:", "cpp_ocularMeds", Integer.parseInt(demo), appNo, true)));
+			   request.setAttribute("currentHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Current History:", "cpp_currentHis", Integer.parseInt(demo), appNo, false)));
+			   request.setAttribute("pastOcularHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Past Ocular History:", "cpp_pastOcularHis", Integer.parseInt(demo), appNo, true)));
+			   request.setAttribute("diagnosticNotes",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Diagnostic Notes:", "cpp_diagnostics", Integer.parseInt(demo), appNo, true)));
+			   request.setAttribute("medicalHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Medical History:", "cpp_medicalHis", Integer.parseInt(demo), appNo, true)));
+			   request.setAttribute("familyHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Family History:", "cpp_familyHis", Integer.parseInt(demo), appNo, true)));
+			   request.setAttribute("ocularMedication",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Ocular Medications:", "cpp_ocularMeds", Integer.parseInt(demo), appNo, true)));
 
 		   } else {*/
-        request.setAttribute("currentHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Current History:", "CurrentHistory", Integer.parseInt(demo), appNo, false)));
-        request.setAttribute("pastOcularHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Past Ocular History:", "PastOcularHistory", Integer.parseInt(demo), appNo, true)));
-        request.setAttribute("diagnosticNotes", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Diagnostic Notes:", "DiagnosticNotes", Integer.parseInt(demo), appNo, true)));
-        request.setAttribute("medicalHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Medical History:", "MedHistory", Integer.parseInt(demo), appNo, true)));
-        request.setAttribute("familyHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Family History:", "FamHistory", Integer.parseInt(demo), appNo, true)));
-        request.setAttribute("ocularMedication", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Ocular Medications:", "OcularMedication", Integer.parseInt(demo), appNo, true)));
+        request.setAttribute("currentHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Current History:", "CurrentHistory", Integer.parseInt(demo), appNo, false)));
+        request.setAttribute("pastOcularHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Past Ocular History:", "PastOcularHistory", Integer.parseInt(demo), appNo, true)));
+        request.setAttribute("diagnosticNotes", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Diagnostic Notes:", "DiagnosticNotes", Integer.parseInt(demo), appNo, true)));
+        request.setAttribute("medicalHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Medical History:", "MedHistory", Integer.parseInt(demo), appNo, true)));
+        request.setAttribute("familyHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Family History:", "FamHistory", Integer.parseInt(demo), appNo, true)));
+        request.setAttribute("ocularMedication", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Ocular Medications:", "OcularMedication", Integer.parseInt(demo), appNo, true)));
 
         IssueDAO issueDao = (IssueDAO) SpringUtils.getBean(IssueDAO.class);
 
@@ -269,12 +269,12 @@ public class Eyeform2Action extends ActionSupport {
         for (String customCppIssue : customCppIssues) {
             Issue i = issueDao.findIssueByCode(customCppIssue);
             if (i != null) {
-                request.setAttribute(customCppIssue, StringEscapeUtils.escapeJavaScript(getFormattedCppItem(i.getDescription() + ":", customCppIssue, Integer.parseInt(demo), appNo, true)));
+                request.setAttribute(customCppIssue, StringEscapeUtils.escapeEcmaScript(getFormattedCppItem(i.getDescription() + ":", customCppIssue, Integer.parseInt(demo), appNo, true)));
             }
         }
         //}
 
-        request.setAttribute("otherMeds", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Other Meds:", "OMeds", Integer.parseInt(demo), appNo, true)));
+        request.setAttribute("otherMeds", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Other Meds:", "OMeds", Integer.parseInt(demo), appNo, true)));
 
 
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
@@ -293,7 +293,7 @@ public class Eyeform2Action extends ActionSupport {
             strOcularProcs = "Past Ocular Procedures:\n" + strOcularProcs;
         else
             strOcularProcs = "";
-        request.setAttribute("ocularProc", StringEscapeUtils.escapeJavaScript(strOcularProcs));
+        request.setAttribute("ocularProc", StringEscapeUtils.escapeEcmaScript(strOcularProcs));
 
 
         List<EyeformSpecsHistory> specs = specsHistoryDao.getAllPreviousAndCurrent(Integer.parseInt(demo), appNo);
@@ -342,7 +342,7 @@ public class Eyeform2Action extends ActionSupport {
         else
             specsStr1 = "";
 
-        request.setAttribute("specs", StringEscapeUtils.escapeJavaScript(specsStr1));
+        request.setAttribute("specs", StringEscapeUtils.escapeEcmaScript(specsStr1));
 
         //impression
         //logger.info("appNo="+appNo);
@@ -353,7 +353,7 @@ public class Eyeform2Action extends ActionSupport {
             request.setAttribute("appNo", appNo);
         }
         String impression = getImpression(appNo);
-        request.setAttribute("impression", StringEscapeUtils.escapeJavaScript("Impression:" + "\n" + impression));
+        request.setAttribute("impression", StringEscapeUtils.escapeEcmaScript("Impression:" + "\n" + impression));
 
 
         //followUp
@@ -376,7 +376,7 @@ public class Eyeform2Action extends ActionSupport {
                 followup.append("Routine eye care by an optometrist is recommended.\n");
         }
 
-        request.setAttribute("followup", StringEscapeUtils.escapeJavaScript(followup.toString()));
+        request.setAttribute("followup", StringEscapeUtils.escapeEcmaScript(followup.toString()));
 
 
         //test book
@@ -390,7 +390,7 @@ public class Eyeform2Action extends ActionSupport {
         }
         if (testbook.length() > 0)
             testbook.insert(0, "Diagnostic test booking:");
-        request.setAttribute("testbooking", StringEscapeUtils.escapeJavaScript(testbook.toString()));
+        request.setAttribute("testbooking", StringEscapeUtils.escapeEcmaScript(testbook.toString()));
 
 
         //procedure book
@@ -404,12 +404,12 @@ public class Eyeform2Action extends ActionSupport {
         }
         if (probook.length() > 0)
             probook.insert(0, "Procedure booking:");
-        request.setAttribute("probooking", StringEscapeUtils.escapeJavaScript(probook.toString()));
+        request.setAttribute("probooking", StringEscapeUtils.escapeEcmaScript(probook.toString()));
 
         //measurements
         if (requestId > 0) {
             String tmp = consultationRequestExtDao.getConsultationRequestExtsByKey(requestId, "specialProblem");
-            request.setAttribute("specialProblem", StringEscapeUtils.escapeJavaScript(tmp));
+            request.setAttribute("specialProblem", StringEscapeUtils.escapeEcmaScript(tmp));
         } else {
             request.setAttribute("specialProblem", "");
         }
@@ -880,31 +880,31 @@ public class Eyeform2Action extends ActionSupport {
         request.setAttribute("reason", cp.getReason());
 
 /*			if(cppFromMeasurements) {
-				request.setAttribute("currentHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Current History:", "cpp_currentHis", demographic.getDemographicNo(), appNo, false)));
-				request.setAttribute("pastOcularHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Past Ocular History:", "cpp_pastOcularHis", demographic.getDemographicNo(), appNo, true)));
-			   request.setAttribute("diagnosticNotes",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Diagnostic Notes:", "cpp_diagnostics", demographic.getDemographicNo(), appNo, true)));
-			   request.setAttribute("medHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Medical History:", "cpp_medicalHis", demographic.getDemographicNo(), appNo, true)));
-			   request.setAttribute("famHistory",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Family History:", "cpp_familyHis", demographic.getDemographicNo(), appNo, true)));
-			   request.setAttribute("ocularMedication",StringEscapeUtils.escapeJavaScript(getFormattedCppItemFromMeasurements("Current Medications:", "cpp_ocularMeds", demographic.getDemographicNo(), appNo, true)));
+				request.setAttribute("currentHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Current History:", "cpp_currentHis", demographic.getDemographicNo(), appNo, false)));
+				request.setAttribute("pastOcularHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Past Ocular History:", "cpp_pastOcularHis", demographic.getDemographicNo(), appNo, true)));
+			   request.setAttribute("diagnosticNotes",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Diagnostic Notes:", "cpp_diagnostics", demographic.getDemographicNo(), appNo, true)));
+			   request.setAttribute("medHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Medical History:", "cpp_medicalHis", demographic.getDemographicNo(), appNo, true)));
+			   request.setAttribute("famHistory",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Family History:", "cpp_familyHis", demographic.getDemographicNo(), appNo, true)));
+			   request.setAttribute("ocularMedication",StringEscapeUtils.escapeEcmaScript(getFormattedCppItemFromMeasurements("Current Medications:", "cpp_ocularMeds", demographic.getDemographicNo(), appNo, true)));
 
 			} else {*/
-        request.setAttribute("currentHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Current History:", "CurrentHistory", demographic.getDemographicNo(), appNo, false)));
-        request.setAttribute("pastOcularHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Past Ocular History:", "PastOcularHistory", demographic.getDemographicNo(), appNo, true)));
-        request.setAttribute("medHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Medical History:", "MedHistory", demographic.getDemographicNo(), appNo, true)));
-        request.setAttribute("famHistory", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Family History:", "FamHistory", demographic.getDemographicNo(), appNo, true)));
-        request.setAttribute("diagnosticNotes", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Diagnostic Notes:", "DiagnosticNotes", demographic.getDemographicNo(), appNo, true)));
-        request.setAttribute("ocularMedication", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Current Medications:", "OcularMedication", demographic.getDemographicNo(), appNo, true)));
+        request.setAttribute("currentHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Current History:", "CurrentHistory", demographic.getDemographicNo(), appNo, false)));
+        request.setAttribute("pastOcularHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Past Ocular History:", "PastOcularHistory", demographic.getDemographicNo(), appNo, true)));
+        request.setAttribute("medHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Medical History:", "MedHistory", demographic.getDemographicNo(), appNo, true)));
+        request.setAttribute("famHistory", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Family History:", "FamHistory", demographic.getDemographicNo(), appNo, true)));
+        request.setAttribute("diagnosticNotes", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Diagnostic Notes:", "DiagnosticNotes", demographic.getDemographicNo(), appNo, true)));
+        request.setAttribute("ocularMedication", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Current Medications:", "OcularMedication", demographic.getDemographicNo(), appNo, true)));
 
         //}
 
-        request.setAttribute("otherMeds", StringEscapeUtils.escapeJavaScript(getFormattedCppItem("Other Medications:", "OMeds", demographic.getDemographicNo(), appNo, true)));
+        request.setAttribute("otherMeds", StringEscapeUtils.escapeEcmaScript(getFormattedCppItem("Other Medications:", "OMeds", demographic.getDemographicNo(), appNo, true)));
 
         IssueDAO issueDao = (IssueDAO) SpringUtils.getBean(IssueDAO.class);
         String customCppIssues[] = OscarProperties.getInstance().getProperty("encounter.custom_cpp_issues", "").split(",");
         for (String customCppIssue : customCppIssues) {
             Issue i = issueDao.findIssueByCode(customCppIssue);
             if (i != null) {
-                request.setAttribute(customCppIssue, StringEscapeUtils.escapeJavaScript(getFormattedCppItem(i.getDescription() + ":", customCppIssue, demographic.getDemographicNo(), appNo, true)));
+                request.setAttribute(customCppIssue, StringEscapeUtils.escapeEcmaScript(getFormattedCppItem(i.getDescription() + ":", customCppIssue, demographic.getDemographicNo(), appNo, true)));
             }
         }
 
@@ -925,7 +925,7 @@ public class Eyeform2Action extends ActionSupport {
             strOcularProcs = "Past Ocular Procedures:\n" + strOcularProcs + "\n";
         else
             strOcularProcs = "";
-        request.setAttribute("ocularProc", StringEscapeUtils.escapeJavaScript(strOcularProcs));
+        request.setAttribute("ocularProc", StringEscapeUtils.escapeEcmaScript(strOcularProcs));
 
         List<EyeformSpecsHistory> specs = specsHistoryDao.getAllPreviousAndCurrent(demographic.getDemographicNo(), appNo);
         StringBuilder specsStr = new StringBuilder();
@@ -972,11 +972,11 @@ public class Eyeform2Action extends ActionSupport {
         else
             specsStr1 = "";
 
-        request.setAttribute("specs", StringEscapeUtils.escapeJavaScript(specsStr1));
+        request.setAttribute("specs", StringEscapeUtils.escapeEcmaScript(specsStr1));
 
         //impression
         String impression = getImpression(appNo);
-        request.setAttribute("impression", StringEscapeUtils.escapeJavaScript(impression));
+        request.setAttribute("impression", StringEscapeUtils.escapeEcmaScript(impression));
 
         //followUp
         EyeformFollowUpDao followUpDao = SpringUtils.getBean(EyeformFollowUpDao.class);
@@ -999,7 +999,7 @@ public class Eyeform2Action extends ActionSupport {
                 followup.append("Routine eye care by an optometrist is recommended.\n");
 
         }
-        request.setAttribute("followup", StringEscapeUtils.escapeJavaScript(followup.toString()));
+        request.setAttribute("followup", StringEscapeUtils.escapeEcmaScript(followup.toString()));
 
 
         //test book
@@ -1013,7 +1013,7 @@ public class Eyeform2Action extends ActionSupport {
         }
         if (testbook.length() > 0)
             testbook.insert(0, "Diagnostic test booking:");
-        request.setAttribute("testbooking", StringEscapeUtils.escapeJavaScript(testbook.toString()));
+        request.setAttribute("testbooking", StringEscapeUtils.escapeEcmaScript(testbook.toString()));
 
 
         //procedure book
@@ -1027,7 +1027,7 @@ public class Eyeform2Action extends ActionSupport {
         }
         if (probook.length() > 0)
             probook.insert(0, "Procedure booking:");
-        request.setAttribute("probooking", StringEscapeUtils.escapeJavaScript(probook.toString()));
+        request.setAttribute("probooking", StringEscapeUtils.escapeEcmaScript(probook.toString()));
 
         return "conReport";
     }

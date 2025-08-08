@@ -56,12 +56,12 @@
     boolean readOnlyDates = Boolean.valueOf(OscarProperties.getInstance().getProperty("intake.readonly_dates", "true"));
 %>
 
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="java.util.GregorianCalendar" %>
 <%@page import="java.util.Calendar" %>
 <%@page import="java.util.List" %>
 <%@page import="java.text.DateFormatSymbols" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 <%@page import="org.oscarehr.common.model.Demographic" %>
 <html>
     <head>

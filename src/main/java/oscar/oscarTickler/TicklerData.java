@@ -31,12 +31,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.model.Tickler;
 import org.oscarehr.managers.TicklerManager;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import oscar.util.ConversionUtils;
 
@@ -66,7 +67,7 @@ public class TicklerData {
 
         String date = service_date;
         if (date != null && !date.equals("now()")) {          //Just a hack for now.
-            date = "'" + StringEscapeUtils.escapeSql(service_date) + "'";
+            date = "'" + SqlEscapeUtil.escapeSql(service_date) + "'";
         }
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");

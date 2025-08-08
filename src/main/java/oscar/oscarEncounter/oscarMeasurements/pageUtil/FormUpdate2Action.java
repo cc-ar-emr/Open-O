@@ -32,6 +32,7 @@ import org.oscarehr.managers.SecurityInfoManager;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -324,7 +325,7 @@ public class FormUpdate2Action extends ActionSupport {
         }
 
         if (valid) {
-            comments = org.apache.commons.lang.StringEscapeUtils.escapeSql(comments);
+            comments = org.oscarehr.util.SqlEscapeUtil.escapeSql(comments);
             if (!GenericValidator.isBlankOrNull(inputValue)) {
 
                 Measurement measurement = new Measurement();

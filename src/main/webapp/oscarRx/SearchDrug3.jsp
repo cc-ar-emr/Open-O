@@ -28,7 +28,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/security.tld" prefix="security" %>
 <%@ taglib uri="/WEB-INF/indivo-tag.tld" prefix="indivo" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.util.WebUtils" %>
 <%@page import="org.oscarehr.myoscar.utils.MyOscarLoggedInInfo" %>
 <%@page import="org.oscarehr.common.dao.DrugDao" %>
@@ -1195,7 +1195,7 @@
                                                 <tr>
                                                     <td><%=formatter.format(note.getCreate_date()) %>
                                                     </td>
-                                                    <td><%=StringEscapeUtils.escapeHtml(str)%>
+                                                    <td><%=StringEscapeUtils.escapeHtml4(str)%>
                                                     </td>
                                                 </tr>
                                                 <%

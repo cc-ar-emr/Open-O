@@ -26,7 +26,7 @@
 
 package oscar.oscarEncounter.pageUtil;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.EncounterFormDao;
 import org.oscarehr.common.model.EncounterForm;
@@ -156,7 +156,7 @@ public class EctDisplayForm2Action extends EctDisplayAction {
                                             + "&formId=latest" + "');");
 
                             key = StringUtils.maxLenString(fullTitle, MAX_LEN_KEY, CROP_LEN_KEY, ELLIPSES) + "(" + serviceDateStr + ")";
-                            key = StringEscapeUtils.escapeJavaScript(key);
+                            key = StringEscapeUtils.escapeEcmaScript(key);
 
                             // auto completion arrays and colour code are set
                             js = "itemColours['" + key + "'] = '" + BGCOLOUR + "'; autoCompList.push('" + key + "'); autoCompleted['" + key + "'] = \"" + url + "\";";
@@ -195,7 +195,7 @@ public class EctDisplayForm2Action extends EctDisplayAction {
                         Dao.addPopUpUrl(url.toString());
                         key = StringUtils.maxLenString(encounterForm.getFormName(), MAX_LEN_KEY, CROP_LEN_KEY, ELLIPSES) + " (new)";
                         Dao.addPopUpText(encounterForm.getFormName());
-                        key = StringEscapeUtils.escapeJavaScript(key);
+                        key = StringEscapeUtils.escapeEcmaScript(key);
 
                         // auto completion arrays and colour code are set
                         js = "itemColours['" + key + "'] = '" + BGCOLOUR + "'; autoCompList.push('" + key + "'); autoCompleted['" + key + "'] = \"" + url + ";\";";

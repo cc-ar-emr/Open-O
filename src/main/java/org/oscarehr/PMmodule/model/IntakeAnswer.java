@@ -25,7 +25,7 @@ package org.oscarehr.PMmodule.model;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 
 public class IntakeAnswer implements Comparable<IntakeAnswer>, Serializable {
 

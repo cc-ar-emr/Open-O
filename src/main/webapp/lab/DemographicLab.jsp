@@ -23,7 +23,7 @@
     Ontario, Canada
 
 --%>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="oscar.oscarEncounter.pageUtil.EctDisplayLabAction2" %>
 <%@page import="org.oscarehr.util.MiscUtils" %>
 <%@page import="java.net.URLEncoder" %>

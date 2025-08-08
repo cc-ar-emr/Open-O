@@ -25,7 +25,7 @@
 
 package oscar.form.pharmaForms.formBPMH.bean;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.oscarehr.common.model.Allergy;
 import org.oscarehr.common.model.Demographic;
 import org.oscarehr.common.model.DemographicCust;

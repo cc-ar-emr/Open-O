@@ -74,7 +74,7 @@
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@page import="oscar.OscarProperties" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.managers.ProgramManager2" %>
 <%@page import="org.oscarehr.PMmodule.model.ProgramProvider" %>
 
@@ -2054,7 +2054,7 @@ if("true".equals(OscarProperties.getInstance().getProperty("iso3166.2.enabled","
                             </td>
                             <td id="chartNoLbl" align="right"><b><fmt:setBundle basename="oscarResources"/><fmt:message key="demographic.demographicaddrecordhtm.formChartNo"/>:</b></td>
                             <td id="chartNo" align="left"><input type="text" id="chart_no" name="chart_no"
-                                                                 value="<%=StringEscapeUtils.escapeHtml(chartNoVal)%>">
+                                                                 value="<%=StringEscapeUtils.escapeHtml4(chartNoVal)%>">
                             </td>
 
                         </tr>

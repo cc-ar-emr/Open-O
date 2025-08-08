@@ -26,7 +26,7 @@
 
 package oscar.oscarBilling.ca.bc.pageUtil;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.oscarehr.util.MiscUtils;
 import oscar.Misc;
 import oscar.entities.WCB;

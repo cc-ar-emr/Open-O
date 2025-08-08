@@ -48,7 +48,7 @@
 <%@page import="org.oscarehr.common.service.BillingONService" %>
 <%@page import="java.text.NumberFormat" %>
 
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 
 <%@taglib uri="/WEB-INF/security.tld" prefix="security" %>
 <%@ taglib uri="/WEB-INF/oscar-tag.tld" prefix="oscar" %>

@@ -24,7 +24,7 @@
 
 --%>
 
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.myoscar.utils.MyOscarLoggedInInfo" %>
 <%@page import="oscar.OscarProperties" %>
 <%
@@ -37,8 +37,8 @@
 <form name="theForm" method="post" action="<%=myOscarExternalLinkUrl%>">
     <input type="hidden" name="userId" value="<%=myOscarLoggedInInfo.getLoggedInPersonId()%>"/>
     <input type="hidden" name="password"
-           value="<%=StringEscapeUtils.escapeHtml(myOscarLoggedInInfo.getLoggedInPersonSecurityToken())%>"/>
-    <input type="hidden" name="redirectPage" value="<%=StringEscapeUtils.escapeHtml(redirectPage)%>"/>
+           value="<%=StringEscapeUtils.escapeHtml4(myOscarLoggedInInfo.getLoggedInPersonSecurityToken())%>"/>
+    <input type="hidden" name="redirectPage" value="<%=StringEscapeUtils.escapeHtml4(redirectPage)%>"/>
     <script type="text/javascript">
         document.theForm.submit();
     </script>

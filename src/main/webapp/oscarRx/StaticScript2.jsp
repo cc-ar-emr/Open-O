@@ -40,7 +40,7 @@
 <%@page import="org.oscarehr.util.SessionConstants" %>
 <%@page import="org.oscarehr.oscarRx.StaticScriptBean" %>
 <%@page import="oscar.oscarRx.util.RxUtil" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 
 <%@page import="java.util.ArrayList" %>
 
@@ -318,7 +318,7 @@
                                    onclick="javascript:reRxDrugSearch3('<%=drug.localDrugId%>');"/>
                             <input type="button" align="top" value="Add to Favorites" style="width: 100px"
                                    class="ControlPushButton"
-                                   onclick="javascript:addFavorite2(<%=drug.localDrugId%>, '<%=StringEscapeUtils.escapeJavaScript((drug.customName!=null&&(!drug.customName.equalsIgnoreCase("null")))?drug.customName:drug.brandName)%>');"/>
+                                   onclick="javascript:addFavorite2(<%=drug.localDrugId%>, '<%=StringEscapeUtils.escapeEcmaScript((drug.customName!=null&&(!drug.customName.equalsIgnoreCase("null")))?drug.customName:drug.brandName)%>');"/>
 
 
                             <%

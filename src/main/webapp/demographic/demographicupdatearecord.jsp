@@ -42,7 +42,7 @@
 <%@ page
         import="java.sql.*, java.util.*, oscar.MyDateFormat, oscar.oscarWaitingList.util.WLWaitingListUtil, oscar.log.*, org.oscarehr.common.OtherIdManager" %>
 
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.util.MiscUtils" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 

@@ -29,7 +29,7 @@
          import="java.util.*,java.sql.*,oscar.*,java.text.*,java.net.*" %>
 <%@ page import="oscar.oscarBilling.ca.on.data.JdbcBillingPageUtil" %>
 <%@ page import="oscar.oscarBilling.ca.on.data.*" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <% //
     int serviceCodeLen = 5;
     String msg = "Type in a name and search first to see if it is available.";

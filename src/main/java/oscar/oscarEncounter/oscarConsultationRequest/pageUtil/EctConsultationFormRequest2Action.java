@@ -31,9 +31,9 @@ import ca.uhn.hl7v2.model.v26.message.ORU_R01;
 import ca.uhn.hl7v2.model.v26.message.REF_I12;
 import com.opensymphony.xwork2.ActionSupport;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.oscarehr.common.dao.*;
@@ -1100,7 +1100,7 @@ public class EctConsultationFormRequest2Action extends ActionSupport {
 
         sb.append(WebUtils.buildQueryString(queryParameters));
 
-        return (StringEscapeUtils.escapeHtml(sb.toString()));
+        return (StringEscapeUtils.escapeHtml4(sb.toString()));
     }
 
     /**

@@ -26,7 +26,7 @@
 
 package oscar.oscarEncounter.pageUtil;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.DocumentDao.DocumentType;
 import org.oscarehr.documentManager.EDoc;
@@ -115,7 +115,7 @@ public class EctDisplayDocs2Action extends EctDisplayAction {
             for (int i = 0; i < docList.size(); i++) {
                 isURLjavaScript = false;
                 EDoc curDoc = docList.get(i);
-                String dispFilename = org.apache.commons.lang.StringUtils.trimToEmpty(curDoc.getFileName());
+                String dispFilename = org.apache.commons.lang3.StringUtils.trimToEmpty(curDoc.getFileName());
                 String dispStatus = String.valueOf(curDoc.getStatus());
 
                 boolean skip = false;
@@ -154,7 +154,7 @@ public class EctDisplayDocs2Action extends EctDisplayAction {
 
                 if (inboxflag) {
                     String path = oscar.util.plugin.IsPropertiesOn.getProperty("DOCUMENT_DIR");
-                    url = "popupPage(700,800,'" + hash + "', '" + request.getContextPath() + "/mod/docmgmtComp/FillARForm.do?method=showInboxDocDetails&path=" + path + "&demoNo=" + bean.demographicNo + "&name=" + StringEscapeUtils.escapeHtml(dispFilename) + "'); return false;";
+                    url = "popupPage(700,800,'" + hash + "', '" + request.getContextPath() + "/mod/docmgmtComp/FillARForm.do?method=showInboxDocDetails&path=" + path + "&demoNo=" + bean.demographicNo + "&name=" + StringEscapeUtils.escapeHtml4(dispFilename) + "'); return false;";
                     isURLjavaScript = true;
                 } else if (curDoc.getRemoteFacilityId() == null && curDoc.isPDF()) {
                     url = "popupPage(window.screen.width,window.screen.height,'" + hash + "','" + request.getContextPath() + "/documentManager/showDocument.jsp?inWindow=true&segmentID=" + dispDocNo + "&providerNo=" + user + "&searchProviderNo=" + user + "&status=A'); return false;";
@@ -166,7 +166,7 @@ public class EctDisplayDocs2Action extends EctDisplayAction {
                 item.setLinkTitle(title + serviceDateStr);
                 item.setTitle(title);
                 key = StringUtils.maxLenString(curDoc.getDescription(), MAX_LEN_KEY, CROP_LEN_KEY, ELLIPSES) + "(" + serviceDateStr + ")";
-                key = StringEscapeUtils.escapeJavaScript(key);
+                key = StringEscapeUtils.escapeEcmaScript(key);
 
                 if (inboxflag) {
                     if (!EDocUtil.getDocReviewFlag(dispDocNo)) item.setColour("FF0000");

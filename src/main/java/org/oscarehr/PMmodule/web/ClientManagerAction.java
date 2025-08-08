@@ -24,8 +24,8 @@
 package org.oscarehr.PMmodule.web;
 
 import com.quatro.service.LookupManager;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.PMmodule.dao.ProgramDao;
 import org.oscarehr.PMmodule.dao.ProviderDao;
@@ -99,19 +99,19 @@ public class ClientManagerAction {
             else sb.append(DateFormatUtils.ISO_DATE_FORMAT.format(admission.getDischargeDate()));
             sb.append(" )");
         }
-        return (StringEscapeUtils.escapeHtml(sb.toString()));
+        return (StringEscapeUtils.escapeHtml4(sb.toString()));
     }
 
     public static String getEscapedProviderDisplay(String providerNo) {
         Provider provider = providerDao.getProvider(providerNo);
 
-        return (StringEscapeUtils.escapeHtml(provider.getFormattedName()));
+        return (StringEscapeUtils.escapeHtml4(provider.getFormattedName()));
     }
 
     public static String getEscapedDateDisplay(Date d) {
         String display = DateFormatUtils.ISO_DATE_FORMAT.format(d);
 
-        return (StringEscapeUtils.escapeHtml(display));
+        return (StringEscapeUtils.escapeHtml4(display));
     }
 
     @Required
@@ -213,7 +213,7 @@ public class ClientManagerAction {
         Program program = programDao.getProgram(admission.getProgramId());
 
         String displayString = program.getName() + " : " + DateFormatUtils.ISO_DATE_FORMAT.format(admission.getAdmissionDate());
-        return (StringEscapeUtils.escapeHtml(displayString));
+        return (StringEscapeUtils.escapeHtml4(displayString));
     }
 
     public static String getCbiProgramDisplayString(OcanStaffForm ocanStaffForm) {
@@ -221,6 +221,6 @@ public class ClientManagerAction {
         Program program = programDao.getProgram(admission.getProgramId());
 
         String displayString = program.getName() + " : " + DateFormatUtils.ISO_DATE_FORMAT.format(admission.getAdmissionDate());
-        return (StringEscapeUtils.escapeHtml(displayString));
+        return (StringEscapeUtils.escapeHtml4(displayString));
     }
 }

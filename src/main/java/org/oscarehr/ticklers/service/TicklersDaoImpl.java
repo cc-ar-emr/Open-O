@@ -31,8 +31,8 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.oscarehr.common.PaginationQuery;
 import org.oscarehr.common.dao.AbstractDaoImpl;
 import org.oscarehr.common.model.Tickler;

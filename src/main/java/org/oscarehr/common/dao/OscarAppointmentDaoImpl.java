@@ -27,7 +27,7 @@
 
 package org.oscarehr.common.dao;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.PMmodule.model.Program;
 import org.oscarehr.common.NativeSql;
 import org.oscarehr.common.model.Appointment;

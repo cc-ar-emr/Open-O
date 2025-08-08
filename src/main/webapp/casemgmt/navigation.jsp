@@ -31,7 +31,7 @@
 <%@ include file="/casemgmt/taglibs.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="/WEB-INF/caisi-tag.tld" prefix="caisi" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@ page import="oscar.oscarEncounter.oscarMeasurements.MeasurementFlowSheet" %>
 <%@ page import="oscar.oscarEncounter.oscarMeasurements.MeasurementTemplateFlowSheetConfig" %>
 <%@ page import="oscar.oscarEncounter.oscarMeasurements.util.MeasurementHelper" %>
@@ -319,7 +319,7 @@
                                       demoNo="<%=bean.demographicNo%>" programId="<%=pgId%>">
                 <tr>
                     <td><a href="javascript:void(0)"
-                           onClick="popupPage('<%=bsurl%>/Tickler.do?method=edit&tickler.demographic_webName=<%=StringEscapeUtils.escapeJavaScript(bean.getPatientLastName() +"," + bean.getPatientFirstName())%>&tickler.demographicNo=<%=bean.demographicNo%>');return false;">Add
+                           onClick="popupPage('<%=bsurl%>/Tickler.do?method=edit&tickler.demographic_webName=<%=StringEscapeUtils.escapeEcmaScript(bean.getPatientLastName() +"," + bean.getPatientFirstName())%>&tickler.demographicNo=<%=bean.demographicNo%>');return false;">Add
                         Tickler</a></td>
                 </tr>
             </caisirole:SecurityAccess>
@@ -568,7 +568,7 @@
                 <tr>
                     <td>
                         <a href="javascript:void(0)"
-                           onClick="popupPage('<%=bsurl%>/Tickler.do?method=filter&filter.demographic_webName=<%=StringEscapeUtils.escapeJavaScript(bean.getPatientLastName() +"," + bean.getPatientFirstName())%>&filter.demographic_no=<%=bean.demographicNo%>');return false;">View
+                           onClick="popupPage('<%=bsurl%>/Tickler.do?method=filter&filter.demographic_webName=<%=StringEscapeUtils.escapeEcmaScript(bean.getPatientLastName() +"," + bean.getPatientFirstName())%>&filter.demographic_no=<%=bean.demographicNo%>');return false;">View
                             Tickler</a><br>
                     </td>
                 </tr>

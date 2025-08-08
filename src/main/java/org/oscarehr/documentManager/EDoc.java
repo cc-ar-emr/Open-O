@@ -26,7 +26,7 @@
 package org.oscarehr.documentManager;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.model.CtlDocument;
 import org.oscarehr.common.model.CtlDocumentPK;

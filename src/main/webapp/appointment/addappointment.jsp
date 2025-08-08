@@ -51,8 +51,8 @@ Ontario, Canada
 <%@ page import="java.time.ZoneId" %>
 
 <%@ page import="java.util.*, java.lang.*, oscar.appt.*" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@ page import="oscar.appt.status.service.AppointmentStatusMgr" %>
 <%@ page import="oscar.appt.status.service.impl.AppointmentStatusMgrImpl" %>
 <%@ page import="oscar.oscarBilling.ca.bc.decisionSupport.BillingGuidelines" %>
@@ -172,7 +172,7 @@ Ontario, Canada
 
     String useProgramLocation = OscarProperties.getInstance().getProperty("useProgramLocation");
     String moduleNames = OscarProperties.getInstance().getProperty("ModuleNames");
-    boolean caisiEnabled = moduleNames != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(moduleNames, "Caisi");
+    boolean caisiEnabled = moduleNames != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(moduleNames, "Caisi");
     boolean locationEnabled = caisiEnabled && (useProgramLocation != null && useProgramLocation.equals("true"));
 
     ProgramManager2 programManager2 = SpringUtils.getBean(ProgramManager2.class);
@@ -1323,7 +1323,7 @@ Ontario, Canada
                             </td>
                             <td>
                                 <input type="text" id="mrp" readonly
-                                       value="<%=bFirstDisp ? "" : StringEscapeUtils.escapeHtml(providerBean.getProperty(curDoctor_no,""))%>">
+                                       value="<%=bFirstDisp ? "" : StringEscapeUtils.escapeHtml4(providerBean.getProperty(curDoctor_no,""))%>">
                             </td>
                         </tr>
                         <tr>

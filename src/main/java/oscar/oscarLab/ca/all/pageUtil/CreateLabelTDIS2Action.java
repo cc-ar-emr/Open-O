@@ -13,7 +13,7 @@ package oscar.oscarLab.ca.all.pageUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.Hl7TextInfoDao;
 import org.oscarehr.managers.SecurityInfoManager;
@@ -64,7 +64,7 @@ public class CreateLabelTDIS2Action extends ActionSupport {
         }
 
         logger.info("Label =" + label);
-        label = StringEscapeUtils.escapeJavaScript(label);
+        label = StringEscapeUtils.escapeEcmaScript(label);
         if (ajaxcall != null && !"null".equalsIgnoreCase(ajaxcall)) {
             return null;
         }

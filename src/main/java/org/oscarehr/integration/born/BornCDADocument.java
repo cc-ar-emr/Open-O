@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.marc.everest.datatypes.AD;
 import org.marc.everest.datatypes.BL;
 import org.marc.everest.datatypes.ENXP;

@@ -47,7 +47,7 @@ import org.apache.logging.log4j.Logger;
 import org.drools.RuleBase;
 import org.drools.WorkingMemory;
 import org.drools.io.RuleBaseLoader;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.oscarehr.common.dao.DxDao;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;

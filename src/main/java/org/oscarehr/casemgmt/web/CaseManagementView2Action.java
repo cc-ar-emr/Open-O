@@ -29,7 +29,7 @@ import com.quatro.service.security.RolesManager;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import net.sf.json.processors.JsDateJsonBeanProcessor;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.oscarehr.PMmodule.caisi_integrator.CaisiIntegratorManager;
@@ -1821,7 +1821,7 @@ public class CaseManagementView2Action extends ActionSupport {
                 if (key.contains(" Date")) {
                     val = oscar.util.UtilDateUtilities.DateToString(cme.getDateValue(), "yyyy-MM-dd");
                 } else {
-                    val = org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(cme.getValue());
+                    val = org.apache.commons.text.StringEscapeUtils.escapeEcmaScript(cme.getValue());
                 }
                 return val;
             }

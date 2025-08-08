@@ -26,7 +26,7 @@
 
 package org.oscarehr.web.eform;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.dao.DemographicDao;
 import org.oscarehr.common.model.Demographic;
 import org.oscarehr.util.SpringUtils;

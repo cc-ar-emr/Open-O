@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.oscarehr.PMmodule.dao.ProgramDao;

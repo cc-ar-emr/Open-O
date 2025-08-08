@@ -42,7 +42,7 @@ import java.util.Map.Entry;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.PMmodule.dao.ProviderDao;
 import org.oscarehr.PMmodule.utility.DateUtils;
 import org.oscarehr.billing.CA.ON.model.BillingPercLimit;

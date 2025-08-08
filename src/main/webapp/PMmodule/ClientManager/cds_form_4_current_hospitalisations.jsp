@@ -25,7 +25,7 @@
 <%@page import="java.util.List" %>
 <%@page import="org.oscarehr.common.model.CdsHospitalisationDays" %>
 <%@page import="org.oscarehr.PMmodule.web.CdsForm4" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 
 <%
     Integer clientId = Integer.parseInt(request.getParameter("clientId"));

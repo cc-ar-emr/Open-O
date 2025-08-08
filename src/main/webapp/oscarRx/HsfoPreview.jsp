@@ -29,7 +29,7 @@
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="oscar.oscarProvider.data.*" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@ page import="oscar.*,java.lang.*" %>
 <%@ page import="org.oscarehr.util.LoggedInInfo" %>
 
@@ -100,14 +100,14 @@
                     clinicTitle += provider.getClinicAddress() + "<br>";
                     clinicTitle += provider.getClinicCity() + "   " + provider.getClinicPostal();
                 %> <input type="hidden" name="doctorName"
-                          value="<%= StringEscapeUtils.escapeHtml(doctorName) %>"/> <c:choose>
+                          value="<%= StringEscapeUtils.escapeHtml4(doctorName) %>"/> <c:choose>
                     <c:when test="${empty infirmaryView_programAddress}">
                         <input type="hidden" name="clinicName"
-                               value="<%= StringEscapeUtils.escapeHtml(clinicTitle.replaceAll("(<br>)","\\\n")) %>"/>
+                               value="<%= StringEscapeUtils.escapeHtml4(clinicTitle.replaceAll("(<br>)","\\\n")) %>"/>
                         <input type="hidden" name="clinicPhone"
-                               value="<%= StringEscapeUtils.escapeHtml(provider.getClinicPhone()) %>"/>
+                               value="<%= StringEscapeUtils.escapeHtml4(provider.getClinicPhone()) %>"/>
                         <input type="hidden" name="clinicFax"
-                               value="<%= StringEscapeUtils.escapeHtml(provider.getClinicFax()) %>"/>
+                               value="<%= StringEscapeUtils.escapeHtml4(provider.getClinicFax()) %>"/>
                     </c:when>
                     <c:otherwise>
                         <input type="hidden" name="clinicName"
@@ -118,18 +118,18 @@
                                value="<c:out value="${infirmaryView_programFax}"/>"/>
                     </c:otherwise>
                 </c:choose> <input type="hidden" name="patientName"
-                                   value="<%= StringEscapeUtils.escapeHtml(patient.getFirstName())+ " " +StringEscapeUtils.escapeHtml(patient.getSurname()) %>"/>
+                                   value="<%= StringEscapeUtils.escapeHtml4(patient.getFirstName())+ " " +StringEscapeUtils.escapeHtml4(patient.getSurname()) %>"/>
                     <input type="hidden" name="patientAddress"
-                           value="<%= StringEscapeUtils.escapeHtml(patient.getAddress()) %>"/>
+                           value="<%= StringEscapeUtils.escapeHtml4(patient.getAddress()) %>"/>
                     <input type="hidden" name="patientCityPostal"
-                           value="<%= StringEscapeUtils.escapeHtml(patient.getCity())+ " " + StringEscapeUtils.escapeHtml(patient.getPostal())%>"/>
+                           value="<%= StringEscapeUtils.escapeHtml4(patient.getCity())+ " " + StringEscapeUtils.escapeHtml4(patient.getPostal())%>"/>
                     <input type="hidden" name="patientPhone"
-                           value="<%= "Tel: " + StringEscapeUtils.escapeHtml(patient.getPhone()) %>"/>
+                           value="<%= "Tel: " + StringEscapeUtils.escapeHtml4(patient.getPhone()) %>"/>
 
                     <input type="hidden" name="rxDate"
-                           value="<%= StringEscapeUtils.escapeHtml(oscar.oscarRx.util.RxUtil.DateToString(oscar.oscarRx.util.RxUtil.Today(), "MMMM d, yyyy")) %>"/>
+                           value="<%= StringEscapeUtils.escapeHtml4(oscar.oscarRx.util.RxUtil.DateToString(oscar.oscarRx.util.RxUtil.Today(), "MMMM d, yyyy")) %>"/>
                     <input type="hidden" name="sigDoctorName"
-                           value="<%= StringEscapeUtils.escapeHtml(doctorName) %>"/>
+                           value="<%= StringEscapeUtils.escapeHtml4(doctorName) %>"/>
                     <!--img src="img/rx.gif" border="0"-->
                 </td>
                 <td valign=top height="100px" id="clinicAddress"><span
@@ -221,7 +221,7 @@
                                 // set the data to session in case user wants to generate PDF
                                 session.setAttribute(oscar.form.pdfservlet.FrmPDFServlet.HSFO_RX_DATA_KEY, rdh);
                             %> <input type="hidden" name="rx"
-                                      value="<%= StringEscapeUtils.escapeHtml(strRx.replaceAll(";","\\\n")) %>"/>
+                                      value="<%= StringEscapeUtils.escapeHtml4(strRx.replaceAll(";","\\\n")) %>"/>
                                 <input type="hidden" name="rx_no_newlines"
                                        value="<%= strRxNoNewLines.toString() %>"/></td>
                         </tr>

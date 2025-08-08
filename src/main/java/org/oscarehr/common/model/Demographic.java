@@ -24,8 +24,8 @@
 package org.oscarehr.common.model;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.oscarehr.PMmodule.utility.DateTimeFormatUtils;
 import org.oscarehr.PMmodule.utility.Utility;
 import org.oscarehr.util.MiscUtils;

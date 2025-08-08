@@ -36,10 +36,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.filter.ElementFilter;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.filter.ElementFilter;
+import org.jdom2.input.SAXBuilder;
 import org.oscarehr.common.dao.ResourceStorageDao;
 import org.oscarehr.common.model.ResourceStorage;
 import org.oscarehr.util.MiscUtils;

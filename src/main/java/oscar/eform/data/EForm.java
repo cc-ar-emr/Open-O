@@ -28,8 +28,8 @@ package oscar.eform.data;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -49,6 +49,7 @@ import oscar.oscarEncounter.oscarMeasurements.bean.EctMeasurementsDataBeanHandle
 import oscar.oscarEncounter.oscarMeasurements.util.WriteNewMeasurements;
 import oscar.util.StringBuilderUtils;
 import oscar.util.UtilDateUtilities;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -724,7 +725,7 @@ public class EForm extends EFormBase {
     private String getSqlParams(String key) {
         if (sql_params.containsKey(key)) {
             String val = sql_params.get(key);
-            return val == null ? "" : StringEscapeUtils.escapeSql(val);
+            return val == null ? "" : SqlEscapeUtil.escapeSql(val);
         }
         return "";
     }

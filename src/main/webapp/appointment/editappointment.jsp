@@ -88,8 +88,8 @@
 <%@ page import="org.oscarehr.util.LoggedInInfo" %>
 <%@ page import="org.oscarehr.managers.LookupListManager" %>
 <%@ page import="org.oscarehr.common.model.LookupList" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@ page import="oscar.oscarEncounter.data.EctFormData" %>
 <%@ page import="oscar.oscarBilling.ca.on.data.BillingDataHlp" %>
 <%@ page import="org.oscarehr.common.dao.AppointmentTypeDao" %>
@@ -165,7 +165,7 @@
 
     String useProgramLocation = OscarProperties.getInstance().getProperty("useProgramLocation");
     String moduleNames = OscarProperties.getInstance().getProperty("ModuleNames");
-    boolean caisiEnabled = moduleNames != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(moduleNames, "Caisi");
+    boolean caisiEnabled = moduleNames != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(moduleNames, "Caisi");
     boolean locationEnabled = caisiEnabled && (useProgramLocation != null && useProgramLocation.equals("true"));
 
     String annotation_display = org.oscarehr.casemgmt.model.CaseManagementNoteLink.DISP_APPOINTMENT;
@@ -1177,7 +1177,7 @@
                     </td>
                     <td>
                         <input type="text" readonly name="doctorNo" id="mrp"
-                               value="<%=StringEscapeUtils.escapeHtml(providerBean.getProperty(doctorNo,""))%>">
+                               value="<%=StringEscapeUtils.escapeHtml4(providerBean.getProperty(doctorNo,""))%>">
                     </td>
                 </tr>
                 <tr>

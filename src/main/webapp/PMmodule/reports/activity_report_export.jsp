@@ -31,7 +31,7 @@
 <%@page import="org.oscarehr.common.model.*" %>
 <%@page import="org.oscarehr.util.*" %>
 <%@page import="java.text.*" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 
 <%@page contentType="text/csv" %>
 <%
@@ -107,7 +107,7 @@
         out.write('\n');
     }
 
-    long months = (endCalendar.getTimeInMillis() - startCalendar.getTimeInMillis()) / (org.apache.commons.lang.time.DateUtils.MILLIS_PER_DAY * 30);
+    long months = (endCalendar.getTimeInMillis() - startCalendar.getTimeInMillis()) / (org.apache.commons.lang3.time.DateUtils.MILLIS_PER_DAY * 30);
     long total = populationReportUIBean.getAllPrograms().size() * populationReportUIBean.getSecRoles().size() * 3 * months;
     progressStatus.total = "Estimated total " + total + " rows (" + populationReportUIBean.getAllPrograms().size() + " programs * " + populationReportUIBean.getSecRoles().size() + " roles * 3 encounter Types * " + months + " months)";
     int rowsProcessed = 0;

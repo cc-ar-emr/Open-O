@@ -15,7 +15,7 @@
 <%@ page errorPage="../appointment/errorpage.jsp"
          import="java.util.*, oscar.oscarReport.data.*" %>
 <%@ page import="oscar.login.*" %>
-<%@ page import="org.apache.commons.lang.*" %>
+<%@ page import="org.apache.commons.lang3.*" %>
 <%
     String reportId = request.getParameter("id") != null ? request.getParameter("id") : "0";
     String tableName = request.getParameter("tableName") != null ? request.getParameter("tableName") : "";
@@ -117,8 +117,8 @@
                             for (int i = 0; i < vecConfigObj.size(); i++) {
                                 String color = i % 2 == 0 ? "trOdd" : "trEven"; //"#EEEEFF" : "";
                                 Properties prop = (Properties) vecConfigObj.get(i);
-                                String fieldName = StringEscapeUtils.escapeHtml(prop.getProperty("name", ""));
-                                String fieldCaption = StringEscapeUtils.escapeHtml(prop.getProperty("caption", ""));
+                                String fieldName = StringEscapeUtils.escapeHtml4(prop.getProperty("name", ""));
+                                String fieldCaption = StringEscapeUtils.escapeHtml4(prop.getProperty("caption", ""));
                                 String fieldId = prop.getProperty("id", "");
                                 String fieldPosition = prop.getProperty("order_no", "");
                                 String action = " Add ";

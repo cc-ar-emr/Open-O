@@ -34,8 +34,8 @@
 <%@page import="org.oscarehr.common.model.Facility" %>
 <%@page import="org.oscarehr.common.model.Provider" %>
 <%@page import="org.oscarehr.common.model.Demographic" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 
 <%
     LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);

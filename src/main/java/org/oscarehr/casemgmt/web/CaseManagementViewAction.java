@@ -23,7 +23,7 @@
 
 package org.oscarehr.casemgmt.web;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.PMmodule.caisi_integrator.CaisiIntegratorManager;
 import org.oscarehr.PMmodule.dao.SecUserRoleDao;
@@ -625,7 +625,7 @@ public class CaseManagementViewAction {
                 if (key.contains(" Date")) {
                     val = oscar.util.UtilDateUtilities.DateToString(cme.getDateValue(), "yyyy-MM-dd");
                 } else {
-                    val = org.apache.commons.lang.StringEscapeUtils.escapeJavaScript(cme.getValue());
+                    val = org.apache.commons.text.StringEscapeUtils.escapeEcmaScript(cme.getValue());
                 }
                 return val;
             }

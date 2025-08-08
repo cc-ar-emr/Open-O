@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.billing.CA.ON.dao.BillingONDiskNameDao;
 import org.oscarehr.billing.CA.ON.dao.BillingONFilenameDao;
@@ -55,6 +55,7 @@ import org.oscarehr.common.model.BillingOnTransaction;
 import org.oscarehr.common.model.BillingPaymentType;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import oscar.util.UtilDateUtilities;
 
@@ -131,7 +132,7 @@ public class JdbcBillingClaimImpl {
             b.setAppointmentNo(null);
         }
 
-        b.setDemographicName(StringEscapeUtils.escapeSql(val.demographic_name));
+        b.setDemographicName(SqlEscapeUtil.escapeSql(val.demographic_name));
         b.setSex(val.sex);
         b.setProvince(val.province);
         if (val.billing_date.length() > 0)
@@ -157,7 +158,7 @@ public class JdbcBillingClaimImpl {
         }
 
         b.setStatus(val.status);
-        b.setComment(StringEscapeUtils.escapeSql(val.comment));
+        b.setComment(SqlEscapeUtil.escapeSql(val.comment));
         b.setVisitType(val.visittype);
         b.setProviderOhipNo(val.provider_ohip_no);
         b.setProviderRmaNo(val.provider_rma_no);
@@ -374,8 +375,8 @@ public class JdbcBillingClaimImpl {
             BillingONExt billingONExt = new BillingONExt();
             billingONExt.setBillingNo(id);
             billingONExt.setDemographicNo(Integer.parseInt(demoNo));
-            billingONExt.setKeyVal(StringEscapeUtils.escapeSql(temp[i]));
-            billingONExt.setValue(StringEscapeUtils.escapeSql(val));
+            billingONExt.setKeyVal(SqlEscapeUtil.escapeSql(temp[i]));
+            billingONExt.setValue(SqlEscapeUtil.escapeSql(val));
             billingONExt.setDateTime(new Date());
             billingONExt.setStatus('1');
             extDao.persist(billingONExt);

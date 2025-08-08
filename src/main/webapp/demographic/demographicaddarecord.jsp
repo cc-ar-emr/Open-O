@@ -44,7 +44,7 @@
         import="java.util.*, java.net.URLEncoder, oscar.oscarDB.*, oscar.MyDateFormat, oscar.oscarWaitingList.WaitingList, org.oscarehr.common.OtherIdManager" %>
 <%@ page import="oscar.log.*" %>
 <%@ page import="org.oscarehr.util.SpringUtils" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 
 <%@ page import="org.oscarehr.common.dao.WaitingListDao" %>
 

@@ -65,8 +65,8 @@
 <%@ page import="org.oscarehr.common.dao.RecycleBinDao" %>
 <%@ page import="org.springframework.dao.DataIntegrityViolationException" %>
 <%@ page import="org.springframework.web.util.HtmlUtils" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.owasp.encoder.Encode" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>

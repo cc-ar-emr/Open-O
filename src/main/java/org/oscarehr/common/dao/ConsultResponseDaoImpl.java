@@ -31,15 +31,16 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.model.ConsultationResponse;
 import org.oscarehr.consultations.ConsultationResponseSearchFilter;
 import org.oscarehr.consultations.ConsultationResponseSearchFilter.SORTMODE;
 import org.oscarehr.util.MiscUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -104,10 +105,10 @@ public class ConsultResponseDaoImpl extends AbstractDaoImpl<ConsultationResponse
             sql.append("and cr.status!=4 and cr.status!=5 ");
         }
         if (StringUtils.isNotBlank(filter.getTeam())) {
-            sql.append("and cr.sendTo = '" + StringEscapeUtils.escapeSql(filter.getTeam()) + "' ");
+            sql.append("and cr.sendTo = '" + SqlEscapeUtil.escapeSql(filter.getTeam()) + "' ");
         }
         if (StringUtils.isNotBlank(filter.getUrgency())) {
-            sql.append("and cr.urgency = '" + StringEscapeUtils.escapeSql(filter.getUrgency()) + "' ");
+            sql.append("and cr.urgency = '" + SqlEscapeUtil.escapeSql(filter.getUrgency()) + "' ");
         }
         if (filter.getDemographicNo() != null && filter.getDemographicNo() > 0) {
             sql.append("and cr.demographicNo = " + filter.getDemographicNo() + " ");

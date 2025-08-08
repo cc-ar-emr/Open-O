@@ -44,7 +44,7 @@
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@ page import="org.owasp.encoder.Encode" %>
 <%@ page import="oscar.util.UtilMisc" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%
     String formClass = "BCAR2020";

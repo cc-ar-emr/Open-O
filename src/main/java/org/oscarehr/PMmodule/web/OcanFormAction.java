@@ -23,7 +23,7 @@
 
 package org.oscarehr.PMmodule.web;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.dao.OcanClientFormDao;
 import org.oscarehr.common.dao.OcanClientFormDataDao;
 import org.oscarehr.common.dao.OcanStaffFormDao;

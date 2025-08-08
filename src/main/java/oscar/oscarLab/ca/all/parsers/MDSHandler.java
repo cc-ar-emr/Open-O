@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.hl7.v2.oscar_to_oscar.DynamicHapiLoaderUtils;
 import org.oscarehr.util.MiscUtils;

@@ -33,7 +33,7 @@ package org.oscarehr.decisionSupport.model.conditionValue;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.decisionSupport.model.DecisionSupportException;
 
 /**

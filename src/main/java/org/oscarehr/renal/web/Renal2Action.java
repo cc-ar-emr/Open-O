@@ -27,7 +27,7 @@ package org.oscarehr.renal.web;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.velocity.VelocityContext;
 import org.oscarehr.PMmodule.dao.ProviderDao;
 import org.oscarehr.common.dao.DemographicDao;
@@ -251,7 +251,7 @@ public class Renal2Action extends ActionSupport {
             }
         }
 
-        String str = "{'result':'" + StringEscapeUtils.escapeJavaScript(nextSteps) + "'}";
+        String str = "{'result':'" + StringEscapeUtils.escapeEcmaScript(nextSteps) + "'}";
         JSONObject jsonArray = (JSONObject) JSONSerializer.toJSON(str);
         response.setContentType("text/x-json");
         try {

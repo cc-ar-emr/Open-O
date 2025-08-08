@@ -32,7 +32,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.PMmodule.dao.ProviderDao;
 import org.oscarehr.common.dao.BatchEligibilityDao;
 import org.oscarehr.common.model.BatchEligibility;

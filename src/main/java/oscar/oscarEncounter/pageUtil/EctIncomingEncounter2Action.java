@@ -41,7 +41,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.caisi.dao.DefaultIssueDao;
 import org.oscarehr.PMmodule.dao.ProgramAccessDAO;
@@ -197,7 +197,7 @@ public class EctIncomingEncounter2Action extends ActionSupport {
                     if (request.getParameter("remyoscarmsg") != null) {
                         MessageTransfer3 messageTransferOrig = MyOscarMessagesHelper.readMessage(request.getSession(),
                                 Long.parseLong(request.getParameter("remyoscarmsg")));
-                        dateStr = StringEscapeUtils.escapeHtml(
+                        dateStr = StringEscapeUtils.escapeHtml4(
                                 DateUtils.formatDateTime(messageTransferOrig.getSentDate(), request.getLocale()));
 
                         MyOscarLoggedInInfo myOscarLoggedInInfo = MyOscarLoggedInInfo
@@ -206,12 +206,12 @@ public class EctIncomingEncounter2Action extends ActionSupport {
                                 .getMinimalPerson(myOscarLoggedInInfo, messageTransferOrig.getSenderPersonId());
                         String originalMessageBody = MessageManager.getMessageBody(messageTransferOrig);
                         messageBeingRepliedTo = props.getString("myoscar.msg.From") + ": "
-                                + StringEscapeUtils.escapeHtml(minimalPersonTransfer.getLastName() + ", "
+                                + StringEscapeUtils.escapeHtml4(minimalPersonTransfer.getLastName() + ", "
                                 + minimalPersonTransfer.getFirstName())
                                 + " (" + dateStr + ")\n" + originalMessageBody + "\n-------------\n"
                                 + props.getString("myoscar.msg.Reply") + ":\n";
                     } else {
-                        dateStr = StringEscapeUtils.escapeHtml(
+                        dateStr = StringEscapeUtils.escapeHtml4(
                                 DateUtils.formatDateTime(messageTransfer.getSentDate(), request.getLocale()));
 
                         MyOscarLoggedInInfo myOscarLoggedInInfo = MyOscarLoggedInInfo
@@ -219,7 +219,7 @@ public class EctIncomingEncounter2Action extends ActionSupport {
                         MinimalPersonTransfer2 minimalPersonTransfer = AccountManager
                                 .getMinimalPerson(myOscarLoggedInInfo, messageTransfer.getSenderPersonId());
                         messageBeingRepliedTo = props.getString("myoscar.msg.From") + ": "
-                                + StringEscapeUtils.escapeHtml(minimalPersonTransfer.getLastName() + ", "
+                                + StringEscapeUtils.escapeHtml4(minimalPersonTransfer.getLastName() + ", "
                                 + minimalPersonTransfer.getFirstName())
                                 + " (" + dateStr + ")\n";
                     }
@@ -227,7 +227,7 @@ public class EctIncomingEncounter2Action extends ActionSupport {
                     String subject = MessageManager.getSubject(messageTransfer);
                     String messageBody = MessageManager.getMessageBody(messageTransfer);
                     bean.reason = props.getString("myoscar.msg.SubjectPrefix") + " - " + subject;
-                    bean.myoscarMsgId = messageBeingRepliedTo + StringEscapeUtils.escapeHtml(messageBody) + "\n";
+                    bean.myoscarMsgId = messageBeingRepliedTo + StringEscapeUtils.escapeHtml4(messageBody) + "\n";
                 } catch (Exception myoscarEx) {
                     bean.oscarMsg = "PHR message was not retrieved";
                     log.error("ERROR retrieving message", myoscarEx);

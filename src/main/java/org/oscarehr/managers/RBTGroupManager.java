@@ -28,7 +28,7 @@ package org.oscarehr.managers;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.dao.RBTGroupDao;
 import org.oscarehr.common.model.RBTGroup;
 import org.oscarehr.util.LoggedInInfo;

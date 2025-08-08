@@ -45,7 +45,7 @@
 <%@ include file="/taglibs.jsp" %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 
 <%@page import="org.oscarehr.eyeform.model.*" %>
 <%@page import="org.oscarehr.eyeform.web.Eyeform2Action" %>
@@ -195,8 +195,8 @@
         con_testbook = '<%=request.getAttribute("testbooking")%>';
         con_ocularpro = '<%=request.getAttribute("ocularProc")%>';
         con_follow = '<%=request.getAttribute("followup")%>';
-        con_aller = '<%=StringEscapeUtils.escapeJavaScript(aller) %>';
-        con_presc = '<%=StringEscapeUtils.escapeJavaScript(presc) %>';
+        con_aller = '<%=StringEscapeUtils.escapeEcmaScript(aller) %>';
+        con_presc = '<%=StringEscapeUtils.escapeEcmaScript(presc) %>';
 
         <%
             String customCppIssues[] = oscar.OscarProperties.getInstance().getProperty("encounter.custom_cpp_issues", "").split(",");

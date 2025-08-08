@@ -32,7 +32,7 @@ import java.util.Date;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.oscarehr.common.model.PartialDate;
 import org.oscarehr.util.MiscUtils;
 import org.springframework.stereotype.Repository;

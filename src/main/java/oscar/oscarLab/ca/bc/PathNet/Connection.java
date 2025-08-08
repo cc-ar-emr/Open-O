@@ -33,7 +33,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.httpclient.HttpException;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.util.MiscUtils;
 import org.w3c.dom.Document;
@@ -150,11 +149,11 @@ public class Connection {
         return builder.parse(input);
     }
 
-    private InputStream CreateInputStream(String queryString) throws HttpException, IOException {
+    private InputStream CreateInputStream(String queryString) throws IOException {
         return this.http.Get(queryString);
     }
 
-    private String CreateString(String queryString) throws HttpException, IOException {
+    private String CreateString(String queryString) throws IOException {
         return this.http.GetString(queryString);
     }
 }

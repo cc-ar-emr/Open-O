@@ -47,7 +47,7 @@
 <%@page import="org.oscarehr.common.model.*" %>
 <%@page import="org.oscarehr.util.*" %>
 <%@page import="java.text.*" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%
     String agencyName = oscar.OscarProperties.getInstance().getProperty("db_name", "");
     String startDateString = request.getParameter("startDate");

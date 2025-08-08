@@ -47,7 +47,7 @@
 <%@page import="org.oscarehr.common.dao.CVCImmunizationDao" %>
 <%@page import="org.oscarehr.common.dao.CVCMappingDao" %>
 <%@page import="org.oscarehr.common.model.CVCMedicationLotNumber" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.common.model.CVCImmunization" %>
 <%@page import="org.oscarehr.managers.CanadianVaccineCatalogueManager" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>

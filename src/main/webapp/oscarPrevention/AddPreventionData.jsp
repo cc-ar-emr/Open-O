@@ -28,14 +28,14 @@
 <%@page import="org.oscarehr.common.model.PartialDate" %>
 <%@page import="org.oscarehr.common.dao.PartialDateDao" %>
 <%@page import="oscar.OscarProperties" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.common.model.Consent" %>
 <%@page import="org.oscarehr.common.dao.ConsentDao" %>
 <%@page import="org.oscarehr.common.model.CVCMapping" %>
 <%@page import="org.oscarehr.common.dao.CVCImmunizationDao" %>
 <%@page import="org.oscarehr.common.dao.CVCMappingDao" %>
 <%@page import="org.oscarehr.common.model.CVCMedicationLotNumber" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.common.model.CVCImmunization" %>
 <%@page import="org.oscarehr.managers.CanadianVaccineCatalogueManager" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
@@ -731,7 +731,7 @@
                 <table class="TopStatusBar">
                     <tr>
                         <td>
-                            <%=StringEscapeUtils.escapeHtml(nameage)%>
+                            <%=StringEscapeUtils.escapeHtml4(nameage)%>
                         </td>
                         <td>&nbsp;
 
@@ -1516,7 +1516,7 @@
         } else if (second != null) {
             ret = second;
         }
-        return StringEscapeUtils.escapeHtml(ret);
+        return StringEscapeUtils.escapeHtml4(ret);
     }
 
     String checked(String first, String second) {

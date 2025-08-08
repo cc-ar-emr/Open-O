@@ -28,8 +28,8 @@ package oscar.oscarDB;
 
 import java.util.List;
 
-import org.jdom.Document;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.output.XMLOutputter;
 import org.oscarehr.common.dao.TableModificationDao;
 import org.oscarehr.common.model.ProviderLabRoutingModel;
 import org.oscarehr.common.model.TableModification;

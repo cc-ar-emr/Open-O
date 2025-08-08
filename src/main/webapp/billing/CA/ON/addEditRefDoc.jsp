@@ -44,7 +44,7 @@
 <%@ page errorPage="../appointment/errorpage.jsp"
          import="java.util.*,
                  java.sql.*" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="org.oscarehr.common.model.Billingreferral" %>
 <%@page import="org.oscarehr.common.dao.BillingreferralDao" %>

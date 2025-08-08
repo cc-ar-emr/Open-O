@@ -46,7 +46,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ include file="/casemgmt/taglibs.jsp" %>
 <%@taglib uri="/WEB-INF/caisi-tag.tld" prefix="caisi" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@ page
         import="org.oscarehr.casemgmt.model.*, org.oscarehr.common.dao.DemographicDao, org.oscarehr.util.SpringUtils, org.oscarehr.common.model.Demographic" %>
 

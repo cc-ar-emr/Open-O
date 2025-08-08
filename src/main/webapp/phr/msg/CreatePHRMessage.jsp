@@ -30,7 +30,7 @@
 <%@page import="org.oscarehr.myoscar_server.ws.MessageTransfer3" %>
 <%@page import="org.oscarehr.myoscar.client.ws_manager.MessageManager" %>
 <%@page import="org.oscarehr.myoscar.utils.MyOscarLoggedInInfo" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.phr.util.MyOscarUtils" %>
 <%@page import="org.oscarehr.phr.util.MyOscarServerRelationManager" %>
 <%@page import="org.oscarehr.myoscar_server.ws.MessageTransfer" %>
@@ -266,7 +266,7 @@
 
                                                         %>
                                                         <input size="30" readonly="readonly" type="text"
-                                                               value="<%=StringEscapeUtils.escapeHtml(senderString)%>"/>
+                                                               value="<%=StringEscapeUtils.escapeHtml4(senderString)%>"/>
                                                         <%
 
                                                             if (replyAll) {
@@ -278,7 +278,7 @@
                                                         %>
                                                         <br/>
                                                         <input size="30" readonly="readonly" type="text"
-                                                               value="<%=StringEscapeUtils.escapeHtml(recipientString)%>"/>
+                                                               value="<%=StringEscapeUtils.escapeHtml4(recipientString)%>"/>
                                                         <%
                                                                 }
                                                             }
@@ -318,7 +318,7 @@
                                                                 String subject = MessageManager.getSubject(replyToMessage);
                                                         %>
                                                         <input size="67" readonly="readonly" type="text"
-                                                               value="Re: <%=StringEscapeUtils.escapeHtml(subject)%>"/>
+                                                               value="Re: <%=StringEscapeUtils.escapeHtml4(subject)%>"/>
                                                         <%
                                                         } else {
                                                         %>
@@ -339,7 +339,7 @@
                                                     <td>
                                                         <textarea disabled="disabled" readonly="readonly" cols="60"
                                                                   rows="4"
-                                                                  style="border: 1px solid black;color:black"><%=StringEscapeUtils.escapeHtml(messageBody)%></textarea>
+                                                                  style="border: 1px solid black;color:black"><%=StringEscapeUtils.escapeHtml4(messageBody)%></textarea>
                                                     </td>
                                                 </tr>
                                                 <%
@@ -355,7 +355,7 @@
                                                             }
                                                         %>
                                                         <textarea name="body" id="message" cols="60" rows="18">
-                                                            <%=StringEscapeUtils.escapeHtml(body)%>
+                                                            <%=StringEscapeUtils.escapeHtml4(body)%>
                                                         </textarea>
                                                     </td>
 

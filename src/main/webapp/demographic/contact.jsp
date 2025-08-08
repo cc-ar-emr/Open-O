@@ -25,7 +25,7 @@
 --%>
 
 <%@ include file="/taglibs.jsp" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="org.oscarehr.PMmodule.dao.ProviderDao" %>
 <%@page import="org.oscarehr.common.model.DemographicContact" %>

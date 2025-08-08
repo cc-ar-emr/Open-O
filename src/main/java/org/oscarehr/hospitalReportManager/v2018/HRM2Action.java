@@ -39,8 +39,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -75,6 +75,7 @@ import org.oscarehr.managers.SecurityInfoManager;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import oscar.OscarProperties;
 
@@ -592,7 +593,7 @@ public class HRM2Action extends ActionSupport {
             limitToProvider = LoggedInInfo.getLoggedInInfoFromSession(request).getLoggedInProviderNo();
         }
 
-        List<HrmLog> logs = hrmLogDao.query(Integer.parseInt(start), Integer.parseInt(length), StringEscapeUtils.escapeSql(orderBy), StringEscapeUtils.escapeSql(orderingColumnDirection), limitToProvider);
+        List<HrmLog> logs = hrmLogDao.query(Integer.parseInt(start), Integer.parseInt(length), SqlEscapeUtil.escapeSql(orderBy), SqlEscapeUtil.escapeSql(orderingColumnDirection), limitToProvider);
 
         JSONArray data = new JSONArray();
 

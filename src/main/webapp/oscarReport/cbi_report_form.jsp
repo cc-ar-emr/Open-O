@@ -50,7 +50,7 @@
 <%@page import="org.oscarehr.util.LoggedInInfo" %>
 <%@page import="java.util.GregorianCalendar" %>
 <%@page import="java.text.DateFormatSymbols" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="oscar.util.CBIUtil" %>
 <%@page import="java.util.Date" %>
 
@@ -202,7 +202,7 @@
                                 if (provider.getProviderNo().equals(Provider.SYSTEM_PROVIDER_NO)) continue;
 
                         %>
-                        <option value="<%=provider.getProviderNo()%>"><%=StringEscapeUtils.escapeHtml(provider.getFormattedName())%>
+                        <option value="<%=provider.getProviderNo()%>"><%=StringEscapeUtils.escapeHtml4(provider.getFormattedName())%>
                         </option>
                         <%
                             }
@@ -217,7 +217,7 @@
 
                             for (Program program : programs) {
                         %>
-                        <option value="<%=program.getId()%>"><%=StringEscapeUtils.escapeHtml(program.getName() + " (" + program.getType() + ")")%>
+                        <option value="<%=program.getId()%>"><%=StringEscapeUtils.escapeHtml4(program.getName() + " (" + program.getType() + ")")%>
                         </option>
                         <%
                             }

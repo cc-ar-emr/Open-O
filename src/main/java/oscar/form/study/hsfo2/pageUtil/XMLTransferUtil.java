@@ -42,10 +42,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.Logger;
 import org.apache.xmlbeans.XmlCalendar;
 import org.apache.xmlbeans.XmlCursor;
@@ -2046,9 +2049,9 @@ public class XMLTransferUtil {
         userId = userId.replaceAll("&", "&amp;");
         passwd = passwd.replaceAll("&", "&amp;");
 
-        PostMethod post = new PostMethod(getWebUrl());
+        HttpPost post = new HttpPost(getWebUrl());
 //    post.setRequestHeader( "SOAPAction", getDataDateRangeAction );
-        post.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+        post.setHeader("Content-Type", "text/xml; charset=utf-8");
 
 //    String soapMsg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 //                     + "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"
@@ -2072,33 +2075,38 @@ public class XMLTransferUtil {
                         + "</soapenv:Body>"
                         + "</soapenv:Envelope>";
 
-        RequestEntity re = new StringRequestEntity(soapMsg, "text/xml", "utf-8");
+        StringEntity entity = new StringEntity(soapMsg, "UTF-8");
+        entity.setContentType("text/xml");
+        post.setEntity(entity);
 
-        post.setRequestEntity(re);
+        try (CloseableHttpClient httpclient = HttpClients.createDefault();
+            CloseableHttpResponse response = httpclient.execute(post)) {
 
-        HttpClient httpclient = new HttpClient();
-        // Execute request
-        try {
-            Map<SoapElementKey, Object> output = new HashMap<SoapElementKey, Object>();
-            int result = httpclient.executeMethod(post);
-            // Display status code
+            Map<SoapElementKey, Object> output = new HashMap<>();
 
+            int result = response.getStatusLine().getStatusCode();
             output.put(SoapElementKey.responseStatusCode, result);
-            String rsXml = post.getResponseBodyAsString();
-            logger.debug("response xml of GetDataDateRange: \n" + rsXml);
+
+            String rsXml = null;
+            HttpEntity responseEntity = response.getEntity();
+            if (responseEntity != null) {
+                rsXml = EntityUtils.toString(responseEntity, "UTF-8");
+                logger.debug("response xml of GetDataDateRange: \n" + rsXml);
+            }
+
             if (result != 200) {
                 logger.error("GetDataDateRange result code: " + result);
                 return null;
             }
 
             output.put(SoapElementKey.GetDataDateRangeResult, getElementValue(rsXml, "GetDataDateRangeResult"));
-
             output.put(SoapElementKey.DataBeginDate, getElementValue(rsXml, "DataBeginDate"));
             output.put(SoapElementKey.DataEndDate, getElementValue(rsXml, "DataEndDate"));
 
             return output;
+
         } finally {
-            post.releaseConnection();
+            // Close automatically
         }
     }
 
@@ -2128,9 +2136,9 @@ public class XMLTransferUtil {
         passwd = passwd.replaceAll("&", "&amp;");
 
         final String webUrl = getWebUrl();
-        PostMethod post = new PostMethod(webUrl);
+        HttpPost post = new HttpPost(webUrl);
 //    post.setRequestHeader( "SOAPAction", dataVaultAction );     //no soap action required
-        post.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+        post.setHeader("Content-Type", "text/xml; charset=utf-8");
 
         {
             final String key = "dataBeginDate";
@@ -2244,41 +2252,41 @@ public class XMLTransferUtil {
 
 //    ByteArrayInputStream bis = new ByteArrayInputStream( outputStream.toByteArray() );
 //    RequestEntity re = new InputStreamRequestEntity( bis, "text/xml");
-        RequestEntity re = new StringRequestEntity(soapMsg, "text/xml", "utf-8");
+        StringEntity entity = new StringEntity(soapMsg, "UTF-8");
+        entity.setContentType("text/xml");
+        post.setEntity(entity);
 
-        post.setRequestEntity(re);
-
-        HttpClient httpclient = new HttpClient();
         // Execute request
-        try {
-            Map<SoapElementKey, Object> output = new HashMap<SoapElementKey, Object>();
+            try (CloseableHttpClient httpclient = HttpClients.createDefault();
+                CloseableHttpResponse response = httpclient.execute(post)) {
 
-            int result = httpclient.executeMethod(post);
-            // Display status code
+                Map<SoapElementKey, Object> output = new HashMap<SoapElementKey, Object>();
+                int result = response.getStatusLine().getStatusCode();
+                output.put(SoapElementKey.responseStatusCode, result);
 
-            output.put(SoapElementKey.responseStatusCode, result);
-            String rsXml = post.getResponseBodyAsString();
-            logger.info("url: " + webUrl);
-            logger.info("dataVaultAction: " + dataVaultAction);
-            logger.info("xml: =======");
-            logger.info(xml);
-            logger.info("xml end: =======");
-            logger.info("response xml of DataVault: \n" + rsXml);
-            logger.error("DataVault result code: " + result);
-            if (result != 200) {
-                logger.error("ERROR: DataVault result code: " + result);
+                String rsXml = null;
+                HttpEntity responseEntity = response.getEntity();
+                if (responseEntity != null) {
+                    rsXml = EntityUtils.toString(responseEntity, "UTF-8");
+                }
+
+                logger.info("url: " + webUrl);
+                logger.info("dataVaultAction: " + dataVaultAction);
+                logger.info("xml: =======");
+                logger.info(xml);
+                logger.info("xml end: =======");
+                logger.info("response xml of DataVault: \n" + rsXml);
+                logger.error("DataVault result code: " + result);
+
+                if (result != 200) {
+                    logger.error("ERROR: DataVault result code: " + result);
+                    return output;
+                }
+
+                output.put(SoapElementKey.DataVaultStatusStrResult, getElementValue(rsXml, "DataVaultStatusStrResult"));
+                output.put(SoapElementKey.StatusMessage, getElementValue(rsXml, "StatusMessage"));
+
                 return output;
             }
-
-            //output.put( SoapElementKey.DataVaultResult, getElementValue( rsXml, "DataVaultResult" ) );
-            output.put(SoapElementKey.DataVaultStatusStrResult, getElementValue(rsXml, "DataVaultStatusStrResult"));
-            output.put(SoapElementKey.StatusMessage, getElementValue(rsXml, "StatusMessage"));
-            return output;
-
-        } finally {
-            // Release current connection to the connection pool
-            post.releaseConnection();
         }
     }
-
-}

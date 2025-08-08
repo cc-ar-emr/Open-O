@@ -24,7 +24,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.dao.SiteDao;
 import org.oscarehr.common.model.Site;
 import org.oscarehr.util.SpringUtils;

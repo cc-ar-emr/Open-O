@@ -54,13 +54,13 @@
 <%@page import="java.text.SimpleDateFormat" %>
 <%@page import="java.text.DateFormat" %>
 
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 
 <%@page import="java.util.HashSet" %>
 <%@page import="org.oscarehr.PMmodule.model.Program" %>
 <%@page import="org.oscarehr.PMmodule.dao.ProgramDao" %>
 <%@page import="org.oscarehr.PMmodule.service.ProgramManager" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.common.model.Provider" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="org.oscarehr.managers.ProviderManager2" %>
@@ -68,7 +68,7 @@
 
 <%@page import="org.oscarehr.common.model.CdsFormOption" %>
 <%@page import="org.oscarehr.web.Cds4ReportUIBean" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 <%
     CBIUtil cbiUtil = new CBIUtil();
 

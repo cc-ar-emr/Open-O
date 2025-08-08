@@ -52,7 +52,7 @@
 <%@page import="org.oscarehr.myoscar_server.ws.MinimalPersonTransfer2" %>
 <%@page import="org.oscarehr.myoscar_server.ws.MessageTransfer3" %>
 <%@page import="oscar.util.DateUtils" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils,java.net.URLEncoder" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils,java.net.URLEncoder" %>
 <%@page import="org.oscarehr.phr.web.MyOscarMessagesHelper" %>
 <%@page import="oscar.util.UtilDateUtilities,java.util.*" %>
 <%@page import="org.oscarehr.phr.util.MyOscarUtils,org.oscarehr.common.model.Demographic" %>
@@ -205,7 +205,7 @@
                                             displayName.append(minimalPersonSender.getUserName());
                                             displayName.append(")");
                                         %>
-                                        <%=StringEscapeUtils.escapeHtml(displayName.toString())%>
+                                        <%=StringEscapeUtils.escapeHtml4(displayName.toString())%>
                                     </td>
                                 </tr>
                                 <tr>
@@ -217,7 +217,7 @@
                                             for (Long recipientId : messageTransfer.getRecipientPeopleIds()) {
                                                 MinimalPersonTransfer2 recipient = AccountManager.getMinimalPerson(myOscarLoggedInInfo, recipientId);
                                         %>
-                                        <%=StringEscapeUtils.escapeHtml(recipient.getLastName() + ", " + recipient.getFirstName() + " (" + recipient.getUserName() + "); ")%>
+                                        <%=StringEscapeUtils.escapeHtml4(recipient.getLastName() + ", " + recipient.getFirstName() + " (" + recipient.getUserName() + "); ")%>
                                         <%
                                             }
                                         %>
@@ -228,7 +228,7 @@
                                         <fmt:setBundle basename="oscarResources"/><fmt:message key="oscarMessenger.ViewMessage.msgSubject"/>:
                                     </td>
                                     <td class="Printable" bgcolor="#BBBBFF">
-                                        <%=StringEscapeUtils.escapeHtml(subject)%>
+                                        <%=StringEscapeUtils.escapeHtml4(subject)%>
                                     </td>
                                 </tr>
                                 <tr>
@@ -236,7 +236,7 @@
                                         <fmt:setBundle basename="oscarResources"/><fmt:message key="oscarMessenger.ViewMessage.msgDate"/>:
                                     </td>
                                     <td class="Printable" bgcolor="#B8B8FF">
-                                        <%=StringEscapeUtils.escapeHtml(DateUtils.formatDateTime(messageTransfer.getSentDate(), request.getLocale()))%>
+                                        <%=StringEscapeUtils.escapeHtml4(DateUtils.formatDateTime(messageTransfer.getSentDate(), request.getLocale()))%>
                                     </td>
                                 </tr>
                                 <tr>
@@ -244,20 +244,20 @@
                                     <td bgcolor="#EEEEFF"></td>
                                     <td bgcolor="#EEEEFF">
                                         <textarea name="msgBody" wrap="hard" readonly="true" rows="18"
-                                                  cols="60"><%=StringEscapeUtils.escapeHtml(messageBody)%></textarea><br>
+                                                  cols="60"><%=StringEscapeUtils.escapeHtml4(messageBody)%></textarea><br>
 
                                         <%
                                             if (filename != null) {
                                         %>
                                         <div style="padding-top:0.5em;padding-bottom:0.5em">
-                                            <%=StringEscapeUtils.escapeHtml(filename)%>
+                                            <%=StringEscapeUtils.escapeHtml4(filename)%>
                                             &nbsp;
-                                            (<%=StringEscapeUtils.escapeHtml(mimeType)%> <%=fileSize%> bytes)
+                                            (<%=StringEscapeUtils.escapeHtml4(mimeType)%> <%=fileSize%> bytes)
                                             &nbsp;
                                             <a href="msg/attachment_retriever.jsp?messageId=<%=messageId%>&amp;download=false">open</a>
                                             &nbsp;
                                             <a href="msg/attachment_retriever.jsp?messageId=<%=messageId%>&amp;download=true"
-                                               download="<%=StringEscapeUtils.escapeHtml(filename)%>">download</a>
+                                               download="<%=StringEscapeUtils.escapeHtml4(filename)%>">download</a>
                                             <%
                                                 if (demographic != null) {
                                             %>

@@ -40,13 +40,13 @@ import javax.persistence.Entity;
 import javax.persistence.PostUpdate;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.drools.FactException;
 import org.drools.RuleBase;
 import org.drools.WorkingMemory;
-import org.jdom.Element;
-import org.jdom.Namespace;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
 import org.oscarehr.decisionSupport.model.DSCondition;
 import org.oscarehr.decisionSupport.model.DSConsequence;
 import org.oscarehr.decisionSupport.model.DSDemographicAccess;

@@ -40,7 +40,7 @@
 <%@ page import="oscar.util.*" %>
 <%@ page import="oscar.login.*" %>
 <%@ page import="oscar.log.*" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <html>
 <head>
     <title>

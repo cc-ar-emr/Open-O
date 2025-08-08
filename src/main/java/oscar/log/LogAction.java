@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.OscarLogDao;
 import org.oscarehr.common.model.OscarLog;

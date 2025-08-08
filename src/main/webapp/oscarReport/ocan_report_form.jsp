@@ -47,7 +47,7 @@
 <%@page import="org.oscarehr.PMmodule.dao.*" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
 <%@page import="java.text.DateFormatSymbols" %>
-<%@page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@page import="org.apache.commons.text.StringEscapeUtils" %>
 
 <%@ include file="/taglibs.jsp" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"

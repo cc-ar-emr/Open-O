@@ -66,8 +66,8 @@ import com.opensymphony.xwork2.ActionSupport;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.xmlbeans.XmlException;
@@ -3003,7 +3003,7 @@ public class ImportDemographicDataAction42Action extends ActionSupport {
                 if (StringUtils.empty(encounter)) {
                     err_data.add("Empty clinical note (" + (i + 1) + ")");
                     //continue;
-                    encounter = org.apache.commons.lang.StringUtils.trimToEmpty(encounter);
+                    encounter = org.apache.commons.lang3.StringUtils.trimToEmpty(encounter);
                 }
 
 

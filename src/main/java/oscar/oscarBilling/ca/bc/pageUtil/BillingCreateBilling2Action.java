@@ -26,7 +26,7 @@
 
 package oscar.oscarBilling.ca.bc.pageUtil;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;

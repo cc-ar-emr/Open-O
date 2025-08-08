@@ -36,7 +36,7 @@
 <%@page import="org.oscarehr.PMmodule.web.CdsForm4" %>
 <%@page import="org.oscarehr.util.SessionConstants" %>
 <%@page import="org.oscarehr.util.SpringUtils" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 <%@include file="/layouts/caisi_html_top-jquery.jspf" %>
 
 

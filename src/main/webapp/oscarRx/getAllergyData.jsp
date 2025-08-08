@@ -24,7 +24,7 @@
 
 --%>
 
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="org.oscarehr.common.model.Allergy" %>
 <%@page import="org.oscarehr.PMmodule.caisi_integrator.RemoteDrugAllergyHelper" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>

@@ -59,7 +59,7 @@
 
 <%@ page import="java.util.*" %>
 <%@ page import="org.oscarehr.common.dao.CtlDocClassDao" %>
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%@page import="org.oscarehr.util.SessionConstants" %>
 <%@ page import="org.oscarehr.documentManager.EDocUtil" %>
 <%@ page import="org.oscarehr.documentManager.EDoc" %>
@@ -585,7 +585,7 @@
                                         } else { // curdoc get status
                                         %>
                                         <a style="color:red; padding:0;"
-                                           href="javascript: checkDelete('documentReport.jsp?delDocumentNo=<%=curdoc.getDocId()%>&function=<%=module%>&functionid=<%=moduleid%>&viewstatus=<%=viewstatus%>','<%=StringEscapeUtils.escapeJavaScript(curdoc.getDescription())%>')"
+                                           href="javascript: checkDelete('documentReport.jsp?delDocumentNo=<%=curdoc.getDocId()%>&function=<%=module%>&functionid=<%=moduleid%>&viewstatus=<%=viewstatus%>','<%=StringEscapeUtils.escapeEcmaScript(curdoc.getDescription())%>')"
                                            class="btn btn-link" title="Delete">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                  fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -612,7 +612,7 @@
                                             </a>
                                             <% } else { // curdoc get status %>
                                             <a style="color:red;padding:0;"
-                                               href="javascript: checkDelete('documentReport.jsp?delDocumentNo=<%=curdoc.getDocId()%>&function=<%=module%>&functionid=<%=moduleid%>&viewstatus=<%=viewstatus%>','<%=StringEscapeUtils.escapeJavaScript(curdoc.getDescription())%>')"
+                                               href="javascript: checkDelete('documentReport.jsp?delDocumentNo=<%=curdoc.getDocId()%>&function=<%=module%>&functionid=<%=moduleid%>&viewstatus=<%=viewstatus%>','<%=StringEscapeUtils.escapeEcmaScript(curdoc.getDescription())%>')"
                                                class="btn btn-link" title="Delete">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                      fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">

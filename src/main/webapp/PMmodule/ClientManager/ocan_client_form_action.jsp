@@ -33,7 +33,7 @@
 <%@page import="java.util.Map" %>
 <%@page import="java.util.Date" %>
 <%@page import="java.util.List" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%
     LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
 

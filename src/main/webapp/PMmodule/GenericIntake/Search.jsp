@@ -30,7 +30,7 @@
 <%@page import="org.oscarehr.caisi_integrator.ws.MatchingDemographicTransferScore" %>
 <%@page import="java.util.HashMap" %>
 <%@page import="java.util.GregorianCalendar" %>
-<%@page import="org.apache.commons.lang.time.DateFormatUtils" %>
+<%@page import="org.apache.commons.lang3.time.DateFormatUtils" %>
 <%@ page import="org.oscarehr.PMmodule.web.utils.UserRoleUtils" %>
 
 <%

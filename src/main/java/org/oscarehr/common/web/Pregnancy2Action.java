@@ -27,7 +27,7 @@ package org.oscarehr.common.web;
 import com.opensymphony.xwork2.ActionSupport;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.struts2.ServletActionContext;
 import org.oscarehr.PMmodule.dao.ProviderDao;
 import org.oscarehr.common.dao.*;

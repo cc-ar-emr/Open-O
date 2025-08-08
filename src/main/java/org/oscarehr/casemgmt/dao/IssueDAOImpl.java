@@ -31,8 +31,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.oscarehr.casemgmt.model.Issue;
 import org.oscarehr.common.dao.AbstractDaoImpl;
 import org.oscarehr.util.MiscUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 
@@ -115,7 +116,7 @@ public class IssueDAOImpl extends HibernateDaoSupport implements IssueDAO {
             if (x != 0) {
                 buf.append(",");
             }
-            buf.append("\'" + StringEscapeUtils.escapeSql((roles.get(x)).getName()) + "\'");
+            buf.append("\'" + SqlEscapeUtil.escapeSql((roles.get(x)).getName()) + "\'");
         }
         String roleList = buf.toString();
 
@@ -136,7 +137,7 @@ public class IssueDAOImpl extends HibernateDaoSupport implements IssueDAO {
             if (x != 0) {
                 buf.append(",");
             }
-            buf.append("\'" + StringEscapeUtils.escapeSql((roles.get(x)).getName()) + "\'");
+            buf.append("\'" + SqlEscapeUtil.escapeSql((roles.get(x)).getName()) + "\'");
         }
         final String roleList = buf.toString();
 
@@ -171,7 +172,7 @@ public class IssueDAOImpl extends HibernateDaoSupport implements IssueDAO {
             if (x != 0) {
                 buf.append(",");
             }
-            buf.append("\'" + StringEscapeUtils.escapeSql((roles.get(x)).getName()) + "\'");
+            buf.append("\'" + SqlEscapeUtil.escapeSql((roles.get(x)).getName()) + "\'");
         }
         final String roleList = buf.toString();
 

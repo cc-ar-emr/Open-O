@@ -29,7 +29,7 @@ package org.oscarehr.documentManager.actions;
 import com.quatro.dao.security.SecObjectNameDao;
 import com.quatro.model.security.Secobjectname;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.PMmodule.dao.SecUserRoleDao;
@@ -46,6 +46,7 @@ import org.oscarehr.managers.DemographicManager;
 import org.oscarehr.util.LoggedInInfo;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 import oscar.oscarLab.ca.all.Hl7textResultsData;
 import oscar.oscarLab.ca.on.CommonLabResultData;
 import oscar.oscarLab.ca.on.HRMResultsData;
@@ -212,11 +213,11 @@ public class DmsInboxManage2Action extends ActionSupport {
         boolean providerSearch = !"-1".equals(searchProviderNo);
 
         MiscUtils.getLogger().debug("SEARCH " + searchProviderNo);
-        String patientFirstName = StringEscapeUtils.escapeSql(request.getParameter("fname"));
-        String patientLastName = StringEscapeUtils.escapeSql(request.getParameter("lname"));
-        String patientHealthNumber = StringEscapeUtils.escapeSql(request.getParameter("hnum"));
-        String startDate = StringEscapeUtils.escapeSql(request.getParameter("startDate"));
-        String endDate = StringEscapeUtils.escapeSql(request.getParameter("endDate"));
+        String patientFirstName = SqlEscapeUtil.escapeSql(request.getParameter("fname"));
+        String patientLastName = SqlEscapeUtil.escapeSql(request.getParameter("lname"));
+        String patientHealthNumber = SqlEscapeUtil.escapeSql(request.getParameter("hnum"));
+        String startDate = SqlEscapeUtil.escapeSql(request.getParameter("startDate"));
+        String endDate = SqlEscapeUtil.escapeSql(request.getParameter("endDate"));
 
         if (patientFirstName == null) {
             patientFirstName = "";
@@ -267,10 +268,10 @@ public class DmsInboxManage2Action extends ActionSupport {
         CommonLabResultData comLab = new CommonLabResultData();
         // String providerNo = request.getParameter("providerNo");
         String providerNo = (String) session.getAttribute("user");
-        String searchProviderNo = StringEscapeUtils.escapeSql(request.getParameter("searchProviderNo"));
-        String ackStatus = StringEscapeUtils.escapeSql(request.getParameter("status"));
-        String demographicNo = StringEscapeUtils.escapeSql(request.getParameter("demographicNo")); // used when searching for labs by patient instead of provider
-        String scannedDocStatus = StringEscapeUtils.escapeSql(request.getParameter("scannedDocument"));
+        String searchProviderNo = SqlEscapeUtil.escapeSql(request.getParameter("searchProviderNo"));
+        String ackStatus = SqlEscapeUtil.escapeSql(request.getParameter("status"));
+        String demographicNo = SqlEscapeUtil.escapeSql(request.getParameter("demographicNo")); // used when searching for labs by patient instead of provider
+        String scannedDocStatus = SqlEscapeUtil.escapeSql(request.getParameter("scannedDocument"));
         Integer page = 0;
         try {
             page = Integer.parseInt(request.getParameter("page"));
@@ -289,8 +290,8 @@ public class DmsInboxManage2Action extends ActionSupport {
         }
         scannedDocStatus = "I";
 
-        String startDateStr = StringEscapeUtils.escapeSql(request.getParameter("startDate"));
-        String endDateStr = StringEscapeUtils.escapeSql(request.getParameter("endDate"));
+        String startDateStr = SqlEscapeUtil.escapeSql(request.getParameter("startDate"));
+        String endDateStr = SqlEscapeUtil.escapeSql(request.getParameter("endDate"));
 
 
         String view = request.getParameter("view");
@@ -357,9 +358,9 @@ public class DmsInboxManage2Action extends ActionSupport {
         }
 
         InboxResultsDao inboxResultsDao = (InboxResultsDao) SpringUtils.getBean(InboxResultsDao.class);
-        String patientFirstName = StringEscapeUtils.escapeSql(request.getParameter("fname"));
-        String patientLastName = StringEscapeUtils.escapeSql(request.getParameter("lname"));
-        String patientHealthNumber = StringEscapeUtils.escapeSql(request.getParameter("hnum"));
+        String patientFirstName = SqlEscapeUtil.escapeSql(request.getParameter("fname"));
+        String patientLastName = SqlEscapeUtil.escapeSql(request.getParameter("lname"));
+        String patientHealthNumber = SqlEscapeUtil.escapeSql(request.getParameter("hnum"));
 
         ArrayList<LabResultData> labdocs = new ArrayList<LabResultData>();
 

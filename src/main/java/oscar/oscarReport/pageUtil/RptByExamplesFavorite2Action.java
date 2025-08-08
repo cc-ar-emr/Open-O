@@ -32,12 +32,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.oscarehr.common.dao.ReportByExamplesFavoriteDao;
 import org.oscarehr.common.model.ReportByExamplesFavorite;
 import org.oscarehr.util.MiscUtils;
 import org.oscarehr.util.SpringUtils;
+import org.oscarehr.util.SqlEscapeUtil;
 
 import oscar.oscarReport.bean.RptByExampleQueryBeanHandler;
 
@@ -72,7 +72,13 @@ public class RptByExamplesFavorite2Action extends ActionSupport {
                     break;
                 }
             }
-            return "edit";
+        } else {
+            String favoriteName = this.getFavoriteName();
+            String query = this.getQuery();
+
+            String queryWithEscapeChar = SqlEscapeUtil.escapeSql(query);///queryWithEscapeChar);
+            MiscUtils.getLogger().debug("escapeSql: " + queryWithEscapeChar);
+            write2Database(providerNo, favoriteName, queryWithEscapeChar);
         }
 
         // Save new favorite

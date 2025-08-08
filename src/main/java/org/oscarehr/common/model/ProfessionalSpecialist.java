@@ -23,7 +23,7 @@
 
 package org.oscarehr.common.model;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.integration.fhir.interfaces.ContactInterface;
 import org.oscarehr.integration.fhir.resources.constants.ContactRelationship;
 import org.oscarehr.integration.fhir.resources.constants.ContactType;

@@ -24,7 +24,7 @@
  */
 package oscar.oscarEncounter.data.myoscar;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 public class WeightMeasurement extends MyOscarMeasurement {
 

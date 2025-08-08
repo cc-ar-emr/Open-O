@@ -32,10 +32,10 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.oscarehr.common.PaginationQuery;
 import org.oscarehr.common.model.ConsultationRequest;
 import org.oscarehr.consultations.ConsultationQuery;

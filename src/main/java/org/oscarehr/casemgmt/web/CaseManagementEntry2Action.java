@@ -28,8 +28,8 @@ import com.quatro.model.security.Secrole;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import net.sf.json.processors.JsDateJsonBeanProcessor;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
@@ -673,7 +673,7 @@ public class CaseManagementEntry2Action extends ActionSupport implements Session
 
         Date noteDate = new Date();
 
-        strNote = org.apache.commons.lang.StringUtils.trimToNull(strNote);
+        strNote = org.apache.commons.lang3.StringUtils.trimToNull(strNote);
         if ((archived == null || !archived.equalsIgnoreCase("true")) && (strNote == null || strNote.equals("")))
             return null;
 
@@ -831,7 +831,7 @@ public class CaseManagementEntry2Action extends ActionSupport implements Session
 
         // strNote = strNote.trim();
         logger.debug("Saving: " + strNote);
-        strNote = org.apache.commons.lang.StringUtils.trimToNull(strNote);
+        strNote = org.apache.commons.lang3.StringUtils.trimToNull(strNote);
         if (strNote == null || strNote.equals("")) return null;
 
         String userName = loggedInInfo.getLoggedInProvider().getFullName();
@@ -1263,7 +1263,7 @@ public class CaseManagementEntry2Action extends ActionSupport implements Session
 
         CaseManagementNote note = sessionFrm.getCaseNote();
         String noteTxt = this.getCaseNote_note();
-        noteTxt = org.apache.commons.lang.StringUtils.trimToNull(noteTxt);
+        noteTxt = org.apache.commons.lang3.StringUtils.trimToNull(noteTxt);
         if (noteTxt == null || noteTxt.equals("")) return -1L;
 
         note.setNote(noteTxt);
@@ -1726,7 +1726,7 @@ public class CaseManagementEntry2Action extends ActionSupport implements Session
         if (session.getAttribute("userrole") == null) return "expired";
 
         String noteTxt = request.getParameter("noteTxt");
-        noteTxt = org.apache.commons.lang.StringUtils.trimToNull(noteTxt);
+        noteTxt = org.apache.commons.lang3.StringUtils.trimToNull(noteTxt);
         if (noteTxt == null || noteTxt.equals("")) return null;
 
         logger.debug("Saving Note" + request.getParameter("nId"));
@@ -2151,7 +2151,7 @@ public class CaseManagementEntry2Action extends ActionSupport implements Session
         CaseManagementEntryFormBean sessionFrm = (CaseManagementEntryFormBean) session.getAttribute(sessionFrmName);
         CaseManagementNote note = sessionFrm.getCaseNote();
         String noteTxt = this.getCaseNote_note();
-        noteTxt = org.apache.commons.lang.StringUtils.trimToNull(noteTxt);
+        noteTxt = org.apache.commons.lang3.StringUtils.trimToNull(noteTxt);
         note.setNote(noteTxt);
 
         request.setAttribute("demoName", getDemoName(demono));
@@ -4106,7 +4106,7 @@ public class CaseManagementEntry2Action extends ActionSupport implements Session
     }
 
     public String getTrimmedNoteText() {
-        return org.apache.commons.lang.StringUtils.trimToNull(this.getCaseNote_note());
+        return org.apache.commons.lang3.StringUtils.trimToNull(this.getCaseNote_note());
     }
 
     public Integer getHourOfEncounterTime() {

@@ -32,8 +32,8 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.PreventionDao;
 import org.oscarehr.common.dao.PreventionExtDao;

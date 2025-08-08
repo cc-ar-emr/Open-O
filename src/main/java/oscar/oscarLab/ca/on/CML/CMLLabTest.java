@@ -29,7 +29,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.oscarehr.common.dao.LabPatientPhysicianInfoDao;
 import org.oscarehr.common.dao.LabReportInformationDao;

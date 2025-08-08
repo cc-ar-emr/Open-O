@@ -25,7 +25,7 @@
 --%>
 <%@page import="org.oscarehr.managers.IntegratorFileLogManager" %>
 <%@page import="org.oscarehr.common.model.IntegratorFileLog" %>
-<%@page import="org.apache.commons.lang.StringUtils" %>
+<%@page import="org.apache.commons.lang3.StringUtils" %>
 <%@page import="java.text.SimpleDateFormat" %>
 <%@page import="org.oscarehr.common.dao.UserPropertyDAO" %>
 <%@page import="org.oscarehr.util.LoggedInInfo" %>

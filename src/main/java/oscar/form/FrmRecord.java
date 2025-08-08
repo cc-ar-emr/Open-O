@@ -30,7 +30,7 @@ import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.oscarehr.common.dao.DemographicExtDao;
 import org.oscarehr.common.model.Demographic;
 import org.oscarehr.common.model.DemographicExt;
