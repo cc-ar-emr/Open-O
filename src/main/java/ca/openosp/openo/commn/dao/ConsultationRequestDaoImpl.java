@@ -14,10 +14,11 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang3.time.DateFormatUtils;
 import ca.openosp.openo.commn.NativeSql;
 import ca.openosp.openo.commn.model.ConsultationRequest;
 import ca.openosp.openo.commn.model.ConsultationRequestExt;
+import ca.openosp.openo.commn.model.ProfessionalSpecialist;
+import ca.openosp.openo.commn.model.Provider;
 import ca.openosp.openo.consultation.dto.ConsultationListDTO;
 
 @SuppressWarnings("unchecked")
@@ -67,22 +68,22 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
         }
 
         if (!team.isEmpty()) {
-            sql.append("and cr.sendTo = '" + team + "' ");
+            sql.append("and cr.sendTo = :team ");
         }
 
         if (startDate != null) {
             if (searchDate != null && searchDate.equals("1")) {
-                sql.append("and cr.appointmentDate >= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(startDate) + "' ");
+                sql.append("and cr.appointmentDate >= :startDate ");
             } else {
-                sql.append("and cr.referralDate >= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(startDate) + "' ");
+                sql.append("and cr.referralDate >= :startDate ");
             }
         }
 
         if (endDate != null) {
             if (searchDate != null && searchDate.equals("1")) {
-                sql.append("and cr.appointmentDate <= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(endDate) + "' ");
+                sql.append("and cr.appointmentDate <= :endDate ");
             } else {
-                sql.append("and cr.referralDate <= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(endDate) + "' ");
+                sql.append("and cr.referralDate <= :endDate ");
             }
         }
 
@@ -107,6 +108,15 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
 
 
         Query query = entityManager.createQuery(sql.toString());
+        if (!team.isEmpty()) {
+            query.setParameter("team", team);
+        }
+        if (startDate != null) {
+            query.setParameter("startDate", startDate);
+        }
+        if (endDate != null) {
+            query.setParameter("endDate", endDate);
+        }
         query.setFirstResult(offset != null ? offset : 0);
 
         //need to never send more than MAX_LIST_RETURN_SIZE
@@ -229,8 +239,16 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
      */
     @Override
     public List<ConsultationListDTO> getConsultationDTOs(String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer offset, Integer limit) {
+        return getConsultationDTOs(team, showCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit, null, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ConsultationListDTO> getConsultationDTOs(String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer offset, Integer limit, Integer consultantId, String filterProviderNo) {
         List<Object> paramList = new ArrayList<>();
-        String sql = buildConsultationDTOQuery(paramList, team, showCompleted, startDate, endDate, orderby, desc, searchDate);
+        String sql = buildConsultationDTOQuery(paramList, team, showCompleted, startDate, endDate, orderby, desc, searchDate, consultantId, filterProviderNo);
 
         Query query = entityManager.createQuery(sql, ConsultationListDTO.class);
         for (int i = 0; i < paramList.size(); i++) {
@@ -265,6 +283,22 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ProfessionalSpecialist> getDistinctConsultants() {
+        return entityManager.createQuery("SELECT DISTINCT specialist FROM ConsultationRequest cr JOIN cr.professionalSpecialist specialist ORDER BY specialist.lastName, specialist.firstName", ProfessionalSpecialist.class).getResultList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Provider> getDistinctConsultProviders() {
+        return entityManager.createQuery("SELECT DISTINCT mrp FROM ConsultationRequest cr JOIN Demographic d ON d.DemographicNo = cr.demographicId JOIN Provider mrp ON mrp.ProviderNo = d.ProviderNo ORDER BY mrp.LastName, mrp.FirstName", Provider.class).getResultList();
+    }
+
+    /**
      * Builds the complete JPQL query string for DTO projection with parameterized filters and sorting.
      * Uses positional parameters to prevent SQL injection (replacing the previous string concatenation pattern).
      *
@@ -276,9 +310,11 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
      * @param orderby String the sort column identifier (1-9)
      * @param desc String "1" for descending, otherwise ascending
      * @param searchDate String "1" to filter on appointment date instead of referral date
+     * @param consultantId Integer the ProfessionalSpecialist id to filter by (null to skip)
+     * @param filterProviderNo String the patient MRP provider number to filter by (null/empty to skip)
      * @return String the complete JPQL query
      */
-    private String buildConsultationDTOQuery(List<Object> paramList, String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate) {
+    private String buildConsultationDTOQuery(List<Object> paramList, String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer consultantId, String filterProviderNo) {
         int paramIndex = 1;
         StringBuilder sql = new StringBuilder(DTO_SELECT);
         sql.append(DTO_FROM);
@@ -291,6 +327,16 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
         if (team != null && !team.isEmpty()) {
             sql.append("AND cr.sendTo = ?").append(paramIndex++).append(" ");
             paramList.add(team);
+        }
+
+        if (consultantId != null) {
+            sql.append("AND specialist.id = ?").append(paramIndex++).append(" ");
+            paramList.add(consultantId);
+        }
+
+        if (filterProviderNo != null && !filterProviderNo.isEmpty()) {
+            sql.append("AND mrp.ProviderNo = ?").append(paramIndex++).append(" ");
+            paramList.add(filterProviderNo);
         }
 
         if (startDate != null) {

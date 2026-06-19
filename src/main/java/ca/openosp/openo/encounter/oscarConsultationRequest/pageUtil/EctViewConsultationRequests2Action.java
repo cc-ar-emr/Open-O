@@ -61,6 +61,8 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
     private String searchDate = null;
     private Integer offset;
     private Integer limit = ConsultationRequestDaoImpl.DEFAULT_CONSULT_REQUEST_RESULTS_LIMIT;
+    private Integer consultantId;
+    private String filterProviderNo;
 
     public String execute() throws ServletException, IOException {
         if (!securityInfoManager.hasPrivilege(LoggedInInfo.getLoggedInInfoFromSession(request), "_con", "r", null)) {
@@ -98,6 +100,8 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
         request.setAttribute("orderby", orderby);
         request.setAttribute("desc", desc);
         request.setAttribute("searchDate", searchDate);
+        request.setAttribute("consultantId", consultantId);
+        request.setAttribute("filterProviderNo", filterProviderNo);
         return SUCCESS;
     }
 
@@ -244,5 +248,21 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
 
     public void setLimit(Integer limit) {
         this.limit = limit;
+    }
+
+    public Integer getConsultantId() {
+        return consultantId;
+    }
+
+    public void setConsultantId(Integer consultantId) {
+        this.consultantId = consultantId;
+    }
+
+    public String getFilterProviderNo() {
+        return filterProviderNo;
+    }
+
+    public void setFilterProviderNo(String filterProviderNo) {
+        this.filterProviderNo = filterProviderNo;
     }
 }

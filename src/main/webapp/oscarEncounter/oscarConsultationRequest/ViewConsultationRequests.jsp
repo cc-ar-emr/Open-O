@@ -57,6 +57,8 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctConsultationFormRequestUtil" %>
 <%@ page import="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctViewConsultationRequestsUtil" %>
+<%@ page import="ca.openosp.openo.commn.model.ProfessionalSpecialist" %>
+<%@ page import="ca.openosp.openo.commn.model.Provider" %>
 <%@ page import="ca.openosp.openo.commn.IsPropertiesOn" %>
 <%@ page import="org.owasp.encoder.Encode" %>
 
@@ -178,6 +180,45 @@
             searchDate = "0";
         }
 
+        // Consultant and provider filter selections (issue #2455). Both optional and combinable.
+        Integer consultantId = (Integer) request.getAttribute("consultantId");
+        String filterProviderNo = (String) request.getAttribute("filterProviderNo");
+        if (filterProviderNo == null) {
+            filterProviderNo = "";
+        }
+
+        // Compute the distinct consultant and provider lists directly here so the filter dropdowns
+        // are always populated regardless of how this page is reached. Apply the same site/team
+        // privacy filter used elsewhere on this page to the provider list.
+        ConsultationRequestDao consultReqDaoForFilters = SpringUtils.getBean(ConsultationRequestDao.class);
+        List<ProfessionalSpecialist> distinctConsultants = consultReqDaoForFilters.getDistinctConsultants();
+        List<Provider> distinctConsultProviders = consultReqDaoForFilters.getDistinctConsultProviders();
+        if (isSiteAccessPrivacy || isTeamAccessPrivacy) {
+            List<Provider> filteredProviders = new ArrayList<Provider>();
+            for (Provider pv : distinctConsultProviders) {
+                if (providerMap.containsKey(pv.getProviderNo())) {
+                    filteredProviders.add(pv);
+                }
+            }
+            distinctConsultProviders = filteredProviders;
+        }
+
+        // Pre-compute labels for the current selections so the search boxes repopulate on reload.
+        String selectedConsultantLabel = "";
+        for (ProfessionalSpecialist sp : distinctConsultants) {
+            if (consultantId != null && consultantId.equals(sp.getId())) {
+                selectedConsultantLabel = sp.getFormattedName();
+                break;
+            }
+        }
+        String selectedProviderLabel = "";
+        for (Provider pv : distinctConsultProviders) {
+            if (!filterProviderNo.isEmpty() && filterProviderNo.equals(pv.getProviderNo())) {
+                selectedProviderLabel = pv.getFormattedName();
+                break;
+            }
+        }
+
         EctConsultationFormRequestUtil consultUtil;
         consultUtil = new EctConsultationFormRequestUtil();
 
@@ -237,6 +278,9 @@ background-color:rgb(212, 212, 254);
 
         </style>
 
+        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/library/jquery/jquery-ui-1.12.1.min.css">
+        <script type="text/javascript" src="<%= request.getContextPath() %>/library/jquery/jquery-3.6.4.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/library/jquery/jquery-ui-1.12.1.min.js"></script>
 
     </head>
     <script language="javascript">
@@ -342,7 +386,7 @@ background-color:rgb(212, 212, 254);
                 <table width="100%">
                     <tr>
                         <td style="margin: 0; padding: 0;">
-                            <form action="${pageContext.request.contextPath}/oscarEncounter/ViewConsultation.do" method="get">
+                            <form id="consultSearchForm" action="${pageContext.request.contextPath}/oscarEncounter/ViewConsultation.do" method="get">
                                 <fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.oscarConsultationRequest.ViewConsultationRequests.formSelectTeam"/>:
                                 <select name="sendTo">
                                     <option value=""><fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.oscarConsultationRequest.ViewConsultationRequests.formViewAll"/></option>
@@ -367,6 +411,16 @@ background-color:rgb(212, 212, 254);
                                         }
                                     %>
                                 </select>
+                                <input type="text" id="consultantSearch" autocomplete="off" size="22"
+                                       placeholder="All Consultants"
+                                       value="<%=Encode.forHtmlAttribute(selectedConsultantLabel)%>"/>
+                                <input type="hidden" name="consultantId" id="consultantId"
+                                       value="<%=Encode.forHtmlAttribute(consultantId != null ? consultantId.toString() : "")%>"/>
+                                <input type="text" id="providerSearch" autocomplete="off" size="22"
+                                       placeholder="All Providers"
+                                       value="<%=Encode.forHtmlAttribute(selectedProviderLabel)%>"/>
+                                <input type="hidden" name="filterProviderNo" id="filterProviderNo"
+                                       value="<%=Encode.forHtmlAttribute(filterProviderNo)%>"/>
                                 <input type="submit"
                                        value="<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.oscarConsultationRequest.ViewConsultationRequests.btnConsReq"/>"/>
                                 <div style="margin: 0; padding: 0; ">
@@ -391,6 +445,84 @@ background-color:rgb(212, 212, 254);
                                     <input type="hidden" name="limit" id="limit" value="<%= Encode.forHtmlAttribute(String.valueOf(limit)) %>"/>
                                 </div>
                             </form>
+                            <script type="text/javascript">
+                                var consultantOptions = [
+                                    <%
+                                        for (int ci = 0; ci < distinctConsultants.size(); ci++) {
+                                            ProfessionalSpecialist sp = distinctConsultants.get(ci);
+                                            String consLabel = sp.getFormattedName();
+                                            String consIdVal = sp.getId() != null ? sp.getId().toString() : "";
+                                    %>
+                                    {label: "<%=Encode.forJavaScript(consLabel)%>", value: "<%=Encode.forJavaScript(consIdVal)%>"}<%= ci < distinctConsultants.size() - 1 ? "," : "" %>
+                                    <% } %>
+                                ];
+                                var providerOptions = [
+                                    <%
+                                        for (int pi = 0; pi < distinctConsultProviders.size(); pi++) {
+                                            Provider pv = distinctConsultProviders.get(pi);
+                                            String pvLabel = pv.getFormattedName();
+                                            String pvNoVal = pv.getProviderNo() != null ? pv.getProviderNo() : "";
+                                    %>
+                                    {label: "<%=Encode.forJavaScript(pvLabel)%>", value: "<%=Encode.forJavaScript(pvNoVal)%>"}<%= pi < distinctConsultProviders.size() - 1 ? "," : "" %>
+                                    <% } %>
+                                ];
+
+                                jQuery(function () {
+                                    function setupFilterAutocomplete(searchId, hiddenId, options) {
+                                        jQuery(searchId).autocomplete({
+                                            source: options,
+                                            minLength: 0,
+                                            delay: 0,
+                                            focus: function (event, ui) {
+                                                event.preventDefault();
+                                                jQuery(searchId).val(ui.item.label);
+                                            },
+                                            select: function (event, ui) {
+                                                event.preventDefault();
+                                                jQuery(searchId).val(ui.item.label);
+                                                jQuery(hiddenId).val(ui.item.value);
+                                            },
+                                            change: function (event, ui) {
+                                                if (!ui.item) {
+                                                    jQuery(searchId).val("");
+                                                    jQuery(hiddenId).val("");
+                                                }
+                                            }
+                                        });
+                                        // Show the full list on focus so the input behaves like a searchable dropdown.
+                                        jQuery(searchId).on("focus", function () {
+                                            jQuery(this).autocomplete("search", jQuery(this).val());
+                                        });
+                                    }
+
+                                    // Drop a stale hidden id if the visible text no longer matches a known option.
+                                    function reconcileFilter(searchId, hiddenId, options) {
+                                        var text = jQuery(searchId).val().trim();
+                                        var idVal = jQuery(hiddenId).val();
+                                        if (text === "") {
+                                            jQuery(hiddenId).val("");
+                                            return;
+                                        }
+                                        var matched = options.some(function (o) {
+                                            return o.label === text && o.value === idVal;
+                                        });
+                                        if (!matched) {
+                                            jQuery(searchId).val("");
+                                            jQuery(hiddenId).val("");
+                                        }
+                                    }
+
+                                    setupFilterAutocomplete("#consultantSearch", "#consultantId", consultantOptions);
+                                    setupFilterAutocomplete("#providerSearch", "#filterProviderNo", providerOptions);
+
+                                    // When filters change, reset paging to the first page and sanitize the hidden ids.
+                                    jQuery("#consultSearchForm").on("submit", function () {
+                                        jQuery("#offset").val(0);
+                                        reconcileFilter("#consultantSearch", "#consultantId", consultantOptions);
+                                        reconcileFilter("#providerSearch", "#filterProviderNo", providerOptions);
+                                    });
+                                });
+                            </script>
                         </td>
                     </tr>
                     <tr>
@@ -456,7 +588,7 @@ background-color:rgb(212, 212, 254);
                                 <%
                                     EctViewConsultationRequestsUtil theRequests;
                                     theRequests = new EctViewConsultationRequestsUtil();
-                                    theRequests.estConsultationVecByTeam(LoggedInInfo.getLoggedInInfoFromSession(request), team, includeCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit);
+                                    theRequests.estConsultationVecByTeam(LoggedInInfo.getLoggedInInfoFromSession(request), team, includeCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit, consultantId, filterProviderNo);
                                     boolean overdue;
                                     UserPropertyDAO pref = (UserPropertyDAO) WebApplicationContextUtils.getWebApplicationContext(pageContext.getServletContext()).getBean(UserPropertyDAO.class);
                                     String user = (String) session.getAttribute("user");
