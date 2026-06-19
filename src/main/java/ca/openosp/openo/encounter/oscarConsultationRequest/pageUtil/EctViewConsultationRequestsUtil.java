@@ -155,7 +155,8 @@ public class EctViewConsultationRequestsUtil {
           }
 
       } catch(Exception e) {
-         MiscUtils.getLogger().error("Error loading consultation list for team: " + (team != null ? team : "all"), e);
+         String requestingProviderNo = (loggedInInfo != null && loggedInInfo.getLoggedInProviderNo() != null) ? loggedInInfo.getLoggedInProviderNo() : "unknown";
+         MiscUtils.getLogger().error("Error loading consultation list for team: " + (team != null ? team : "all") + " (requesting provider: " + requestingProviderNo + ")", e);
          verdict = false;
       }
       return verdict;

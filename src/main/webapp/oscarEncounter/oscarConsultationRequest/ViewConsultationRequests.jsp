@@ -201,6 +201,12 @@
                 }
             }
             distinctConsultProviders = filteredProviders;
+            // Defense-in-depth: ignore a provider filter outside the user's site/team scope so a
+            // crafted request can't push an out-of-scope providerNo into the query. (Out-of-scope
+            // rows are also dropped per-row at render time.)
+            if (!filterProviderNo.isEmpty() && !providerMap.containsKey(filterProviderNo)) {
+                filterProviderNo = "";
+            }
         }
 
         // Pre-compute labels for the current selections so the search boxes repopulate on reload.
@@ -324,6 +330,7 @@ background-color:rgb(212, 212, 254);
                 document.forms[0].orderby.value = val;
                 document.forms[0].desc.value = '0';
             }
+            if (typeof sanitizeConsultationFilters === "function") sanitizeConsultationFilters();
             document.forms[0].submit();
         }
 
@@ -334,6 +341,7 @@ background-color:rgb(212, 212, 254);
             if (next) frm.offset.value = <%=offset+limit%>;
             else frm.offset.value = <%=offset-limit%>;
 
+            if (typeof sanitizeConsultationFilters === "function") sanitizeConsultationFilters();
             frm.submit();
         }
     </script>
@@ -467,6 +475,30 @@ background-color:rgb(212, 212, 254);
                                     <% } %>
                                 ];
 
+                                // Drop a stale hidden id if the visible text no longer matches a known option.
+                                function reconcileConsultationFilter(searchId, hiddenId, options) {
+                                    var text = jQuery(searchId).val().trim();
+                                    var idVal = jQuery(hiddenId).val();
+                                    if (text === "") {
+                                        jQuery(hiddenId).val("");
+                                        return;
+                                    }
+                                    var matched = options.some(function (o) {
+                                        return o.label === text && o.value === idVal;
+                                    });
+                                    if (!matched) {
+                                        jQuery(searchId).val("");
+                                        jQuery(hiddenId).val("");
+                                    }
+                                }
+
+                                // Sanitize both filter fields. Invoked from every submit path (filter button,
+                                // sort headers, paging) because native form.submit() bypasses jQuery submit handlers.
+                                function sanitizeConsultationFilters() {
+                                    reconcileConsultationFilter("#consultantSearch", "#consultantId", consultantOptions);
+                                    reconcileConsultationFilter("#providerSearch", "#filterProviderNo", providerOptions);
+                                }
+
                                 jQuery(function () {
                                     function setupFilterAutocomplete(searchId, hiddenId, options) {
                                         jQuery(searchId).autocomplete({
@@ -495,31 +527,13 @@ background-color:rgb(212, 212, 254);
                                         });
                                     }
 
-                                    // Drop a stale hidden id if the visible text no longer matches a known option.
-                                    function reconcileFilter(searchId, hiddenId, options) {
-                                        var text = jQuery(searchId).val().trim();
-                                        var idVal = jQuery(hiddenId).val();
-                                        if (text === "") {
-                                            jQuery(hiddenId).val("");
-                                            return;
-                                        }
-                                        var matched = options.some(function (o) {
-                                            return o.label === text && o.value === idVal;
-                                        });
-                                        if (!matched) {
-                                            jQuery(searchId).val("");
-                                            jQuery(hiddenId).val("");
-                                        }
-                                    }
-
                                     setupFilterAutocomplete("#consultantSearch", "#consultantId", consultantOptions);
                                     setupFilterAutocomplete("#providerSearch", "#filterProviderNo", providerOptions);
 
-                                    // When filters change, reset paging to the first page and sanitize the hidden ids.
+                                    // Filter button submit: reset paging to the first page, then sanitize hidden ids.
                                     jQuery("#consultSearchForm").on("submit", function () {
                                         jQuery("#offset").val(0);
-                                        reconcileFilter("#consultantSearch", "#consultantId", consultantOptions);
-                                        reconcileFilter("#providerSearch", "#filterProviderNo", providerOptions);
+                                        sanitizeConsultationFilters();
                                     });
                                 });
                             </script>
