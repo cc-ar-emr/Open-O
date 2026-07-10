@@ -58,6 +58,7 @@
 <%@ page import="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctConsultationFormRequestUtil" %>
 <%@ page import="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctViewConsultationRequestsUtil" %>
 <%@ page import="ca.openosp.openo.commn.model.ProfessionalSpecialist" %>
+<%@ page import="ca.openosp.openo.commn.dao.ProfessionalSpecialistDao" %>
 <%@ page import="ca.openosp.openo.commn.model.Provider" %>
 <%@ page import="ca.openosp.openo.commn.IsPropertiesOn" %>
 <%@ page import="org.owasp.encoder.Encode" %>
@@ -187,11 +188,9 @@
             filterProviderNo = "";
         }
 
-        // Compute the distinct consultant and provider lists directly here so the filter dropdowns
-        // are always populated regardless of how this page is reached. Apply the same site/team
-        // privacy filter used elsewhere on this page to the provider list.
+        // Providers are a bounded, per-clinic list, so the filter is a plain dropdown populated
+        // up front. Apply the same site/team privacy filter used elsewhere on this page.
         ConsultationRequestDao consultReqDaoForFilters = SpringUtils.getBean(ConsultationRequestDao.class);
-        List<ProfessionalSpecialist> distinctConsultants = consultReqDaoForFilters.getDistinctConsultants();
         List<Provider> distinctConsultProviders = consultReqDaoForFilters.getDistinctConsultProviders();
         if (isSiteAccessPrivacy || isTeamAccessPrivacy) {
             List<Provider> filteredProviders = new ArrayList<Provider>();
@@ -209,19 +208,14 @@
             }
         }
 
-        // Pre-compute labels for the current selections so the search boxes repopulate on reload.
+        // Consultant options are loaded via AJAX.
+        // Selected consultant label is tracked in the event of a reload.
         String selectedConsultantLabel = "";
-        for (ProfessionalSpecialist sp : distinctConsultants) {
-            if (consultantId != null && consultantId.equals(sp.getId())) {
-                selectedConsultantLabel = sp.getFormattedName();
-                break;
-            }
-        }
-        String selectedProviderLabel = "";
-        for (Provider pv : distinctConsultProviders) {
-            if (!filterProviderNo.isEmpty() && filterProviderNo.equals(pv.getProviderNo())) {
-                selectedProviderLabel = pv.getFormattedName();
-                break;
+        if (consultantId != null) {
+            ProfessionalSpecialistDao professionalSpecialistDao = SpringUtils.getBean(ProfessionalSpecialistDao.class);
+            ProfessionalSpecialist selectedConsultant = professionalSpecialistDao.find(consultantId);
+            if (selectedConsultant != null) {
+                selectedConsultantLabel = selectedConsultant.getFormattedName();
             }
         }
 
@@ -424,11 +418,16 @@ background-color:rgb(212, 212, 254);
                                        value="<%=Encode.forHtmlAttribute(selectedConsultantLabel)%>"/>
                                 <input type="hidden" name="consultantId" id="consultantId"
                                        value="<%=Encode.forHtmlAttribute(consultantId != null ? consultantId.toString() : "")%>"/>
-                                <input type="text" id="providerSearch" autocomplete="off" size="22"
-                                       placeholder="All Providers"
-                                       value="<%=Encode.forHtmlAttribute(selectedProviderLabel)%>"/>
-                                <input type="hidden" name="filterProviderNo" id="filterProviderNo"
-                                       value="<%=Encode.forHtmlAttribute(filterProviderNo)%>"/>
+                                <select name="filterProviderNo" id="filterProviderNo">
+                                    <option value="">All Providers</option>
+                                    <%
+                                        for (Provider pv : distinctConsultProviders) {
+                                            String pvNo = pv.getProviderNo() != null ? pv.getProviderNo() : "";
+                                            boolean pvSelected = !filterProviderNo.isEmpty() && filterProviderNo.equals(pvNo);
+                                    %>
+                                    <option value="<%=Encode.forHtmlAttribute(pvNo)%>" <%=pvSelected ? "selected" : ""%>><%=Encode.forHtml(pv.getFormattedName())%></option>
+                                    <% } %>
+                                </select>
                                 <input type="submit"
                                        value="<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.oscarConsultationRequest.ViewConsultationRequests.btnConsReq"/>"/>
                                 <div style="margin: 0; padding: 0; ">
@@ -454,83 +453,49 @@ background-color:rgb(212, 212, 254);
                                 </div>
                             </form>
                             <script type="text/javascript">
-                                var consultantOptions = [
-                                    <%
-                                        for (int ci = 0; ci < distinctConsultants.size(); ci++) {
-                                            ProfessionalSpecialist sp = distinctConsultants.get(ci);
-                                            String consLabel = sp.getFormattedName();
-                                            String consIdVal = sp.getId() != null ? sp.getId().toString() : "";
-                                    %>
-                                    {label: "<%=Encode.forJavaScript(consLabel)%>", value: "<%=Encode.forJavaScript(consIdVal)%>"}<%= ci < distinctConsultants.size() - 1 ? "," : "" %>
-                                    <% } %>
-                                ];
-                                var providerOptions = [
-                                    <%
-                                        for (int pi = 0; pi < distinctConsultProviders.size(); pi++) {
-                                            Provider pv = distinctConsultProviders.get(pi);
-                                            String pvLabel = pv.getFormattedName();
-                                            String pvNoVal = pv.getProviderNo() != null ? pv.getProviderNo() : "";
-                                    %>
-                                    {label: "<%=Encode.forJavaScript(pvLabel)%>", value: "<%=Encode.forJavaScript(pvNoVal)%>"}<%= pi < distinctConsultProviders.size() - 1 ? "," : "" %>
-                                    <% } %>
-                                ];
+                                // Typing clears any prior selection; a fresh id is only set via the
+                                // autocomplete "select" handler below, so half-typed/unselected text
+                                // never silently implies a filter.
+                                jQuery("#consultantSearch").on("input", function () {
+                                    jQuery("#consultantId").val("");
+                                });
 
-                                // Drop a stale hidden id if the visible text no longer matches a known option.
-                                function reconcileConsultationFilter(searchId, hiddenId, options) {
-                                    var text = jQuery(searchId).val().trim();
-                                    var idVal = jQuery(hiddenId).val();
-                                    if (text === "") {
-                                        jQuery(hiddenId).val("");
-                                        return;
-                                    }
-                                    var matched = options.some(function (o) {
-                                        return o.label === text && o.value === idVal;
-                                    });
-                                    if (!matched) {
-                                        jQuery(searchId).val("");
-                                        jQuery(hiddenId).val("");
-                                    }
-                                }
-
-                                // Sanitize both filter fields. Invoked from every submit path (filter button,
-                                // sort headers, paging) because native form.submit() bypasses jQuery submit handlers.
+                                // If the box was left with typed text but no confirmed selection,
+                                // clear the text too. Invoked from every submit path (filter button,
+                                // sort headers, paging) because native form.submit() bypasses jQuery
+                                // submit handlers.
                                 function sanitizeConsultationFilters() {
-                                    reconcileConsultationFilter("#consultantSearch", "#consultantId", consultantOptions);
-                                    reconcileConsultationFilter("#providerSearch", "#filterProviderNo", providerOptions);
+                                    if (!jQuery("#consultantId").val()) {
+                                        jQuery("#consultantSearch").val("");
+                                    }
                                 }
 
                                 jQuery(function () {
-                                    function setupFilterAutocomplete(searchId, hiddenId, options) {
-                                        jQuery(searchId).autocomplete({
-                                            source: options,
-                                            minLength: 0,
-                                            delay: 0,
-                                            focus: function (event, ui) {
-                                                event.preventDefault();
-                                                jQuery(searchId).val(ui.item.label);
-                                            },
-                                            select: function (event, ui) {
-                                                event.preventDefault();
-                                                jQuery(searchId).val(ui.item.label);
-                                                jQuery(hiddenId).val(ui.item.value);
-                                            },
-                                            change: function (event, ui) {
-                                                if (!ui.item) {
-                                                    jQuery(searchId).val("");
-                                                    jQuery(hiddenId).val("");
-                                                }
-                                            }
-                                        });
-                                        // Show the full list on focus so the input behaves like a searchable dropdown.
-                                        jQuery(searchId).on("focus", function () {
-                                            jQuery(this).autocomplete("search", jQuery(this).val());
-                                        });
-                                    }
+                                    var contextPath = "<%= request.getContextPath() %>";
+                                    jQuery("#consultantSearch").autocomplete({
+                                        minLength: 2,
+                                        delay: 300,
+                                        source: function (request, response) {
+                                            jQuery.getJSON(contextPath + "/oscarEncounter/searchConsultationConsultants.do", {keyword: request.term})
+                                                .done(function (data) {
+                                                    response(data || []);
+                                                })
+                                                .fail(function () {
+                                                    response([]);
+                                                });
+                                        },
+                                        focus: function (event, ui) {
+                                            event.preventDefault();
+                                            jQuery("#consultantSearch").val(ui.item.label);
+                                        },
+                                        select: function (event, ui) {
+                                            event.preventDefault();
+                                            jQuery("#consultantSearch").val(ui.item.label);
+                                            jQuery("#consultantId").val(ui.item.value);
+                                        }
+                                    });
 
-                                    setupFilterAutocomplete("#consultantSearch", "#consultantId", consultantOptions);
-                                    setupFilterAutocomplete("#providerSearch", "#filterProviderNo", providerOptions);
-
-                                    // Filter button submit: reset paging to the first page, then sanitize hidden ids.
+                                    // Filter button submit: reset paging to the first page, then sanitize.
                                     jQuery("#consultSearchForm").on("submit", function () {
                                         jQuery("#offset").val(0);
                                         sanitizeConsultationFilters();

@@ -96,12 +96,15 @@ public interface ConsultationRequestDao extends AbstractDao<ConsultationRequest>
     List<ConsultationListDTO> getConsultationDTOs(String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer offset, Integer limit, Integer consultantId, String filterProviderNo);
 
     /**
-     * Returns the distinct consultants (specialists) that appear on any consultation request,
-     * ordered by last then first name, for populating the consultant filter options.
+     * Searches distinct consultants (specialists) that appear on any consultation request whose
+     * first or last name matches the given keyword, ordered by last then first name and capped
+     * to maxResults.
      *
-     * @return List of distinct ProfessionalSpecialist referenced by consultation requests
+     * @param keyword String the case-insensitive search term to match against specialist name
+     * @param maxResults int the maximum number of results to return
+     * @return List of matching ProfessionalSpecialist referenced by consultation requests
      */
-    List<ProfessionalSpecialist> getDistinctConsultants();
+    List<ProfessionalSpecialist> searchDistinctConsultants(String keyword, int maxResults);
 
     /**
      * Returns the distinct patient providers (MRPs) that appear on any consultation request,
