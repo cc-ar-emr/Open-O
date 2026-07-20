@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import ca.openosp.openo.commn.dao.utils.SchemaUtils;
 import ca.openosp.openo.commn.model.ConsultationRequest;
+import ca.openosp.openo.commn.model.ProfessionalSpecialist;
 import ca.openosp.openo.commn.dao.ConsultationRequestDao;
 import ca.openosp.openo.utility.SpringUtils;
 
@@ -82,6 +83,31 @@ public class ConsultationRequestDaoTest extends DaoTestFixtures {
     @Test
     public void testFindRequestsByDemoNo() {
         assertNotNull(dao.findRequestsByDemoNo(100, new Date()));
+    }
+
+    @Test
+    public void testSearchDistinctConsultantsMatchesKeywordSpanningNameSeparator() {
+        ProfessionalSpecialist specialist = new ProfessionalSpecialist();
+        specialist.setLastName("Smith");
+        specialist.setFirstName("Brian");
+        dao.persist(specialist);
+
+        ConsultationRequest cr = new ConsultationRequest();
+        cr.setProviderNo("0");
+        cr.setReferralDate(new Date());
+        cr.setProfessionalSpecialist(specialist);
+        dao.persist(cr);
+
+        // keyword spans the "lastName, firstName" separator, as displayed by the autocomplete
+        List<ProfessionalSpecialist> matches = dao.searchDistinctConsultants("smith, b", 10);
+        assertNotNull(matches);
+        assertTrue(matches.size() == 1);
+        assertTrue(matches.get(0).getLastName().equals("Smith"));
+
+        // single-token keyword should still match
+        matches = dao.searchDistinctConsultants("Smith", 10);
+        assertNotNull(matches);
+        assertTrue(matches.size() == 1);
     }
 
 }

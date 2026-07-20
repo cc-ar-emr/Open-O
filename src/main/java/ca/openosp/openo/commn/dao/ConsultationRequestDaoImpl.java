@@ -287,7 +287,7 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
      */
     @Override
     public List<ProfessionalSpecialist> searchDistinctConsultants(String keyword, int maxResults) {
-        Query query = entityManager.createQuery("SELECT DISTINCT specialist FROM ConsultationRequest cr JOIN cr.professionalSpecialist specialist WHERE LOWER(specialist.lastName) LIKE :keyword OR LOWER(specialist.firstName) LIKE :keyword ORDER BY specialist.lastName, specialist.firstName", ProfessionalSpecialist.class);
+        Query query = entityManager.createQuery("SELECT DISTINCT specialist FROM ConsultationRequest cr JOIN cr.professionalSpecialist specialist WHERE LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :keyword ORDER BY specialist.lastName, specialist.firstName", ProfessionalSpecialist.class);
         String likePattern = "%" + keyword.toLowerCase() + "%";
         query.setParameter("keyword", likePattern);
         query.setMaxResults(maxResults);
