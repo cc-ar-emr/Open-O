@@ -232,6 +232,31 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
             "LEFT JOIN ConsultationServices svc ON svc.serviceId = cr.serviceId " +
             "LEFT JOIN cr.professionalSpecialist specialist ";
 
+    /** Escape character used by LIKE patterns; see {@link #escapeLikeWildcards(String)}. */
+    private static final String LIKE_ESCAPE_CHAR = "!";
+
+    /** Named parameter prefix for the consultant search terms ("term0", "term1", ...). */
+    private static final String NAME_TERM_PARAM = "term";
+
+    /** Number of name terms {@link #CONSULTANT_SEARCH_QUERY} matches; extra terms are ignored. */
+    private static final int MAX_NAME_SEARCH_TERMS = 4;
+
+    /**
+     * JPQL for the consultant autocomplete search. Each term is matched against the specialist name
+     * as the autocomplete displays it ("lastName, firstName"), lowercased for case-insensitive
+     * matching, with nested two-argument CONCAT to stay within the JPA spec. Requiring every term
+     * to appear somewhere in that string lets terms match in any order and keeps the ", " separator
+     * from blocking a match. Term slots are fixed and fully parameterized; unused slots bind "%".
+     */
+    private static final String CONSULTANT_SEARCH_QUERY = """
+            SELECT DISTINCT specialist FROM ConsultationRequest cr
+            JOIN cr.professionalSpecialist specialist
+            WHERE LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term0 ESCAPE '!'
+            AND LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term1 ESCAPE '!'
+            AND LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term2 ESCAPE '!'
+            AND LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term3 ESCAPE '!'
+            ORDER BY specialist.lastName, specialist.firstName""";
+
     /**
      * {@inheritDoc}
      *
@@ -287,11 +312,57 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
      */
     @Override
     public List<ProfessionalSpecialist> searchDistinctConsultants(String keyword, int maxResults) {
-        Query query = entityManager.createQuery("SELECT DISTINCT specialist FROM ConsultationRequest cr JOIN cr.professionalSpecialist specialist WHERE LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :keyword ORDER BY specialist.lastName, specialist.firstName", ProfessionalSpecialist.class);
-        String likePattern = "%" + keyword.toLowerCase() + "%";
-        query.setParameter("keyword", likePattern);
+        List<String> terms = tokenizeNameKeyword(keyword);
+        if (terms.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Query query = entityManager.createQuery(CONSULTANT_SEARCH_QUERY, ProfessionalSpecialist.class);
+        for (int i = 0; i < MAX_NAME_SEARCH_TERMS; i++) {
+            // unused term slots match anything, so a keyword with fewer terms is not narrowed
+            query.setParameter(NAME_TERM_PARAM + i, i < terms.size() ? "%" + terms.get(i) + "%" : "%");
+        }
         query.setMaxResults(maxResults);
         return query.getResultList();
+    }
+
+    /**
+     * Splits a name search keyword into lowercase terms on whitespace and commas, so the keyword is
+     * matched term by term rather than as one literal string. This makes spacing and punctuation
+     * around the "lastName, firstName" separator irrelevant: "Smith,B", "Smith,   B", "Smith B" and
+     * "B Smith" all match "Smith, Brian". Terms past {@link #MAX_NAME_SEARCH_TERMS} are ignored,
+     * which only ever broadens the result set.
+     *
+     * @param keyword String the raw user-typed keyword (null or punctuation-only yields no terms)
+     * @return List of lowercase terms, LIKE wildcards escaped, in the order typed
+     */
+    private static List<String> tokenizeNameKeyword(String keyword) {
+        List<String> terms = new ArrayList<>();
+        if (keyword == null) {
+            return terms;
+        }
+        for (String term : keyword.toLowerCase().split("[\\s,]+")) {
+            if (!term.isEmpty()) {
+                terms.add(escapeLikeWildcards(term));
+                if (terms.size() == MAX_NAME_SEARCH_TERMS) {
+                    break;
+                }
+            }
+        }
+        return terms;
+    }
+
+    /**
+     * Escapes LIKE wildcards so a user-typed "%" or "_" matches literally instead of acting as a
+     * wildcard. Only valid against a LIKE carrying {@code ESCAPE '<LIKE_ESCAPE_CHAR>'}.
+     *
+     * @param term String the search term to escape
+     * @return String the term with the escape character, "%" and "_" escaped
+     */
+    private static String escapeLikeWildcards(String term) {
+        return term.replace(LIKE_ESCAPE_CHAR, LIKE_ESCAPE_CHAR + LIKE_ESCAPE_CHAR)
+                .replace("%", LIKE_ESCAPE_CHAR + "%")
+                .replace("_", LIKE_ESCAPE_CHAR + "_");
     }
 
     /**

@@ -87,6 +87,44 @@ public class ConsultationRequestDaoTest extends DaoTestFixtures {
 
     @Test
     public void testSearchDistinctConsultantsMatchesKeywordSpanningNameSeparator() {
+        persistConsultantNamedSmithBrian();
+
+        // keyword spans the "lastName, firstName" separator, as displayed by the autocomplete
+        assertMatchesSmith("smith, b");
+
+        // single-token keyword should still match
+        assertMatchesSmith("Smith");
+    }
+
+    @Test
+    public void testSearchDistinctConsultantsIgnoresSpacingAndTermOrder() {
+        persistConsultantNamedSmithBrian();
+
+        assertMatchesSmith("smith,b");          // no space after the comma
+        assertMatchesSmith("smith,   b");       // extra spaces after the comma
+        assertMatchesSmith("  Smith,B  ");      // surrounding whitespace
+        assertMatchesSmith("smith b");          // no comma at all
+        assertMatchesSmith("brian smith");      // first name typed first
+        assertMatchesSmith("smith, brian");     // the full formatted name
+    }
+
+    @Test
+    public void testSearchDistinctConsultantsExcludesNonMatchingAndWildcardKeywords() {
+        persistConsultantNamedSmithBrian();
+
+        // every term must match, so an unrelated second term rules the consultant out
+        assertTrue(dao.searchDistinctConsultants("smith, z", 10).isEmpty());
+
+        // "%" and "_" are matched literally rather than as LIKE wildcards
+        assertTrue(dao.searchDistinctConsultants("%", 10).isEmpty());
+        assertTrue(dao.searchDistinctConsultants("smit_", 10).isEmpty());
+
+        // a keyword with no searchable terms matches nothing
+        assertTrue(dao.searchDistinctConsultants(" , ", 10).isEmpty());
+        assertTrue(dao.searchDistinctConsultants(null, 10).isEmpty());
+    }
+
+    private void persistConsultantNamedSmithBrian() {
         ProfessionalSpecialist specialist = new ProfessionalSpecialist();
         specialist.setLastName("Smith");
         specialist.setFirstName("Brian");
@@ -97,17 +135,13 @@ public class ConsultationRequestDaoTest extends DaoTestFixtures {
         cr.setReferralDate(new Date());
         cr.setProfessionalSpecialist(specialist);
         dao.persist(cr);
+    }
 
-        // keyword spans the "lastName, firstName" separator, as displayed by the autocomplete
-        List<ProfessionalSpecialist> matches = dao.searchDistinctConsultants("smith, b", 10);
+    private void assertMatchesSmith(String keyword) {
+        List<ProfessionalSpecialist> matches = dao.searchDistinctConsultants(keyword, 10);
         assertNotNull(matches);
-        assertTrue(matches.size() == 1);
+        assertTrue("expected a match for keyword [" + keyword + "]", matches.size() == 1);
         assertTrue(matches.get(0).getLastName().equals("Smith"));
-
-        // single-token keyword should still match
-        matches = dao.searchDistinctConsultants("Smith", 10);
-        assertNotNull(matches);
-        assertTrue(matches.size() == 1);
     }
 
 }
