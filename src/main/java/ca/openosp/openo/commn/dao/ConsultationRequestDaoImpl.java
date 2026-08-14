@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -341,7 +342,7 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
         if (keyword == null) {
             return terms;
         }
-        for (String term : keyword.toLowerCase().split("[\\s,]+")) {
+        for (String term : keyword.toLowerCase(Locale.ROOT).split("[\\s,]+")) {
             if (!term.isEmpty()) {
                 terms.add(escapeLikeWildcards(term));
                 if (terms.size() == MAX_NAME_SEARCH_TERMS) {

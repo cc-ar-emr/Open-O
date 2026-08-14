@@ -122,6 +122,7 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
      * response stays small regardless of how many consultants are registered.
      *
      * @throws IOException if writing the JSON response fails
+     * @since 2026-07-10
      */
     public void searchConsultants() throws IOException {
         if (!securityInfoManager.hasPrivilege(LoggedInInfo.getLoggedInInfoFromSession(request), "_con", "r", null)) {
@@ -292,18 +293,34 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
         this.limit = limit;
     }
 
+    /**
+     * @return Integer the consultant the list is filtered to, null for all consultants
+     * @since 2026-06-19
+     */
     public Integer getConsultantId() {
         return consultantId;
     }
 
+    /**
+     * @param consultantId Integer the consultant to filter by, null for all consultants
+     * @since 2026-06-19
+     */
     public void setConsultantId(Integer consultantId) {
         this.consultantId = consultantId;
     }
 
+    /**
+     * @return String the provider number the list is filtered to, null or empty for all providers
+     * @since 2026-06-19
+     */
     public String getFilterProviderNo() {
         return filterProviderNo;
     }
 
+    /**
+     * @param filterProviderNo String the provider number to filter by, null or empty for all
+     * @since 2026-06-19
+     */
     public void setFilterProviderNo(String filterProviderNo) {
         this.filterProviderNo = filterProviderNo;
     }
