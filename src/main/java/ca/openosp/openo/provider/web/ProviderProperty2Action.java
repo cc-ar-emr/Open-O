@@ -2097,7 +2097,7 @@ public class ProviderProperty2Action extends ActionSupport {
         LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
         String providerNo = loggedInInfo.getLoggedInProviderNo();
 
-        UserProperty length = this.userPropertyDAO.getProp(providerNo, "patientNameLength");
+        UserProperty length = this.userPropertyDAO.getProp(providerNo, UserProperty.PATIENT_NAME_LENGTH);
 
         if (length == null) {
             length = new UserProperty();
@@ -2128,11 +2128,11 @@ public class ProviderProperty2Action extends ActionSupport {
 
         String length = s != null ? s.getValue() : "";
 
-        UserProperty wProperty = this.userPropertyDAO.getProp(providerNo,"patientNameLength");
+        UserProperty wProperty = this.userPropertyDAO.getProp(providerNo, UserProperty.PATIENT_NAME_LENGTH);
         if (wProperty == null) {
             wProperty = new UserProperty();
             wProperty.setProviderNo(providerNo);
-            wProperty.setName("patientNameLength");
+            wProperty.setName(UserProperty.PATIENT_NAME_LENGTH);
         }
         wProperty.setValue(length);
         userPropertyDAO.saveProp(wProperty);
