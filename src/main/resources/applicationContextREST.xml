@@ -190,6 +190,7 @@
             <bean class="ca.openosp.openo.webserv.rest.MeasurementService" autowire="byName" />
             <bean class="ca.openosp.openo.webserv.rest.DocumentService" autowire="byName" />
             <bean class="ca.openosp.openo.webserv.rest.ConsentService" autowire="byName"/>
+            <bean class="ca.openosp.openo.webserv.rest.LLMExtractorEndpoint" autowire="byName"/>
         </jaxrs:serviceBeans>
 
         <jaxrs:providers>

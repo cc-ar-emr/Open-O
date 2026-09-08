@@ -26,6 +26,7 @@
         <class>ca.openosp.openo.commn.model.Admission</class>
         <class>ca.openosp.openo.commn.model.OscarLog</class>
         <class>ca.openosp.openo.commn.model.Facility</class>
+        <class>ca.openosp.openo.commn.model.LlmDocumentText</class>
         <class>ca.openosp.openo.commn.model.DemographicMerged</class>
         <class>ca.openosp.openo.PMmodule.model.ProgramQueue</class>
         <!-- Document attachment entities (DocumentDao integration tests) -->
