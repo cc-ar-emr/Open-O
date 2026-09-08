@@ -457,6 +457,9 @@ Ontario, Canada
 
             function onNotBook() {
                 document.forms[0].keyword.value = "<%=DONOTBOOK%>";
+                // Assigning value dispatches no input event, so tell the handler that keeps
+                // #keyword and #demographic_no in step that the name no longer names a patient.
+                $("#keyword").trigger("patient:unlink");
             }
 
             function onButRepeat() {
@@ -498,6 +501,7 @@ Ontario, Canada
                 //document.forms[0].chart_no.value = "<%=Encode.forJavaScriptBlock(apptObj.getChart_no())%>";
                 document.forms[0].keyword.value = "<%=Encode.forJavaScriptBlock(apptObj.getName())%>";
                 document.forms[0].demographic_no.value = "<%=Encode.forJavaScriptBlock(apptObj.getDemographic_no())%>";
+                $("#keyword").trigger("patient:relink");
                 document.forms[0].reason.value = "<%= Encode.forJavaScriptBlock(apptObj.getReason()) %>";
                 document.forms[0].reasonCode.value = "<%= Encode.forJavaScriptBlock(apptObj.getReasonCode()) %>";
                 document.forms[0].notes.value = "<%= Encode.forJavaScriptBlock(apptObj.getNotes()) %>";
@@ -562,18 +566,43 @@ Ontario, Canada
 
                 var url = "<%= request.getContextPath() %>/demographic/SearchDemographic.do?jqueryJSON=true&activeOnly=true";
 
+                // The row the user has highlighted with the arrow keys or the mouse.
+                // jQuery UI only fires select on Enter/Tab/click, so hold the row here
+                // and commit it if the field loses focus while that row is still shown.
+                var highlightedDemographic = null;
+
+                // The patient the field is currently linked to. Refreshed whenever the
+                // field gains focus or a pick is committed, so an edit that ends up back
+                // at the same name can keep its link.
+                var linkedDemographic = null;
+
+                function currentDemographic() {
+                    return {
+                        value: $("#demographic_no").val(),
+                        provider: $("#mrp").val(),
+                        formattedName: $("#keyword").val()
+                    };
+                }
+
+                function commitDemographic(item) {
+                    $("#demographic_no").val(item.value);
+                    $("#mrp").val(item.provider);
+                    $("#keyword").val(item.formattedName);
+                    highlightedDemographic = null;
+                    linkedDemographic = currentDemographic();
+                }
+
                 $("#keyword").autocomplete({
                     source: url,
                     minLength: 2,
 
                     focus: function (event, ui) {
                         $("#keyword").val(ui.item.formattedName);
+                        highlightedDemographic = ui.item;
                         return false;
                     },
                     select: function (event, ui) {
-                        $("#demographic_no").val(ui.item.value);
-                        $("#mrp").val(ui.item.provider);
-                        $("#keyword").val(ui.item.formattedName);
+                        commitDemographic(ui.item);
                         return false;
                     }
                 })
@@ -582,6 +611,48 @@ Ontario, Canada
                         .append("<div><b>" + item.label + "</b>" + "<br>" + item.provider + "</div>")
                         .appendTo(ul);
                 };
+
+                $("#keyword").on("focus", function () {
+                    linkedDemographic = currentDemographic();
+                });
+
+                // Editing the name breaks the link to whoever is in demographic_no, so
+                // drop the link until a patient is picked again. patient:unlink is for
+                // code that sets the field directly: assigning value fires no input
+                // event, and triggering one would also start an autocomplete search.
+                $("#keyword").on("input patient:unlink", function () {
+                    highlightedDemographic = null;
+                    $("#demographic_no").val("");
+                    $("#mrp").val("");
+                });
+
+                // pasteAppt fills the field with a patient the appointment is genuinely
+                // linked to, but writes value directly, so take that as the new baseline
+                // rather than leaving the snapshot on whatever focus last saw.
+                $("#keyword").on("patient:relink", function () {
+                    highlightedDemographic = null;
+                    linkedDemographic = currentDemographic();
+                });
+
+                // Escape restores the typed term without an input event, so the row the
+                // user just backed out of would still be sitting in highlightedDemographic.
+                $("#keyword").on("keydown", function (event) {
+                    if (event.keyCode === $.ui.keyCode.ESCAPE) {
+                        highlightedDemographic = null;
+                    }
+                });
+
+                $("#keyword").on("blur", function () {
+                    var name = $("#keyword").val();
+                    if (highlightedDemographic && highlightedDemographic.formattedName === name) {
+                        // Highlighted but never committed with Enter/Tab/click.
+                        commitDemographic(highlightedDemographic);
+                    } else if (!$("#demographic_no").val() && linkedDemographic
+                            && linkedDemographic.value && linkedDemographic.formattedName === name) {
+                        // Edited back to exactly the linked patient's name.
+                        commitDemographic(linkedDemographic);
+                    }
+                });
 
 
                 $.widget('custom.myselectmenu', $.ui.selectmenu, {
