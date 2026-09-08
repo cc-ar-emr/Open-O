@@ -263,13 +263,16 @@ public class Prevention extends AbstractModel<Integer> implements Serializable, 
         lastUpdateDate = new Date();
     }
 
+// Do not uncomment this block as-is: it would be a second method with the same
+// name. To use it, move the autoSyncDate line into the method above.
 //    @PrePersist
 //    protected void autoSetUpdateTime() {
 //        lastUpdateDate = new Date();
 //    autoSyncDate = super.getAutoSyncDate(this.creationDate, ResourceTypeEnum.PREVENTIONS, this.getDemographicNo());
 //
 //  }
-//
+
+
 //  @PostPersist
 //  protected void logAutoSyncDate() {
 //    if (autoSyncDate != null) {
