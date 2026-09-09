@@ -2634,9 +2634,12 @@
             return;
           }
 
+          // encodeURIComponent, because param is built as a string and sent verbatim as
+          // the form-encoded body: an unencoded "+" arrives as a space and a "%" loses the
+          // parameter, so a strength like "1%" silently returned nothing.
           let param = jQuery('#drugCategorySet').serialize()
             + "&query="
-            + request.term.toUpperCase();
+            + encodeURIComponent(request.term.toUpperCase());
           jQuery.ajax({
             url: "${ctx}/oscarRx/searchDrug.do",
             type: 'POST',
