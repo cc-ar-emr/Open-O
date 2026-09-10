@@ -3,6 +3,7 @@ package ca.openosp.openo.documentManager;
 
 import ca.openosp.openo.commn.model.EFormData;
 import ca.openosp.openo.documentManager.data.AttachmentLabResultData;
+import ca.openosp.openo.documentManager.data.AttachmentSections;
 import ca.openosp.openo.commn.model.enumerator.DocumentType;
 import ca.openosp.openo.utility.LoggedInInfo;
 import ca.openosp.openo.utility.PDFGenerationException;
@@ -314,25 +315,19 @@ public interface DocumentAttachmentManager {
     public boolean validateDocumentsBelongToPatient(LoggedInInfo loggedInInfo, Integer demographicNo, String[] documents);
 
     /**
-     * Classifies the supplied attached docs into the three section lists
-     * (patient documents, provider public eDocs, provider private eDocs) and
-     * populates the two ID sets the view needs for pre-checking and foreign-owner
-     * labelling. The three section lists are mutated in place — deleted docs and
-     * foreign private docs are appended to the matching list so the view still
-     * renders them. {@code allDocuments}, {@code providerPrivateDocs}, and
-     * {@code providerPublicDocs} may be {@code null}: in that case only
-     * {@code attachedDocumentIds} is populated (for pre-checking) and the
-     * section merge is skipped.
+     * Merges the items attached to a consult/eForm into the attachment window's sections so
+     * every attached item is listed and can be unchecked to detach it. Each attached item is
+     * appended to its section unless that section already lists it — e.g. deleted items, other
+     * providers' private docs, and docs no longer listed for this patient or facility. Also
+     * records the attached doc/eForm ids (for pre-checking) and the ids of attached private docs
+     * owned by another provider (for labelling).
      *
-     * @param loggedInInfo        LoggedInInfo the current user's session (for current-provider comparison)
-     * @param attachedDocs        List&lt;EDoc&gt; the docs attached to the current consult/eForm; may be null/empty
-     * @param allDocuments        List&lt;EDoc&gt; mutable list of patient documents; may be null
-     * @param providerPrivateDocs List&lt;EDoc&gt; mutable list of the current provider's private eDocs; may be null
-     * @param providerPublicDocs  List&lt;EDoc&gt; mutable list of public provider eDocs; may be null
-     * @param attachedDocumentIds Set&lt;String&gt; populated with the doc IDs of every attached doc
-     * @param foreignPrivateDocIds Set&lt;String&gt; populated with the doc IDs of attached private docs not owned by the current provider
+     * @param loggedInInfo   LoggedInInfo the current user's session (for current-provider comparison)
+     * @param attachedDocs   List&lt;EDoc&gt; the docs attached to the current consult/eForm; may be null/empty
+     * @param attachedEForms List&lt;EFormData&gt; the eForms attached to the current consult/eForm; may be null/empty
+     * @param sections       AttachmentSections the sections to merge into; mutated in place
      */
-    public void mergeAttachedIntoSections(LoggedInInfo loggedInInfo, List<EDoc> attachedDocs, List<EDoc> allDocuments, List<EDoc> providerPrivateDocs, List<EDoc> providerPublicDocs, Set<String> attachedDocumentIds, Set<String> foreignPrivateDocIds);
+    public void mergeAttachedIntoSections(LoggedInInfo loggedInInfo, List<EDoc> attachedDocs, List<EFormData> attachedEForms, AttachmentSections sections);
 
     /**
      * Returns the EDocs currently attached to a consultation request, or an empty
@@ -359,6 +354,24 @@ public interface DocumentAttachmentManager {
      * @return List&lt;EDoc&gt; attached EDocs, or empty list when {@code fdid} is {@code null}
      */
     public List<EDoc> getAttachedDocsForEForm(LoggedInInfo loggedInInfo, String demographicNo, String fdid);
+
+    /**
+     * Returns the eForms currently attached to a consultation request, deleted ones included,
+     * or an empty list when {@code requestId} is absent.
+     *
+     * @param requestId String the consultation request id; {@code null} short-circuits to an empty list
+     * @return List&lt;EFormData&gt; attached eForms, or empty list when {@code requestId} is {@code null}
+     */
+    public List<EFormData> getAttachedEFormsForConsult(String requestId);
+
+    /**
+     * Returns the eForms currently attached to an eForm instance, deleted ones included,
+     * or an empty list when {@code fdid} is absent.
+     *
+     * @param fdid String the form-data id; {@code null} short-circuits to an empty list
+     * @return List&lt;EFormData&gt; attached eForms, or empty list when {@code fdid} is {@code null}
+     */
+    public List<EFormData> getAttachedEFormsForEForm(String fdid);
 }
 
 	

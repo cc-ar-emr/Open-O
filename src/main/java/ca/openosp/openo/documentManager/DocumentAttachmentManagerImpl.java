@@ -12,6 +12,7 @@ import ca.openosp.openo.commn.model.EFormDocs;
 import ca.openosp.openo.hospitalReportManager.HRMUtil;
 import ca.openosp.openo.commn.model.enumerator.DocumentType;
 import ca.openosp.openo.documentManager.data.AttachmentLabResultData;
+import ca.openosp.openo.documentManager.data.AttachmentSections;
 import ca.openosp.openo.utility.DateUtils;
 import ca.openosp.openo.utility.LoggedInInfo;
 import ca.openosp.openo.utility.PDFGenerationException;
@@ -715,42 +716,29 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
     }
 
     @Override
-    public void mergeAttachedIntoSections(LoggedInInfo loggedInInfo, List<EDoc> attachedDocs, List<EDoc> allDocuments, List<EDoc> providerPrivateDocs, List<EDoc> providerPublicDocs, Set<String> attachedDocumentIds, Set<String> foreignPrivateDocIds) {
-        if (attachedDocs == null || attachedDocs.isEmpty()) {
-            return;
+    public void mergeAttachedIntoSections(LoggedInInfo loggedInInfo, List<EDoc> attachedDocs, List<EFormData> attachedEForms, AttachmentSections sections) {
+        if (attachedDocs != null) {
+            mergeAttachedDocs(loggedInInfo.getLoggedInProviderNo(), attachedDocs, sections);
         }
+        if (attachedEForms != null) {
+            mergeAttachedEForms(attachedEForms, sections);
+        }
+    }
 
-        // attachedDocumentIds drives view pre-checking and is useful even when the
-        // per-section lists aren't loaded — populate it unconditionally.
+    private void mergeAttachedDocs(String currentProviderNo, List<EDoc> attachedDocs, AttachmentSections sections) {
         for (EDoc attachedDoc : attachedDocs) {
-            attachedDocumentIds.add(attachedDoc.getDocId());
-        }
-
-        if (allDocuments == null || providerPrivateDocs == null || providerPublicDocs == null) {
-            return;
-        }
-
-        String currentProviderNo = loggedInInfo.getLoggedInProviderNo();
-
-        for (EDoc attachedDoc : attachedDocs) {
-            boolean isDeleted = attachedDoc.getStatus() == 'D';
-            boolean isPublic = "1".equals(attachedDoc.getDocPublic());
-            boolean ownedByCurrent = attachedDoc.isOwnedBy(currentProviderNo);
-
-            // Patient doc: only deleted ones need re-injecting.
-            if (!attachedDoc.isProviderScoped()) {
-                if (isDeleted) allDocuments.add(attachedDoc);
-                continue;
+            sections.getAttachedDocumentIds().add(attachedDoc.getDocId());
+            sections.sectionFor(attachedDoc).addIfAbsent(attachedDoc);
+            if (attachedDoc.isPrivateProviderDoc() && !attachedDoc.isOwnedBy(currentProviderNo)) {
+                sections.getForeignPrivateDocIds().add(attachedDoc.getDocId());
             }
-            // Public provider doc: only deleted ones need re-injecting.
-            if (isPublic) {
-                if (isDeleted) providerPublicDocs.add(attachedDoc);
-                continue;
-            }
-            // Private provider doc: skip active-own (already listed); merge everything else.
-            if (!isDeleted && ownedByCurrent) continue;
-            providerPrivateDocs.add(attachedDoc);
-            if (!ownedByCurrent) foreignPrivateDocIds.add(attachedDoc.getDocId());
+        }
+    }
+
+    private void mergeAttachedEForms(List<EFormData> attachedEForms, AttachmentSections sections) {
+        for (EFormData attachedEForm : attachedEForms) {
+            sections.getAttachedEFormIds().add(attachedEForm.getId());
+            sections.getEForms().addIfAbsent(attachedEForm);
         }
     }
 
@@ -764,5 +752,17 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
     public List<EDoc> getAttachedDocsForEForm(LoggedInInfo loggedInInfo, String demographicNo, String fdid) {
         if (fdid == null) return Collections.emptyList();
         return EDocUtil.listDocsAttachedToEForm(loggedInInfo, demographicNo, fdid, EDocUtil.ATTACHED);
+    }
+
+    @Override
+    public List<EFormData> getAttachedEFormsForConsult(String requestId) {
+        if (requestId == null) return Collections.emptyList();
+        return EFormUtil.listPatientEformsCurrentAttachedToConsult(requestId);
+    }
+
+    @Override
+    public List<EFormData> getAttachedEFormsForEForm(String fdid) {
+        if (fdid == null) return Collections.emptyList();
+        return EFormUtil.listPatientEformsCurrentAttachedToEForm(fdid);
     }
 }
