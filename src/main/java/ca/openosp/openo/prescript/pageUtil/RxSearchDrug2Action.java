@@ -256,11 +256,23 @@ public final class RxSearchDrug2Action extends ActionSupport {
      * Utilty methods - should be split into a class if they get any bigger.
      */
 
+    /**
+     * Decides whether the drug search anchors to the start of the name.
+     * <p>
+     * The Exact / Any control that used to supply this was removed, so the value is normally
+     * absent and this default is what the search actually uses. It is TRUE because the DPD
+     * backend is meant to search "starts with", which is the behaviour this screen had before a
+     * merge reverted it. Current drugref ignores the flag on Vigilance. Older drugref builds read
+     * it there as ingredient-only, which is why the drugref change has to be deployed first.
+     *
+     * @param wildcard String the posted wildcard value, normally absent
+     * @return boolean true to anchor the search to the start of the name
+     */
     private static boolean wildCardRight(final String wildcard) {
         if (!StringUtils.isBlank(wildcard)) {
             return Boolean.valueOf(wildcard);
         }
-        return Boolean.FALSE;
+        return Boolean.TRUE;
     }
 
     private static void jsonify(final Vector<Hashtable<String, Object>> data,

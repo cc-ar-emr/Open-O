@@ -1161,7 +1161,12 @@
                           <div id="autocomplete_choices"></div>
                         </div>
                         <div id="advanceSearchParameters">
-                          <fieldset id="drugCategorySet">
+                          <%-- Hidden, not disabled: the checked "All" radio must keep posting
+                               method=searchAllCategories. A disabled control is not submitted, and
+                               without that parameter the request falls through to the legacy branch,
+                               which returns HTML to a caller expecting JSON, leaving the dropdown
+                               empty with nothing on screen or in the log to explain it. --%>
+                          <fieldset id="drugCategorySet" hidden>
                             <input type="radio" id="allCategories" name="method"
                                    value="searchAllCategories" class="trigger"
                                    checked="checked"/>
@@ -1179,17 +1184,6 @@
                                    disabled="disabled"
                                    value="searchNaturalRemedy" class="trigger"/>
                             <label for="naturalRemedy">Natural</label>
-                          </fieldset>
-                          <fieldset id="searchParamSet">
-                            <input type="radio" id="wildCardBoth" name="wildcard"
-                                   value="false" checked="checked"/>
-                            <label title="Search exactly as typed (right to left)"
-                                   for="wildCardBoth">Exact</label>
-
-                            <input type="radio" id="wildCardRight" name="wildcard"
-                                   value="true"/>
-                            <label title="Search for all words in all phrases"
-                                   for="wildCardRight">Any</label>
                           </fieldset>
                         </div>
                       </div>
@@ -2576,13 +2570,34 @@
     });
   }
 
+    // Words shorter than this are not highlighted, because the search itself ignores them.
+    const HIGHLIGHT_MIN_WORD_LENGTH = 3;
+
+    /*
+     * Marks the parts of a drug name that matched what was typed.
+     *
+     * The term is split into words the same way the search splits it, so a name is marked when
+     * the words appear apart in it ("Amoxicillin 500" inside "amoxicillin oral 500MG") and when
+     * only one of them matched ("Amoxicillin" inside "Mylan Amoxicilline"). Matching on the
+     * whole phrase instead left rows that the search had returned looking unmatched.
+     */
     function replaceAll(str, keyword) {
-      let matcher;
-      let lastkeyword;
-      if (keyword !== lastkeyword) {
-        matcher = new RegExp("(" + keyword + ")", "ig");
-        lastkeyword = keyword;
+      let words = keyword.split(/[^\p{L}\p{N}]+/u)
+        .filter(function (word) {
+          return word.length >= HIGHLIGHT_MIN_WORD_LENGTH;
+        })
+        .map(function (word) {
+          return jQuery.ui.autocomplete.escapeRegex(word);
+        })
+        // Longest first: the alternation takes the first word that matches, so "met" listed
+        // before "metformin" would mark only the first three letters of "METFORMIN".
+        .sort(function (a, b) {
+          return b.length - a.length;
+        });
+      if (words.length === 0) {
+        return str;
       }
+      let matcher = new RegExp("(" + words.join("|") + ")", "ig");
       return str.replace(matcher, "<span class='drugKeyword' >$1</span>");
     }
 
@@ -2624,11 +2639,12 @@
             return;
           }
 
+          // encodeURIComponent, because param is built as a string and sent verbatim as
+          // the form-encoded body: an unencoded "+" arrives as a space and a "%" loses the
+          // parameter, so a strength like "1%" silently returned nothing.
           let param = jQuery('#drugCategorySet').serialize()
-            + "&"
-            + jQuery('#searchParamSet').serialize()
             + "&query="
-            + request.term.toUpperCase();
+            + encodeURIComponent(request.term.toUpperCase());
           jQuery.ajax({
             url: "${ctx}/oscarRx/searchDrug.do",
             type: 'POST',
@@ -2682,7 +2698,7 @@
             + " class='drugitem"
             + inactivedrug
             + "' >"
-            + replaceAll(item.label, jQuery.ui.autocomplete.escapeRegex(item.keyword))
+            + replaceAll(item.label, item.keyword)
             + "</a>")
           .appendTo(ul);
       };
