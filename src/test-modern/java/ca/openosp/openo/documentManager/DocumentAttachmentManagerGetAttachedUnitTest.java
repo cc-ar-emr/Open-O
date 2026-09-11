@@ -4,6 +4,7 @@ import ca.openosp.openo.commn.dao.ConsultationRequestDao;
 import ca.openosp.openo.commn.dao.EFormDataDao;
 import ca.openosp.openo.commn.model.ConsultationRequest;
 import ca.openosp.openo.commn.model.EFormData;
+import ca.openosp.openo.test.unit.OpenOUnitTestBase;
 import ca.openosp.openo.utility.LoggedInInfo;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,21 +27,26 @@ import static org.mockito.Mockito.when;
  * {@code getAttachedEFormsForEForm}.
  *
  * <p>The attached-item queries filter by consultation/eForm id only, so each getter must
- * return nothing unless that consultation or eForm belongs to the requested patient. Only the
- * rejecting paths are covered here: they return before the static {@code EDocUtil} /
- * {@code EFormUtil} queries, which need a Spring context.</p>
+ * return nothing unless that consultation or eForm belongs to the requested patient. The check
+ * itself ({@code consultBelongsTo} / {@code eFormBelongsTo}) is tested directly, allowed and
+ * rejected. The getters are tested on the rejecting path only: on the allowed path they call
+ * the static {@code EDocUtil} / {@code EFormUtil} queries, which need a Spring context.</p>
  */
-@DisplayName("DocumentAttachmentManagerImpl attached-item getters")
+@DisplayName("DocumentAttachmentManagerImpl attached-item patient check")
 @Tag("unit")
 @Tag("fast")
 @Tag("document")
 @Tag("manager")
-class DocumentAttachmentManagerGetAttachedUnitTest {
+class DocumentAttachmentManagerGetAttachedUnitTest extends OpenOUnitTestBase {
 
-    private static final String PATIENT_DEMO_NO = "42";
-    private static final Integer OTHER_PATIENT_DEMO_NO = 43;
-    private static final String REQUEST_ID = "700";
-    private static final String FDID = "800";
+    private static final Integer PATIENT = 42;
+    private static final Integer OTHER_PATIENT = 43;
+    private static final Integer REQUEST_NO = 700;
+    private static final Integer FDID_NO = 800;
+
+    private static final String PATIENT_DEMO_NO = String.valueOf(PATIENT);
+    private static final String REQUEST_ID = String.valueOf(REQUEST_NO);
+    private static final String FDID = String.valueOf(FDID_NO);
 
     private ConsultationRequestDao consultationRequestDao;
     private EFormDataDao eFormDataDao;
@@ -65,68 +71,112 @@ class DocumentAttachmentManagerGetAttachedUnitTest {
     }
 
     @Nested
-    @DisplayName("consultation getters")
-    class Consultation {
+    @DisplayName("consultBelongsTo")
+    class ConsultBelongsTo {
 
         @Test
-        @DisplayName("returns nothing when the consultation belongs to another patient")
-        void shouldReturnEmpty_whenConsultBelongsToAnotherPatient() {
-            ConsultationRequest consult = new ConsultationRequest();
-            consult.setDemographicId(OTHER_PATIENT_DEMO_NO);
-            when(consultationRequestDao.find(Integer.valueOf(REQUEST_ID))).thenReturn(consult);
-
-            assertThat(manager.getAttachedDocsForConsult(loggedInInfo, PATIENT_DEMO_NO, REQUEST_ID)).isEmpty();
-            assertThat(manager.getAttachedEFormsForConsult(PATIENT_DEMO_NO, REQUEST_ID)).isEmpty();
+        @DisplayName("is true when the consultation belongs to the patient")
+        void shouldBeTrue_whenConsultBelongsToPatient() {
+            when(consultationRequestDao.find(REQUEST_NO)).thenReturn(consultFor(PATIENT));
+            assertThat(manager.consultBelongsTo(REQUEST_ID, PATIENT_DEMO_NO)).isTrue();
         }
 
         @Test
-        @DisplayName("returns nothing when the consultation doesn't exist")
-        void shouldReturnEmpty_whenConsultNotFound() {
-            when(consultationRequestDao.find(Integer.valueOf(REQUEST_ID))).thenReturn(null);
-
-            assertThat(manager.getAttachedDocsForConsult(loggedInInfo, PATIENT_DEMO_NO, REQUEST_ID)).isEmpty();
-            assertThat(manager.getAttachedEFormsForConsult(PATIENT_DEMO_NO, REQUEST_ID)).isEmpty();
+        @DisplayName("is false when the consultation belongs to another patient")
+        void shouldBeFalse_whenConsultBelongsToAnotherPatient() {
+            when(consultationRequestDao.find(REQUEST_NO)).thenReturn(consultFor(OTHER_PATIENT));
+            assertThat(manager.consultBelongsTo(REQUEST_ID, PATIENT_DEMO_NO)).isFalse();
         }
 
         @Test
-        @DisplayName("returns nothing without a lookup when there is no request id (new consultation)")
-        void shouldSkipLookup_whenRequestIdNull() {
-            assertThat(manager.getAttachedDocsForConsult(loggedInInfo, PATIENT_DEMO_NO, null)).isEmpty();
-            assertThat(manager.getAttachedEFormsForConsult(PATIENT_DEMO_NO, null)).isEmpty();
+        @DisplayName("is false when the consultation doesn't exist")
+        void shouldBeFalse_whenConsultNotFound() {
+            when(consultationRequestDao.find(REQUEST_NO)).thenReturn(null);
+            assertThat(manager.consultBelongsTo(REQUEST_ID, PATIENT_DEMO_NO)).isFalse();
+        }
+
+        @Test
+        @DisplayName("is false without a lookup when there is no request id (new consultation)")
+        void shouldBeFalse_whenRequestIdNull() {
+            assertThat(manager.consultBelongsTo(null, PATIENT_DEMO_NO)).isFalse();
             verifyNoInteractions(consultationRequestDao);
         }
     }
 
     @Nested
-    @DisplayName("eForm getters")
-    class EForm {
+    @DisplayName("eFormBelongsTo")
+    class EFormBelongsTo {
 
         @Test
-        @DisplayName("returns nothing when the eForm belongs to another patient")
-        void shouldReturnEmpty_whenEFormBelongsToAnotherPatient() {
-            EFormData eForm = new EFormData();
-            eForm.setDemographicId(OTHER_PATIENT_DEMO_NO);
-            when(eFormDataDao.find(Integer.valueOf(FDID))).thenReturn(eForm);
-
-            assertThat(manager.getAttachedDocsForEForm(loggedInInfo, PATIENT_DEMO_NO, FDID)).isEmpty();
-            assertThat(manager.getAttachedEFormsForEForm(PATIENT_DEMO_NO, FDID)).isEmpty();
+        @DisplayName("is true when the eForm belongs to the patient")
+        void shouldBeTrue_whenEFormBelongsToPatient() {
+            when(eFormDataDao.find(FDID_NO)).thenReturn(eFormFor(PATIENT));
+            assertThat(manager.eFormBelongsTo(FDID, PATIENT_DEMO_NO)).isTrue();
         }
 
         @Test
-        @DisplayName("returns nothing when the eForm doesn't exist")
-        void shouldReturnEmpty_whenEFormNotFound() {
-            when(eFormDataDao.find(Integer.valueOf(FDID))).thenReturn(null);
-
-            assertThat(manager.getAttachedDocsForEForm(loggedInInfo, PATIENT_DEMO_NO, FDID)).isEmpty();
-            assertThat(manager.getAttachedEFormsForEForm(PATIENT_DEMO_NO, FDID)).isEmpty();
+        @DisplayName("is false when the eForm belongs to another patient")
+        void shouldBeFalse_whenEFormBelongsToAnotherPatient() {
+            when(eFormDataDao.find(FDID_NO)).thenReturn(eFormFor(OTHER_PATIENT));
+            assertThat(manager.eFormBelongsTo(FDID, PATIENT_DEMO_NO)).isFalse();
         }
 
         @Test
-        @DisplayName("returns nothing without a lookup when there is no fdid (new eForm)")
-        void shouldSkipLookup_whenFdidNull() {
-            assertThat(manager.getAttachedDocsForEForm(loggedInInfo, PATIENT_DEMO_NO, null)).isEmpty();
-            assertThat(manager.getAttachedEFormsForEForm(PATIENT_DEMO_NO, null)).isEmpty();
+        @DisplayName("is false when the eForm doesn't exist")
+        void shouldBeFalse_whenEFormNotFound() {
+            when(eFormDataDao.find(FDID_NO)).thenReturn(null);
+            assertThat(manager.eFormBelongsTo(FDID, PATIENT_DEMO_NO)).isFalse();
+        }
+
+        @Test
+        @DisplayName("is false without a lookup when there is no fdid (new eForm)")
+        void shouldBeFalse_whenFdidNull() {
+            assertThat(manager.eFormBelongsTo(null, PATIENT_DEMO_NO)).isFalse();
             verifyNoInteractions(eFormDataDao);
         }
+    }
+
+    @Nested
+    @DisplayName("getters")
+    class Getters {
+
+        @Test
+        @DisplayName("consultation getters return nothing for another patient's consultation")
+        void shouldReturnEmpty_whenConsultBelongsToAnotherPatient() {
+            when(consultationRequestDao.find(REQUEST_NO)).thenReturn(consultFor(OTHER_PATIENT));
+
+            assertThat(manager.getAttachedDocsForConsult(loggedInInfo, PATIENT_DEMO_NO, REQUEST_ID)).isEmpty();
+            assertThat(manager.getAttachedEFormsForConsult(PATIENT_DEMO_NO, REQUEST_ID)).isEmpty();
+        }
+
+        @Test
+        @DisplayName("eForm getters return nothing for another patient's eForm")
+        void shouldReturnEmpty_whenEFormBelongsToAnotherPatient() {
+            when(eFormDataDao.find(FDID_NO)).thenReturn(eFormFor(OTHER_PATIENT));
+
+            assertThat(manager.getAttachedDocsForEForm(loggedInInfo, PATIENT_DEMO_NO, FDID)).isEmpty();
+            assertThat(manager.getAttachedEFormsForEForm(PATIENT_DEMO_NO, FDID)).isEmpty();
+        }
+
+        @Test
+        @DisplayName("all getters return nothing when there is no id")
+        void shouldReturnEmpty_whenIdNull() {
+            assertThat(manager.getAttachedDocsForConsult(loggedInInfo, PATIENT_DEMO_NO, null)).isEmpty();
+            assertThat(manager.getAttachedEFormsForConsult(PATIENT_DEMO_NO, null)).isEmpty();
+            assertThat(manager.getAttachedDocsForEForm(loggedInInfo, PATIENT_DEMO_NO, null)).isEmpty();
+            assertThat(manager.getAttachedEFormsForEForm(PATIENT_DEMO_NO, null)).isEmpty();
+        }
+    }
+
+    private static ConsultationRequest consultFor(Integer demographicNo) {
+        ConsultationRequest consult = new ConsultationRequest();
+        consult.setDemographicId(demographicNo);
+        return consult;
+    }
+
+    private static EFormData eFormFor(Integer demographicNo) {
+        EFormData eForm = new EFormData();
+        eForm.setDemographicId(demographicNo);
+        return eForm;
     }
 }

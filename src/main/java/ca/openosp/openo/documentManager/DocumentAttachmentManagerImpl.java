@@ -773,13 +773,14 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
 
     // The attached-item queries filter by consult/eForm id only, so without this check a
     // request pairing one patient with another patient's consult or eForm would list its attachments.
-    private boolean consultBelongsTo(String requestId, String demographicNo) {
+    // Package-private for unit tests.
+    boolean consultBelongsTo(String requestId, String demographicNo) {
         if (requestId == null) return false;
         ConsultationRequest consult = consultationRequestDao.find(ConversionUtils.fromIntString(requestId));
         return consult != null && Objects.equals(consult.getDemographicId(), ConversionUtils.fromIntString(demographicNo));
     }
 
-    private boolean eFormBelongsTo(String fdid, String demographicNo) {
+    boolean eFormBelongsTo(String fdid, String demographicNo) {
         if (fdid == null) return false;
         EFormData eForm = eFormDataDao.find(ConversionUtils.fromIntString(fdid));
         return eForm != null && Objects.equals(eForm.getDemographicId(), ConversionUtils.fromIntString(demographicNo));
