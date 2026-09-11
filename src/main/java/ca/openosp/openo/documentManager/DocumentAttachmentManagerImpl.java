@@ -5,8 +5,10 @@ import ca.openosp.openo.managers.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import ca.openosp.openo.commn.dao.ConsultDocsDao;
+import ca.openosp.openo.commn.dao.ConsultationRequestDao;
 import ca.openosp.openo.commn.dao.EFormDocsDao;
 import ca.openosp.openo.commn.model.ConsultDocs;
+import ca.openosp.openo.commn.model.ConsultationRequest;
 import ca.openosp.openo.commn.model.EFormData;
 import ca.openosp.openo.commn.model.EFormDocs;
 import ca.openosp.openo.hospitalReportManager.HRMUtil;
@@ -25,6 +27,7 @@ import ca.openosp.openo.lab.ca.all.Hl7textResultsData;
 import ca.openosp.openo.lab.ca.on.CommonLabResultData;
 import ca.openosp.openo.lab.ca.on.LabResultData;
 import ca.openosp.openo.util.ConcatPDF;
+import ca.openosp.openo.util.ConversionUtils;
 import ca.openosp.openo.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -76,6 +79,8 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
     private ca.openosp.openo.commn.dao.PatientLabRoutingDao patientLabRoutingDao;
     @Autowired
     private ca.openosp.openo.commn.dao.EFormDataDao eFormDataDao;
+    @Autowired
+    private ConsultationRequestDao consultationRequestDao;
 
     @Autowired
     private ConsultationManager consultationManager;
@@ -744,25 +749,39 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
 
     @Override
     public List<EDoc> getAttachedDocsForConsult(LoggedInInfo loggedInInfo, String demographicNo, String requestId) {
-        if (requestId == null) return Collections.emptyList();
+        if (!consultBelongsTo(requestId, demographicNo)) return Collections.emptyList();
         return EDocUtil.listDocs(loggedInInfo, demographicNo, requestId, EDocUtil.ATTACHED);
     }
 
     @Override
     public List<EDoc> getAttachedDocsForEForm(LoggedInInfo loggedInInfo, String demographicNo, String fdid) {
-        if (fdid == null) return Collections.emptyList();
+        if (!eFormBelongsTo(fdid, demographicNo)) return Collections.emptyList();
         return EDocUtil.listDocsAttachedToEForm(loggedInInfo, demographicNo, fdid, EDocUtil.ATTACHED);
     }
 
     @Override
-    public List<EFormData> getAttachedEFormsForConsult(String requestId) {
-        if (requestId == null) return Collections.emptyList();
+    public List<EFormData> getAttachedEFormsForConsult(String demographicNo, String requestId) {
+        if (!consultBelongsTo(requestId, demographicNo)) return Collections.emptyList();
         return EFormUtil.listPatientEformsCurrentAttachedToConsult(requestId);
     }
 
     @Override
-    public List<EFormData> getAttachedEFormsForEForm(String fdid) {
-        if (fdid == null) return Collections.emptyList();
+    public List<EFormData> getAttachedEFormsForEForm(String demographicNo, String fdid) {
+        if (!eFormBelongsTo(fdid, demographicNo)) return Collections.emptyList();
         return EFormUtil.listPatientEformsCurrentAttachedToEForm(fdid);
+    }
+
+    // The attached-item queries filter by consult/eForm id only, so without this check a
+    // request pairing one patient with another patient's consult or eForm would list its attachments.
+    private boolean consultBelongsTo(String requestId, String demographicNo) {
+        if (requestId == null) return false;
+        ConsultationRequest consult = consultationRequestDao.find(ConversionUtils.fromIntString(requestId));
+        return consult != null && Objects.equals(consult.getDemographicId(), ConversionUtils.fromIntString(demographicNo));
+    }
+
+    private boolean eFormBelongsTo(String fdid, String demographicNo) {
+        if (fdid == null) return false;
+        EFormData eForm = eFormDataDao.find(ConversionUtils.fromIntString(fdid));
+        return eForm != null && Objects.equals(eForm.getDemographicId(), ConversionUtils.fromIntString(demographicNo));
     }
 }

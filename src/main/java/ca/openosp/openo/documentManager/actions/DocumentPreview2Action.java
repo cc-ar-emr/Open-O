@@ -386,7 +386,7 @@ public class DocumentPreview2Action extends ActionSupport {
 		List<EFormData> allEForms = EFormUtil.listPatientEformsCurrent(Integer.valueOf(demographicNo), true);
         populateCommonDocs(loggedInInfo, demographicNo, allEForms,
                 documentAttachmentManager.getAttachedDocsForConsult(loggedInInfo, demographicNo, requestId),
-                documentAttachmentManager.getAttachedEFormsForConsult(requestId));
+                documentAttachmentManager.getAttachedEFormsForConsult(demographicNo, requestId));
 
         return "fetchDocuments";
     }
@@ -432,7 +432,7 @@ public class DocumentPreview2Action extends ActionSupport {
 		List<EFormData> allEForms = documentAttachmentManager.getAllEFormsExpectFdid(loggedInInfo, Integer.parseInt(demographicNo), Integer.parseInt(fdidForEformList));
         populateCommonDocs(loggedInInfo, demographicNo, allEForms,
                 documentAttachmentManager.getAttachedDocsForEForm(loggedInInfo, demographicNo, fdidForAttached),
-                documentAttachmentManager.getAttachedEFormsForEForm(fdidForAttached));
+                documentAttachmentManager.getAttachedEFormsForEForm(demographicNo, fdidForAttached));
 
         return "fetchDocuments";
     }

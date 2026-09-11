@@ -331,47 +331,49 @@ public interface DocumentAttachmentManager {
 
     /**
      * Returns the EDocs currently attached to a consultation request, or an empty
-     * list when {@code requestId} is absent. Used by the attachment-dialog flow
-     * to render pre-checked and cross-provider markers alongside the patient's
-     * document library.
+     * list when {@code requestId} is absent or the consultation isn't this patient's.
+     * Used by the attachment-dialog flow to render pre-checked and cross-provider
+     * markers alongside the patient's document library.
      *
      * @param loggedInInfo  LoggedInInfo the current user's session
-     * @param demographicNo String the patient's demographic number
+     * @param demographicNo String the patient's demographic number; the consultation must belong to this patient
      * @param requestId     String the consultation request id; {@code null} short-circuits to an empty list
-     * @return List&lt;EDoc&gt; attached EDocs, or empty list when {@code requestId} is {@code null}
+     * @return List&lt;EDoc&gt; attached EDocs, or empty list when {@code requestId} is {@code null} or not this patient's
      */
     public List<EDoc> getAttachedDocsForConsult(LoggedInInfo loggedInInfo, String demographicNo, String requestId);
 
     /**
      * Returns the EDocs currently attached to an eForm instance, or an empty
-     * list when {@code fdid} is absent. Used by the attachment-dialog flow to
-     * render pre-checked and cross-provider markers alongside the patient's
-     * document library.
+     * list when {@code fdid} is absent or the eForm isn't this patient's. Used by
+     * the attachment-dialog flow to render pre-checked and cross-provider markers
+     * alongside the patient's document library.
      *
      * @param loggedInInfo  LoggedInInfo the current user's session
-     * @param demographicNo String the patient's demographic number
+     * @param demographicNo String the patient's demographic number; the eForm must belong to this patient
      * @param fdid          String the form-data id; {@code null} short-circuits to an empty list
-     * @return List&lt;EDoc&gt; attached EDocs, or empty list when {@code fdid} is {@code null}
+     * @return List&lt;EDoc&gt; attached EDocs, or empty list when {@code fdid} is {@code null} or not this patient's
      */
     public List<EDoc> getAttachedDocsForEForm(LoggedInInfo loggedInInfo, String demographicNo, String fdid);
 
     /**
      * Returns the eForms currently attached to a consultation request, deleted ones included,
-     * or an empty list when {@code requestId} is absent.
+     * or an empty list when {@code requestId} is absent or the consultation isn't this patient's.
      *
-     * @param requestId String the consultation request id; {@code null} short-circuits to an empty list
-     * @return List&lt;EFormData&gt; attached eForms, or empty list when {@code requestId} is {@code null}
+     * @param demographicNo String the patient's demographic number; the consultation must belong to this patient
+     * @param requestId     String the consultation request id; {@code null} short-circuits to an empty list
+     * @return List&lt;EFormData&gt; attached eForms, or empty list when {@code requestId} is {@code null} or not this patient's
      */
-    public List<EFormData> getAttachedEFormsForConsult(String requestId);
+    public List<EFormData> getAttachedEFormsForConsult(String demographicNo, String requestId);
 
     /**
      * Returns the eForms currently attached to an eForm instance, deleted ones included,
-     * or an empty list when {@code fdid} is absent.
+     * or an empty list when {@code fdid} is absent or the eForm isn't this patient's.
      *
-     * @param fdid String the form-data id; {@code null} short-circuits to an empty list
-     * @return List&lt;EFormData&gt; attached eForms, or empty list when {@code fdid} is {@code null}
+     * @param demographicNo String the patient's demographic number; the eForm must belong to this patient
+     * @param fdid          String the form-data id; {@code null} short-circuits to an empty list
+     * @return List&lt;EFormData&gt; attached eForms, or empty list when {@code fdid} is {@code null} or not this patient's
      */
-    public List<EFormData> getAttachedEFormsForEForm(String fdid);
+    public List<EFormData> getAttachedEFormsForEForm(String demographicNo, String fdid);
 }
 
 	
