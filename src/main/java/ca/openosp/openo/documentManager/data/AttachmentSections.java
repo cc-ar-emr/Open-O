@@ -127,23 +127,50 @@ public class AttachmentSections {
     }
 
     /**
-     * @return Set&lt;String&gt; ids of every attached doc, used to pre-check them
+     * Records a doc as attached, so the view pre-checks it.
+     *
+     * @param docId String the attached doc's id
+     */
+    public void recordAttachedDocument(String docId) {
+        attachedDocumentIds.add(docId);
+    }
+
+    /**
+     * Records an attached doc as another provider's private doc, so the view labels it.
+     *
+     * @param docId String the attached doc's id
+     */
+    public void recordForeignPrivateDoc(String docId) {
+        foreignPrivateDocIds.add(docId);
+    }
+
+    /**
+     * Records an eForm as attached, so the view pre-checks it.
+     *
+     * @param fdid Integer the attached eForm's fdid
+     */
+    public void recordAttachedEForm(Integer fdid) {
+        attachedEFormIds.add(fdid);
+    }
+
+    /**
+     * @return Set&lt;String&gt; a read-only view of the ids of every attached doc, used to pre-check them
      */
     public Set<String> getAttachedDocumentIds() {
-        return attachedDocumentIds;
+        return Collections.unmodifiableSet(attachedDocumentIds);
     }
 
     /**
-     * @return Set&lt;String&gt; ids of attached private docs owned by another provider
+     * @return Set&lt;String&gt; a read-only view of the ids of attached private docs owned by another provider
      */
     public Set<String> getForeignPrivateDocIds() {
-        return foreignPrivateDocIds;
+        return Collections.unmodifiableSet(foreignPrivateDocIds);
     }
 
     /**
-     * @return Set&lt;Integer&gt; fdids of every attached eForm, used to pre-check them
+     * @return Set&lt;Integer&gt; a read-only view of the fdids of every attached eForm, used to pre-check them
      */
     public Set<Integer> getAttachedEFormIds() {
-        return attachedEFormIds;
+        return Collections.unmodifiableSet(attachedEFormIds);
     }
 }

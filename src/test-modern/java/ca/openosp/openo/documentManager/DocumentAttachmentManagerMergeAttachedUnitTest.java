@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -226,6 +227,17 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
             assertSectionListsEmpty();
             assertThat(attachedDocumentIds).isEmpty();
             assertThat(sections.getEForms().getItems()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("the id sets handed to the view are read-only")
+        void shouldRejectChanges_whenIdSetsModifiedByCaller() {
+            merge(providerDoc("13", 'A', false, OTHER_PROVIDER));
+            assertThatThrownBy(() -> sections.getAttachedDocumentIds().add("99")).isInstanceOf(UnsupportedOperationException.class);
+            assertThatThrownBy(() -> sections.getForeignPrivateDocIds().clear()).isInstanceOf(UnsupportedOperationException.class);
+            assertThatThrownBy(() -> sections.getAttachedEFormIds().add(99)).isInstanceOf(UnsupportedOperationException.class);
+            assertThat(attachedDocumentIds).containsExactly("13");
+            assertThat(foreignPrivateDocIds).containsExactly("13");
         }
     }
 

@@ -732,17 +732,17 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
 
     private void mergeAttachedDocs(String currentProviderNo, List<EDoc> attachedDocs, AttachmentSections sections) {
         for (EDoc attachedDoc : attachedDocs) {
-            sections.getAttachedDocumentIds().add(attachedDoc.getDocId());
+            sections.recordAttachedDocument(attachedDoc.getDocId());
             sections.sectionFor(attachedDoc).addIfAbsent(attachedDoc);
             if (attachedDoc.isPrivateProviderDoc() && !attachedDoc.isOwnedBy(currentProviderNo)) {
-                sections.getForeignPrivateDocIds().add(attachedDoc.getDocId());
+                sections.recordForeignPrivateDoc(attachedDoc.getDocId());
             }
         }
     }
 
     private void mergeAttachedEForms(List<EFormData> attachedEForms, AttachmentSections sections) {
         for (EFormData attachedEForm : attachedEForms) {
-            sections.getAttachedEFormIds().add(attachedEForm.getId());
+            sections.recordAttachedEForm(attachedEForm.getId());
             sections.getEForms().addIfAbsent(attachedEForm);
         }
     }
