@@ -301,8 +301,9 @@ public class EctDisplayForm2Action extends EctDisplayAction {
                 continue;
             }
 
+            // sorted by edited date, the same record formId=latest opens
             EctFormData.PatientForm[] pforms =
-                    EctFormData.getPatientFormsFromLocalAndRemote(loggedInInfo, bean.demographicNo, table);
+                    EctFormData.getPatientFormsFromLocalAndRemote(loggedInInfo, bean.demographicNo, table, true);
             if (pforms.length == 0) {
                 continue;
             }
