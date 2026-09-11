@@ -2588,6 +2588,11 @@
         })
         .map(function (word) {
           return jQuery.ui.autocomplete.escapeRegex(word);
+        })
+        // Longest first: the alternation takes the first word that matches, so "met" listed
+        // before "metformin" would mark only the first three letters of "METFORMIN".
+        .sort(function (a, b) {
+          return b.length - a.length;
         });
       if (words.length === 0) {
         return str;
