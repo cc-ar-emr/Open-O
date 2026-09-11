@@ -344,6 +344,24 @@ public class EDoc extends TagObject implements Comparable<EDoc> {
         return providerNo != null && providerNo.equals(moduleId);
     }
 
+    /**
+     * Whether this doc is flagged public ({@code docPublic} is {@code "1"}).
+     *
+     * @return {@code true} when the doc is public
+     */
+    public boolean isPublicDoc() {
+        return "1".equals(docPublic);
+    }
+
+    /**
+     * Whether this doc sits in a provider's private library: provider-scoped and not public.
+     *
+     * @return {@code true} for a private provider doc
+     */
+    public boolean isPrivateProviderDoc() {
+        return isProviderScoped() && !isPublicDoc();
+    }
+
     public String getType() {
         return type;
     }

@@ -1,5 +1,7 @@
 package ca.openosp.openo.documentManager;
 
+import ca.openosp.openo.commn.model.EFormData;
+import ca.openosp.openo.documentManager.data.AttachmentSections;
 import ca.openosp.openo.utility.LoggedInInfo;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -8,25 +10,26 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link DocumentAttachmentManagerImpl#mergeAttachedIntoSections}
  * — the classification function that decides which section (patient / provider
- * public / provider private) an attached EDoc lands in when the attachment
- * manager reopens a saved consult or eForm. Exercised one doc at a time via a
+ * public / provider private / eForms) an attached item lands in when the attachment
+ * manager reopens a saved consult or eForm. Docs are exercised one at a time via a
  * single-element attached list; no Spring context.
  *
  * Covers the full matrix of (module type, public flag, ownership, deleted state)
- * combinations that drive the UI's section placement and "(other provider)" label.
+ * combinations that drive the UI's section placement and "(other provider)" label,
+ * plus deleted/current attached eForms.
  */
 @DisplayName("DocumentAttachmentManagerImpl.mergeAttachedIntoSections")
 @Tag("unit")
@@ -39,6 +42,7 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
     private final DocumentAttachmentManagerImpl manager = new DocumentAttachmentManagerImpl();
 
     private LoggedInInfo loggedInInfo;
+    private AttachmentSections sections;
     private List<EDoc> allDocuments;
     private List<EDoc> providerPrivateDocs;
     private List<EDoc> providerPublicDocs;
@@ -49,11 +53,7 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
     void resetSinks() {
         loggedInInfo = mock(LoggedInInfo.class);
         when(loggedInInfo.getLoggedInProviderNo()).thenReturn(CURRENT_PROVIDER);
-        allDocuments = new ArrayList<>();
-        providerPrivateDocs = new ArrayList<>();
-        providerPublicDocs = new ArrayList<>();
-        attachedDocumentIds = new HashSet<>();
-        foreignPrivateDocIds = new HashSet<>();
+        useSections(new AttachmentSections(null, null, null, null));
     }
 
     @Nested
@@ -61,10 +61,23 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
     class PatientDocs {
 
         @Test
-        @DisplayName("active patient doc is a no-op — already listed in allDocuments")
-        void shouldBeNoOp_whenActivePatientDoc() {
+        @DisplayName("active patient doc already listed in allDocuments is not added again")
+        void shouldNotDuplicate_whenActivePatientDocAlreadyListed() {
+            EDoc doc = patientDoc("1", 'A');
+            useSections(new AttachmentSections(Collections.singletonList(doc), null, null, null));
             merge(patientDoc("1", 'A'));
-            assertSectionListsEmpty();
+            assertThat(allDocuments).containsExactly(doc);
+            assertThat(providerPrivateDocs).isEmpty();
+            assertThat(providerPublicDocs).isEmpty();
+        }
+
+        @Test
+        @DisplayName("active patient doc missing from allDocuments (e.g. moved to another patient) is added so it can be detached")
+        void shouldAdd_whenActivePatientDocNotListed() {
+            EDoc doc = patientDoc("12", 'A');
+            merge(doc);
+            assertThat(allDocuments).containsExactly(doc);
+            assertThat(foreignPrivateDocIds).isEmpty();
         }
 
         @Test
@@ -84,10 +97,15 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
     class PublicProviderDocs {
 
         @Test
-        @DisplayName("active public provider doc is a no-op — already listed in providerPublicDocs")
-        void shouldBeNoOp_whenActivePublicProviderDoc() {
+        @DisplayName("active public provider doc already listed in providerPublicDocs is not added again")
+        void shouldNotDuplicate_whenActivePublicProviderDocAlreadyListed() {
+            EDoc doc = providerDoc("3", 'A', true, OTHER_PROVIDER);
+            useSections(new AttachmentSections(null, null, Collections.singletonList(doc), null));
             merge(providerDoc("3", 'A', true, OTHER_PROVIDER));
-            assertSectionListsEmpty();
+            assertThat(providerPublicDocs).containsExactly(doc);
+            assertThat(allDocuments).isEmpty();
+            assertThat(providerPrivateDocs).isEmpty();
+            assertThat(foreignPrivateDocIds).isEmpty();
         }
 
         @Test
@@ -107,10 +125,15 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
     class OwnPrivateProviderDocs {
 
         @Test
-        @DisplayName("active own private doc is a no-op — already listed in providerPrivateDocs")
-        void shouldBeNoOp_whenActiveOwnPrivateDoc() {
+        @DisplayName("active own private doc already listed in providerPrivateDocs is not added again")
+        void shouldNotDuplicate_whenActiveOwnPrivateDocAlreadyListed() {
+            EDoc doc = providerDoc("5", 'A', false, CURRENT_PROVIDER);
+            useSections(new AttachmentSections(null, Collections.singletonList(doc), null, null));
             merge(providerDoc("5", 'A', false, CURRENT_PROVIDER));
-            assertSectionListsEmpty();
+            assertThat(providerPrivateDocs).containsExactly(doc);
+            assertThat(allDocuments).isEmpty();
+            assertThat(providerPublicDocs).isEmpty();
+            assertThat(foreignPrivateDocIds).isEmpty();
         }
 
         @Test
@@ -190,7 +213,84 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
         @Test
         @DisplayName("empty attached list is a no-op across all section lists and id sets")
         void shouldBeNoOp_whenAttachedListIsEmpty() {
-            manager.mergeAttachedIntoSections(loggedInInfo, Collections.emptyList(), allDocuments, providerPrivateDocs, providerPublicDocs, attachedDocumentIds, foreignPrivateDocIds);
+            manager.mergeAttachedIntoSections(loggedInInfo, Collections.emptyList(), Collections.emptyList(), sections);
+            assertSectionListsEmpty();
+            assertThat(attachedDocumentIds).isEmpty();
+            assertThat(sections.getEForms().getItems()).isEmpty();
+            assertThat(sections.getAttachedEFormIds()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("null attached lists are a no-op")
+        void shouldBeNoOp_whenAttachedListsNull() {
+            manager.mergeAttachedIntoSections(loggedInInfo, null, null, sections);
+            assertSectionListsEmpty();
+            assertThat(attachedDocumentIds).isEmpty();
+            assertThat(sections.getEForms().getItems()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("the id sets handed to the view are read-only")
+        void shouldRejectChanges_whenIdSetsModifiedByCaller() {
+            merge(providerDoc("13", 'A', false, OTHER_PROVIDER));
+            assertThatThrownBy(() -> sections.getAttachedDocumentIds().add("99")).isInstanceOf(UnsupportedOperationException.class);
+            assertThatThrownBy(() -> sections.getForeignPrivateDocIds().clear()).isInstanceOf(UnsupportedOperationException.class);
+            assertThatThrownBy(() -> sections.getAttachedEFormIds().add(99)).isInstanceOf(UnsupportedOperationException.class);
+            assertThat(attachedDocumentIds).containsExactly("13");
+            assertThat(foreignPrivateDocIds).containsExactly("13");
+        }
+    }
+
+    @Nested
+    @DisplayName("eForms")
+    class EForms {
+
+        @Test
+        @DisplayName("current attached eForm is already listed — not added again, but its id is collected")
+        void shouldNotDuplicate_whenAttachedEFormCurrent() {
+            EFormData current = eForm(1, true);
+            AttachmentSections withEForms = new AttachmentSections(null, null, null, Collections.singletonList(current));
+
+            manager.mergeAttachedIntoSections(loggedInInfo, null, Collections.singletonList(eForm(1, true)), withEForms);
+
+            assertThat(withEForms.getEForms().getItems()).containsExactly(current);
+            assertThat(withEForms.getAttachedEFormIds()).containsExactly(1);
+        }
+
+        @Test
+        @DisplayName("deleted attached eForm is appended after the current eForms so it can be detached")
+        void shouldAppendDeletedEForm_whenAttachedEFormDeleted() {
+            EFormData current = eForm(1, true);
+            EFormData deleted = eForm(2, false);
+            AttachmentSections withEForms = new AttachmentSections(null, null, null, Collections.singletonList(current));
+
+            manager.mergeAttachedIntoSections(loggedInInfo, null, Arrays.asList(current, deleted), withEForms);
+
+            assertThat(withEForms.getEForms().getItems()).containsExactly(current, deleted);
+            assertThat(withEForms.getAttachedEFormIds()).containsExactlyInAnyOrder(1, 2);
+        }
+
+        @Test
+        @DisplayName("eForm attached twice is only added once")
+        void shouldAddOnce_whenEFormAttachedTwice() {
+            manager.mergeAttachedIntoSections(loggedInInfo, null, Arrays.asList(eForm(3, false), eForm(3, false)), sections);
+
+            assertThat(sections.getEForms().getItems()).extracting(EFormData::getId).containsExactly(3);
+        }
+
+        @Test
+        @DisplayName("several deleted eForms keep their attached order")
+        void shouldKeepAttachedOrder_whenSeveralDeletedEForms() {
+            manager.mergeAttachedIntoSections(loggedInInfo, null, Arrays.asList(eForm(5, false), eForm(4, false)), sections);
+
+            assertThat(sections.getEForms().getItems()).extracting(EFormData::getId).containsExactly(5, 4);
+        }
+
+        @Test
+        @DisplayName("attached eForms don't touch the doc sections")
+        void shouldLeaveDocSectionsAlone_whenOnlyEFormsAttached() {
+            manager.mergeAttachedIntoSections(loggedInInfo, null, Collections.singletonList(eForm(6, false)), sections);
+
             assertSectionListsEmpty();
             assertThat(attachedDocumentIds).isEmpty();
         }
@@ -198,8 +298,17 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
 
     // --- helpers ---------------------------------------------------------
 
+    private void useSections(AttachmentSections newSections) {
+        sections = newSections;
+        allDocuments = sections.getPatientDocuments().getItems();
+        providerPrivateDocs = sections.getProviderPrivateDocuments().getItems();
+        providerPublicDocs = sections.getProviderPublicDocuments().getItems();
+        attachedDocumentIds = sections.getAttachedDocumentIds();
+        foreignPrivateDocIds = sections.getForeignPrivateDocIds();
+    }
+
     private void merge(EDoc doc) {
-        manager.mergeAttachedIntoSections(loggedInInfo, Collections.singletonList(doc), allDocuments, providerPrivateDocs, providerPublicDocs, attachedDocumentIds, foreignPrivateDocIds);
+        manager.mergeAttachedIntoSections(loggedInInfo, Collections.singletonList(doc), null, sections);
     }
 
     private void assertSectionListsEmpty() {
@@ -217,6 +326,13 @@ class DocumentAttachmentManagerMergeAttachedUnitTest {
         d.setModuleId("2001");
         d.setDocPublic("0");
         return d;
+    }
+
+    private static EFormData eForm(int fdid, boolean current) {
+        EFormData eForm = new EFormData();
+        eForm.setId(fdid);
+        eForm.setCurrent(current);
+        return eForm;
     }
 
     private static EDoc providerDoc(String docId, char status, boolean isPublic, String ownerProviderNo) {

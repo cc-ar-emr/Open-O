@@ -167,8 +167,13 @@ jQuery(document).on('click', '*[data-poload]', function () {
 
                 let delegate = "#" + delegateKey;
                 let element = jQuery('#attachDocumentsForm').find(delegate);
-                if (element.length === 0) {
+                // addFormIfNotFound only knows encounter forms; an unlisted attachment of any other
+                // type has no checkbox to pre-check, so skip it instead of aborting the whole loop.
+                if (element.length === 0 && data.name === "formNo") {
                     element = addFormIfNotFound(data, demographicNo, delegate);
+                }
+                if (element.length === 0) {
+                    return;
                 }
                 element.prop("checked", true).attr("data-pre-attached", "true");
 

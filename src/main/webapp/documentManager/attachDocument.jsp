@@ -379,11 +379,15 @@
                                     </button>
                                 </li>
                                 <c:forEach items="${ allEForms }" var="eForm" varStatus="loop">
-                                    <li class="eForm ${loop.index > 4 ? 'hide' : ''}">
-                                        <input class="eForm_check attachable_check" type="checkbox" name="eFormNo"
-                                               id="eFormNo${ eForm.id }" value="${eForm.id}" title="${e:forHtmlAttribute(eForm.formName)}"/>
+                                    <c:set var="isDeleted" value="${not eForm.current}"/>
+                                    <c:set var="isAttached" value="${not empty attachedEFormIds and attachedEFormIds.contains(eForm.id)}"/>
+                                    <li class="eForm ${loop.index > 4 ? 'hide' : ''} ${isDeleted ? 'deleted-doc' : ''}">
+                                        <input class="eForm_${isAttached ? 'pre_check' : 'check'} attachable_check" type="checkbox" name="eFormNo"
+                                               id="eFormNo${ eForm.id }" value="${eForm.id}"
+                                               ${isAttached ? 'checked="checked" data-pre-attached="true"' : ''}
+                                               title="${e:forHtmlAttribute(eForm.formName)}"/>
                                         <label for="eFormNo${eForm.id}">
-                                            <c:out value="${eForm.subject.length() > 0 ? eForm.subject : eForm.formName} ${ eForm.getFormDate() }"/>
+                                            <c:out value="${eForm.subject.length() > 0 ? eForm.subject : eForm.formName} ${ eForm.getFormDate() }"/><c:if test="${isDeleted}"> (deleted)</c:if>
                                         </label>
                                         <button class="preview-button" type="button" title="Preview"
                                                 onclick="getPdf('EFORM', '${eForm.id}', 'method=renderEFormPDF&eFormId=${eForm.id}')">
