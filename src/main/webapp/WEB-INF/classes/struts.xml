@@ -1015,6 +1015,7 @@
         <action name="oscarEncounter/ViewConsultation" class="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctViewConsultationRequests2Action">
             <result name="success">/oscarEncounter/oscarConsultationRequest/ViewConsultationRequests.jsp</result>
         </action>
+        <action name="oscarEncounter/searchConsultationConsultants" class="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctViewConsultationRequests2Action" method="searchConsultants"/>
         <action name="oscarEncounter/ViewRequest" class="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctViewRequest2Action">
             <result name="failESend">/oscarEncounter/ViewRequest.do</result>
             <result name="success">/oscarEncounter/oscarConsultationRequest/ConsultationFormRequest.jsp</result>

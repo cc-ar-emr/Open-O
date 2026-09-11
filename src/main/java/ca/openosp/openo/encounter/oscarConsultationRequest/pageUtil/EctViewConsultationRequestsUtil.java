@@ -113,12 +113,25 @@ public class EctViewConsultationRequestsUtil {
     * @return boolean true if data was loaded successfully, false on error
     */
    public boolean estConsultationVecByTeam(LoggedInInfo loggedInInfo, String team,boolean showCompleted,Date startDate, Date endDate,String orderby,String desc,String searchDate, Integer offset, Integer limit) {
+      return estConsultationVecByTeam(loggedInInfo, team, showCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit, null, null);
+   }
+
+   /**
+    * Same as {@link #estConsultationVecByTeam(LoggedInInfo, String, boolean, Date, Date, String, String, String, Integer, Integer)}
+    * but additionally filters by an optional consultant (specialist) and/or patient provider (MRP).
+    * Both filters are optional and combine with each other and the other filters.
+    *
+    * @param consultantId Integer the ProfessionalSpecialist id to filter by (null for no consultant filter)
+    * @param filterProviderNo String the patient MRP provider number to filter by (null/empty for no provider filter)
+    * @return boolean true if data was loaded successfully, false on error
+    */
+   public boolean estConsultationVecByTeam(LoggedInInfo loggedInInfo, String team,boolean showCompleted,Date startDate, Date endDate,String orderby,String desc,String searchDate, Integer offset, Integer limit, Integer consultantId, String filterProviderNo) {
       initLists();
 
       boolean verdict = true;
       try {
           ConsultationRequestDao consultReqDao = SpringUtils.getBean(ConsultationRequestDao.class);
-          List<ConsultationListDTO> dtos = consultReqDao.getConsultationDTOs(team, showCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit);
+          List<ConsultationListDTO> dtos = consultReqDao.getConsultationDTOs(team, showCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit, consultantId, filterProviderNo);
 
           for (ConsultationListDTO dto : dtos) {
               ids.add(dto.getId() != null ? dto.getId().toString() : "");
@@ -142,7 +155,8 @@ public class EctViewConsultationRequestsUtil {
           }
 
       } catch(Exception e) {
-         MiscUtils.getLogger().error("Error loading consultation list for team: " + (team != null ? team : "all"), e);
+         String requestingProviderNo = (loggedInInfo != null && loggedInInfo.getLoggedInProviderNo() != null) ? loggedInInfo.getLoggedInProviderNo() : "unknown";
+         MiscUtils.getLogger().error("Error loading consultation list for team: " + (team != null ? team : "all") + " (requesting provider: " + requestingProviderNo + ")", e);
          verdict = false;
       }
       return verdict;

@@ -57,6 +57,9 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctConsultationFormRequestUtil" %>
 <%@ page import="ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil.EctViewConsultationRequestsUtil" %>
+<%@ page import="ca.openosp.openo.commn.model.ProfessionalSpecialist" %>
+<%@ page import="ca.openosp.openo.commn.dao.ProfessionalSpecialistDao" %>
+<%@ page import="ca.openosp.openo.commn.model.Provider" %>
 <%@ page import="ca.openosp.openo.commn.IsPropertiesOn" %>
 <%@ page import="org.owasp.encoder.Encode" %>
 
@@ -178,6 +181,44 @@
             searchDate = "0";
         }
 
+        // Consultant and provider filter selections (issue #2455). Both optional and combinable.
+        Integer consultantId = (Integer) request.getAttribute("consultantId");
+        String filterProviderNo = (String) request.getAttribute("filterProviderNo");
+        if (filterProviderNo == null) {
+            filterProviderNo = "";
+        }
+
+        // Providers are a bounded, per-clinic list, so the filter is a plain dropdown populated
+        // up front. Apply the same site/team privacy filter used elsewhere on this page.
+        ConsultationRequestDao consultReqDaoForFilters = SpringUtils.getBean(ConsultationRequestDao.class);
+        List<Provider> distinctConsultProviders = consultReqDaoForFilters.getDistinctConsultProviders();
+        if (isSiteAccessPrivacy || isTeamAccessPrivacy) {
+            List<Provider> filteredProviders = new ArrayList<Provider>();
+            for (Provider pv : distinctConsultProviders) {
+                if (providerMap.containsKey(pv.getProviderNo())) {
+                    filteredProviders.add(pv);
+                }
+            }
+            distinctConsultProviders = filteredProviders;
+            // Defense-in-depth: ignore a provider filter outside the user's site/team scope so a
+            // crafted request can't push an out-of-scope providerNo into the query. (Out-of-scope
+            // rows are also dropped per-row at render time.)
+            if (!filterProviderNo.isEmpty() && !providerMap.containsKey(filterProviderNo)) {
+                filterProviderNo = "";
+            }
+        }
+
+        // Consultant options are loaded via AJAX.
+        // Selected consultant label is tracked in the event of a reload.
+        String selectedConsultantLabel = "";
+        if (consultantId != null) {
+            ProfessionalSpecialistDao professionalSpecialistDao = SpringUtils.getBean(ProfessionalSpecialistDao.class);
+            ProfessionalSpecialist selectedConsultant = professionalSpecialistDao.find(consultantId);
+            if (selectedConsultant != null) {
+                selectedConsultantLabel = selectedConsultant.getFormattedName();
+            }
+        }
+
         EctConsultationFormRequestUtil consultUtil;
         consultUtil = new EctConsultationFormRequestUtil();
 
@@ -237,6 +278,9 @@ background-color:rgb(212, 212, 254);
 
         </style>
 
+        <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/library/jquery/jquery-ui-1.12.1.min.css">
+        <script type="text/javascript" src="<%= request.getContextPath() %>/library/jquery/jquery-3.6.4.min.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/library/jquery/jquery-ui-1.12.1.min.js"></script>
 
     </head>
     <script language="javascript">
@@ -280,6 +324,7 @@ background-color:rgb(212, 212, 254);
                 document.forms[0].orderby.value = val;
                 document.forms[0].desc.value = '0';
             }
+            if (typeof sanitizeConsultationFilters === "function") sanitizeConsultationFilters();
             document.forms[0].submit();
         }
 
@@ -290,6 +335,7 @@ background-color:rgb(212, 212, 254);
             if (next) frm.offset.value = "<%=Encode.forJavaScript(String.valueOf(offset+limit))%>";
             else frm.offset.value = "<%=Encode.forJavaScript(String.valueOf(offset-limit))%>";
 
+            if (typeof sanitizeConsultationFilters === "function") sanitizeConsultationFilters();
             frm.submit();
         }
     </script>
@@ -342,7 +388,7 @@ background-color:rgb(212, 212, 254);
                 <table width="100%">
                     <tr>
                         <td style="margin: 0; padding: 0;">
-                            <form action="${pageContext.request.contextPath}/oscarEncounter/ViewConsultation.do" method="get">
+                            <form id="consultSearchForm" action="${pageContext.request.contextPath}/oscarEncounter/ViewConsultation.do" method="get">
                                 <fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.oscarConsultationRequest.ViewConsultationRequests.formSelectTeam"/>:
                                 <select name="sendTo">
                                     <option value=""><fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.oscarConsultationRequest.ViewConsultationRequests.formViewAll"/></option>
@@ -366,6 +412,21 @@ background-color:rgb(212, 212, 254);
                                             }
                                         }
                                     %>
+                                </select>
+                                <input type="text" id="consultantSearch" autocomplete="off" size="22"
+                                       placeholder="All Consultants"
+                                       value="<%=Encode.forHtmlAttribute(selectedConsultantLabel)%>"/>
+                                <input type="hidden" name="consultantId" id="consultantId"
+                                       value="<%=Encode.forHtmlAttribute(consultantId != null ? consultantId.toString() : "")%>"/>
+                                <select name="filterProviderNo" id="filterProviderNo">
+                                    <option value="">All Providers</option>
+                                    <%
+                                        for (Provider pv : distinctConsultProviders) {
+                                            String pvNo = pv.getProviderNo() != null ? pv.getProviderNo() : "";
+                                            boolean pvSelected = !filterProviderNo.isEmpty() && filterProviderNo.equals(pvNo);
+                                    %>
+                                    <option value="<%=Encode.forHtmlAttribute(pvNo)%>" <%=pvSelected ? "selected" : ""%>><%=Encode.forHtml(pv.getFormattedName())%></option>
+                                    <% } %>
                                 </select>
                                 <input type="submit"
                                        value="<fmt:setBundle basename="oscarResources"/><fmt:message key="oscarEncounter.oscarConsultationRequest.ViewConsultationRequests.btnConsReq"/>"/>
@@ -391,6 +452,56 @@ background-color:rgb(212, 212, 254);
                                     <input type="hidden" name="limit" id="limit" value="<%= Encode.forHtmlAttribute(String.valueOf(limit)) %>"/>
                                 </div>
                             </form>
+                            <script type="text/javascript">
+                                // Typing clears any prior selection; a fresh id is only set via the
+                                // autocomplete "select" handler below, so half-typed/unselected text
+                                // never silently implies a filter.
+                                jQuery("#consultantSearch").on("input", function () {
+                                    jQuery("#consultantId").val("");
+                                });
+
+                                // If the box was left with typed text but no confirmed selection,
+                                // clear the text too. Invoked from every submit path (filter button,
+                                // sort headers, paging) because native form.submit() bypasses jQuery
+                                // submit handlers.
+                                function sanitizeConsultationFilters() {
+                                    if (!jQuery("#consultantId").val()) {
+                                        jQuery("#consultantSearch").val("");
+                                    }
+                                }
+
+                                jQuery(function () {
+                                    var contextPath = "<%= request.getContextPath() %>";
+                                    jQuery("#consultantSearch").autocomplete({
+                                        minLength: 2,
+                                        delay: 300,
+                                        source: function (request, response) {
+                                            jQuery.getJSON(contextPath + "/oscarEncounter/searchConsultationConsultants.do", {keyword: request.term})
+                                                .done(function (data) {
+                                                    response(data || []);
+                                                })
+                                                .fail(function () {
+                                                    response([]);
+                                                });
+                                        },
+                                        focus: function (event, ui) {
+                                            event.preventDefault();
+                                            jQuery("#consultantSearch").val(ui.item.label);
+                                        },
+                                        select: function (event, ui) {
+                                            event.preventDefault();
+                                            jQuery("#consultantSearch").val(ui.item.label);
+                                            jQuery("#consultantId").val(ui.item.value);
+                                        }
+                                    });
+
+                                    // Filter button submit: reset paging to the first page, then sanitize.
+                                    jQuery("#consultSearchForm").on("submit", function () {
+                                        jQuery("#offset").val(0);
+                                        sanitizeConsultationFilters();
+                                    });
+                                });
+                            </script>
                         </td>
                     </tr>
                     <tr>
@@ -456,7 +567,7 @@ background-color:rgb(212, 212, 254);
                                 <%
                                     EctViewConsultationRequestsUtil theRequests;
                                     theRequests = new EctViewConsultationRequestsUtil();
-                                    theRequests.estConsultationVecByTeam(LoggedInInfo.getLoggedInInfoFromSession(request), team, includeCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit);
+                                    theRequests.estConsultationVecByTeam(LoggedInInfo.getLoggedInInfoFromSession(request), team, includeCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit, consultantId, filterProviderNo);
                                     boolean overdue;
                                     UserPropertyDAO pref = (UserPropertyDAO) WebApplicationContextUtils.getWebApplicationContext(pageContext.getServletContext()).getBean(UserPropertyDAO.class);
                                     String user = (String) session.getAttribute("user");

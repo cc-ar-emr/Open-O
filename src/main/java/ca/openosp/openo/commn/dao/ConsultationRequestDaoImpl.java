@@ -9,15 +9,17 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang3.time.DateFormatUtils;
 import ca.openosp.openo.commn.NativeSql;
 import ca.openosp.openo.commn.model.ConsultationRequest;
 import ca.openosp.openo.commn.model.ConsultationRequestExt;
+import ca.openosp.openo.commn.model.ProfessionalSpecialist;
+import ca.openosp.openo.commn.model.Provider;
 import ca.openosp.openo.consultation.dto.ConsultationListDTO;
 
 @SuppressWarnings("unchecked")
@@ -67,22 +69,22 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
         }
 
         if (!team.isEmpty()) {
-            sql.append("and cr.sendTo = '" + team + "' ");
+            sql.append("and cr.sendTo = :team ");
         }
 
         if (startDate != null) {
             if (searchDate != null && searchDate.equals("1")) {
-                sql.append("and cr.appointmentDate >= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(startDate) + "' ");
+                sql.append("and cr.appointmentDate >= :startDate ");
             } else {
-                sql.append("and cr.referralDate >= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(startDate) + "' ");
+                sql.append("and cr.referralDate >= :startDate ");
             }
         }
 
         if (endDate != null) {
             if (searchDate != null && searchDate.equals("1")) {
-                sql.append("and cr.appointmentDate <= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(endDate) + "' ");
+                sql.append("and cr.appointmentDate <= :endDate ");
             } else {
-                sql.append("and cr.referralDate <= '" + DateFormatUtils.ISO_DATETIME_FORMAT.format(endDate) + "' ");
+                sql.append("and cr.referralDate <= :endDate ");
             }
         }
 
@@ -107,6 +109,15 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
 
 
         Query query = entityManager.createQuery(sql.toString());
+        if (!team.isEmpty()) {
+            query.setParameter("team", team);
+        }
+        if (startDate != null) {
+            query.setParameter("startDate", startDate);
+        }
+        if (endDate != null) {
+            query.setParameter("endDate", endDate);
+        }
         query.setFirstResult(offset != null ? offset : 0);
 
         //need to never send more than MAX_LIST_RETURN_SIZE
@@ -222,6 +233,31 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
             "LEFT JOIN ConsultationServices svc ON svc.serviceId = cr.serviceId " +
             "LEFT JOIN cr.professionalSpecialist specialist ";
 
+    /** Escape character used by LIKE patterns; see {@link #escapeLikeWildcards(String)}. */
+    private static final String LIKE_ESCAPE_CHAR = "!";
+
+    /** Named parameter prefix for the consultant search terms ("term0", "term1", ...). */
+    private static final String NAME_TERM_PARAM = "term";
+
+    /** Number of name terms {@link #CONSULTANT_SEARCH_QUERY} matches; extra terms are ignored. */
+    private static final int MAX_NAME_SEARCH_TERMS = 4;
+
+    /**
+     * JPQL for the consultant autocomplete search. Each term is matched against the specialist name
+     * as the autocomplete displays it ("lastName, firstName"), lowercased for case-insensitive
+     * matching, with nested two-argument CONCAT to stay within the JPA spec. Requiring every term
+     * to appear somewhere in that string lets terms match in any order and keeps the ", " separator
+     * from blocking a match. Term slots are fixed and fully parameterized; unused slots bind "%".
+     */
+    private static final String CONSULTANT_SEARCH_QUERY = """
+            SELECT DISTINCT specialist FROM ConsultationRequest cr
+            JOIN cr.professionalSpecialist specialist
+            WHERE LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term0 ESCAPE '!'
+            AND LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term1 ESCAPE '!'
+            AND LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term2 ESCAPE '!'
+            AND LOWER(CONCAT(CONCAT(specialist.lastName, ', '), specialist.firstName)) LIKE :term3 ESCAPE '!'
+            ORDER BY specialist.lastName, specialist.firstName""";
+
     /**
      * {@inheritDoc}
      *
@@ -229,8 +265,16 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
      */
     @Override
     public List<ConsultationListDTO> getConsultationDTOs(String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer offset, Integer limit) {
+        return getConsultationDTOs(team, showCompleted, startDate, endDate, orderby, desc, searchDate, offset, limit, null, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ConsultationListDTO> getConsultationDTOs(String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer offset, Integer limit, Integer consultantId, String filterProviderNo) {
         List<Object> paramList = new ArrayList<>();
-        String sql = buildConsultationDTOQuery(paramList, team, showCompleted, startDate, endDate, orderby, desc, searchDate);
+        String sql = buildConsultationDTOQuery(paramList, team, showCompleted, startDate, endDate, orderby, desc, searchDate, consultantId, filterProviderNo);
 
         Query query = entityManager.createQuery(sql, ConsultationListDTO.class);
         for (int i = 0; i < paramList.size(); i++) {
@@ -265,6 +309,72 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ProfessionalSpecialist> searchDistinctConsultants(String keyword, int maxResults) {
+        List<String> terms = tokenizeNameKeyword(keyword);
+        if (terms.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Query query = entityManager.createQuery(CONSULTANT_SEARCH_QUERY, ProfessionalSpecialist.class);
+        for (int i = 0; i < MAX_NAME_SEARCH_TERMS; i++) {
+            // unused term slots match anything, so a keyword with fewer terms is not narrowed
+            query.setParameter(NAME_TERM_PARAM + i, i < terms.size() ? "%" + terms.get(i) + "%" : "%");
+        }
+        query.setMaxResults(maxResults);
+        return query.getResultList();
+    }
+
+    /**
+     * Splits a name search keyword into lowercase terms on whitespace and commas, so the keyword is
+     * matched term by term rather than as one literal string. This makes spacing and punctuation
+     * around the "lastName, firstName" separator irrelevant: "Smith,B", "Smith,   B", "Smith B" and
+     * "B Smith" all match "Smith, Brian". Terms past {@link #MAX_NAME_SEARCH_TERMS} are ignored,
+     * which only ever broadens the result set.
+     *
+     * @param keyword String the raw user-typed keyword (null or punctuation-only yields no terms)
+     * @return List of lowercase terms, LIKE wildcards escaped, in the order typed
+     */
+    private static List<String> tokenizeNameKeyword(String keyword) {
+        List<String> terms = new ArrayList<>();
+        if (keyword == null) {
+            return terms;
+        }
+        for (String term : keyword.toLowerCase(Locale.ROOT).split("[\\s,]+")) {
+            if (!term.isEmpty()) {
+                terms.add(escapeLikeWildcards(term));
+                if (terms.size() == MAX_NAME_SEARCH_TERMS) {
+                    break;
+                }
+            }
+        }
+        return terms;
+    }
+
+    /**
+     * Escapes LIKE wildcards so a user-typed "%" or "_" matches literally instead of acting as a
+     * wildcard. Only valid against a LIKE carrying {@code ESCAPE '<LIKE_ESCAPE_CHAR>'}.
+     *
+     * @param term String the search term to escape
+     * @return String the term with the escape character, "%" and "_" escaped
+     */
+    private static String escapeLikeWildcards(String term) {
+        return term.replace(LIKE_ESCAPE_CHAR, LIKE_ESCAPE_CHAR + LIKE_ESCAPE_CHAR)
+                .replace("%", LIKE_ESCAPE_CHAR + "%")
+                .replace("_", LIKE_ESCAPE_CHAR + "_");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Provider> getDistinctConsultProviders() {
+        return entityManager.createQuery("SELECT DISTINCT mrp FROM ConsultationRequest cr JOIN Demographic d ON d.DemographicNo = cr.demographicId JOIN Provider mrp ON mrp.ProviderNo = d.ProviderNo ORDER BY mrp.LastName, mrp.FirstName", Provider.class).getResultList();
+    }
+
+    /**
      * Builds the complete JPQL query string for DTO projection with parameterized filters and sorting.
      * Uses positional parameters to prevent SQL injection (replacing the previous string concatenation pattern).
      *
@@ -276,9 +386,11 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
      * @param orderby String the sort column identifier (1-9)
      * @param desc String "1" for descending, otherwise ascending
      * @param searchDate String "1" to filter on appointment date instead of referral date
+     * @param consultantId Integer the ProfessionalSpecialist id to filter by (null to skip)
+     * @param filterProviderNo String the patient MRP provider number to filter by (null/empty to skip)
      * @return String the complete JPQL query
      */
-    private String buildConsultationDTOQuery(List<Object> paramList, String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate) {
+    private String buildConsultationDTOQuery(List<Object> paramList, String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer consultantId, String filterProviderNo) {
         int paramIndex = 1;
         StringBuilder sql = new StringBuilder(DTO_SELECT);
         sql.append(DTO_FROM);
@@ -291,6 +403,16 @@ public class ConsultationRequestDaoImpl extends AbstractDaoImpl<ConsultationRequ
         if (team != null && !team.isEmpty()) {
             sql.append("AND cr.sendTo = ?").append(paramIndex++).append(" ");
             paramList.add(team);
+        }
+
+        if (consultantId != null) {
+            sql.append("AND specialist.id = ?").append(paramIndex++).append(" ");
+            paramList.add(consultantId);
+        }
+
+        if (filterProviderNo != null && !filterProviderNo.isEmpty()) {
+            sql.append("AND mrp.ProviderNo = ?").append(paramIndex++).append(" ");
+            paramList.add(filterProviderNo);
         }
 
         if (startDate != null) {

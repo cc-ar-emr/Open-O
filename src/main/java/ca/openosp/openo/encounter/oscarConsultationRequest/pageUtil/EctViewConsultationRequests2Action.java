@@ -28,17 +28,24 @@ package ca.openosp.openo.encounter.oscarConsultationRequest.pageUtil;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.Logger;
+import ca.openosp.openo.commn.dao.ConsultationRequestDao;
 import ca.openosp.openo.commn.dao.ConsultationRequestDaoImpl;
+import ca.openosp.openo.commn.model.ProfessionalSpecialist;
 import ca.openosp.openo.managers.SecurityInfoManager;
 import ca.openosp.openo.utility.LoggedInInfo;
 import ca.openosp.openo.utility.MiscUtils;
 import ca.openosp.openo.utility.SpringUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.struts2.ActionSupport;
 import org.apache.struts2.ServletActionContext;
@@ -49,6 +56,9 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
 
     private static SecurityInfoManager securityInfoManager = SpringUtils.getBean(SecurityInfoManager.class);
     private static final Logger logger = MiscUtils.getLogger();
+    private static final int CONSULTANT_SEARCH_MAX_RESULTS = 20;
+
+    private ConsultationRequestDao consultationRequestDao = SpringUtils.getBean(ConsultationRequestDao.class);
 
     private String sendTo;
     private String currentTeam;
@@ -61,6 +71,8 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
     private String searchDate = null;
     private Integer offset;
     private Integer limit = ConsultationRequestDaoImpl.DEFAULT_CONSULT_REQUEST_RESULTS_LIMIT;
+    private Integer consultantId;
+    private String filterProviderNo;
 
     public String execute() throws ServletException, IOException {
         if (!securityInfoManager.hasPrivilege(LoggedInInfo.getLoggedInInfoFromSession(request), "_con", "r", null)) {
@@ -98,7 +110,42 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
         request.setAttribute("orderby", orderby);
         request.setAttribute("desc", desc);
         request.setAttribute("searchDate", searchDate);
+        request.setAttribute("consultantId", consultantId);
+        request.setAttribute("filterProviderNo", filterProviderNo);
         return SUCCESS;
+    }
+
+    /**
+     * Returns consultants (professional specialists) whose name matches the given keyword, as a
+     * JSON array of {@code {label, value}} pairs for the Consultants autocomplete filter on the
+     * Consultations page. Results are capped at {@link #CONSULTANT_SEARCH_MAX_RESULTS} so the
+     * response stays small regardless of how many consultants are registered.
+     *
+     * @throws IOException if writing the JSON response fails
+     * @since 2026-07-10
+     */
+    public void searchConsultants() throws IOException {
+        if (!securityInfoManager.hasPrivilege(LoggedInInfo.getLoggedInInfoFromSession(request), "_con", "r", null)) {
+            throw new SecurityException("missing required sec object (_con)");
+        }
+
+        String keyword = request.getParameter("keyword");
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode results = mapper.createArrayNode();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            List<ProfessionalSpecialist> matches = consultationRequestDao.searchDistinctConsultants(keyword.trim(), CONSULTANT_SEARCH_MAX_RESULTS);
+            for (ProfessionalSpecialist specialist : matches) {
+                ObjectNode node = mapper.createObjectNode();
+                node.put("label", specialist.getFormattedName());
+                node.put("value", specialist.getId() != null ? specialist.getId().toString() : "");
+                results.add(node);
+            }
+        }
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(results.toString());
     }
 
     public String getSendTo() {
@@ -244,5 +291,37 @@ public class EctViewConsultationRequests2Action extends ActionSupport {
 
     public void setLimit(Integer limit) {
         this.limit = limit;
+    }
+
+    /**
+     * @return Integer the consultant the list is filtered to, null for all consultants
+     * @since 2026-06-19
+     */
+    public Integer getConsultantId() {
+        return consultantId;
+    }
+
+    /**
+     * @param consultantId Integer the consultant to filter by, null for all consultants
+     * @since 2026-06-19
+     */
+    public void setConsultantId(Integer consultantId) {
+        this.consultantId = consultantId;
+    }
+
+    /**
+     * @return String the provider number the list is filtered to, null or empty for all providers
+     * @since 2026-06-19
+     */
+    public String getFilterProviderNo() {
+        return filterProviderNo;
+    }
+
+    /**
+     * @param filterProviderNo String the provider number to filter by, null or empty for all
+     * @since 2026-06-19
+     */
+    public void setFilterProviderNo(String filterProviderNo) {
+        this.filterProviderNo = filterProviderNo;
     }
 }

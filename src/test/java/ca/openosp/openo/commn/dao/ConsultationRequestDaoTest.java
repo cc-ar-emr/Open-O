@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import ca.openosp.openo.commn.dao.utils.SchemaUtils;
 import ca.openosp.openo.commn.model.ConsultationRequest;
+import ca.openosp.openo.commn.model.ProfessionalSpecialist;
 import ca.openosp.openo.commn.dao.ConsultationRequestDao;
 import ca.openosp.openo.utility.SpringUtils;
 
@@ -82,6 +83,65 @@ public class ConsultationRequestDaoTest extends DaoTestFixtures {
     @Test
     public void testFindRequestsByDemoNo() {
         assertNotNull(dao.findRequestsByDemoNo(100, new Date()));
+    }
+
+    @Test
+    public void testSearchDistinctConsultantsMatchesKeywordSpanningNameSeparator() {
+        persistConsultantNamedSmithBrian();
+
+        // keyword spans the "lastName, firstName" separator, as displayed by the autocomplete
+        assertMatchesSmith("smith, b");
+
+        // single-token keyword should still match
+        assertMatchesSmith("Smith");
+    }
+
+    @Test
+    public void testSearchDistinctConsultantsIgnoresSpacingAndTermOrder() {
+        persistConsultantNamedSmithBrian();
+
+        assertMatchesSmith("smith,b");          // no space after the comma
+        assertMatchesSmith("smith,   b");       // extra spaces after the comma
+        assertMatchesSmith("  Smith,B  ");      // surrounding whitespace
+        assertMatchesSmith("smith b");          // no comma at all
+        assertMatchesSmith("brian smith");      // first name typed first
+        assertMatchesSmith("smith, brian");     // the full formatted name
+    }
+
+    @Test
+    public void testSearchDistinctConsultantsExcludesNonMatchingAndWildcardKeywords() {
+        persistConsultantNamedSmithBrian();
+
+        // every term must match, so an unrelated second term rules the consultant out
+        assertTrue(dao.searchDistinctConsultants("smith, z", 10).isEmpty());
+
+        // "%" and "_" are matched literally rather than as LIKE wildcards
+        assertTrue(dao.searchDistinctConsultants("%", 10).isEmpty());
+        assertTrue(dao.searchDistinctConsultants("smit_", 10).isEmpty());
+
+        // a keyword with no searchable terms matches nothing
+        assertTrue(dao.searchDistinctConsultants(" , ", 10).isEmpty());
+        assertTrue(dao.searchDistinctConsultants(null, 10).isEmpty());
+    }
+
+    private void persistConsultantNamedSmithBrian() {
+        ProfessionalSpecialist specialist = new ProfessionalSpecialist();
+        specialist.setLastName("Smith");
+        specialist.setFirstName("Brian");
+        dao.persist(specialist);
+
+        ConsultationRequest cr = new ConsultationRequest();
+        cr.setProviderNo("0");
+        cr.setReferralDate(new Date());
+        cr.setProfessionalSpecialist(specialist);
+        dao.persist(cr);
+    }
+
+    private void assertMatchesSmith(String keyword) {
+        List<ProfessionalSpecialist> matches = dao.searchDistinctConsultants(keyword, 10);
+        assertNotNull(matches);
+        assertTrue("expected a match for keyword [" + keyword + "]", matches.size() == 1);
+        assertTrue(matches.get(0).getLastName().equals("Smith"));
     }
 
 }

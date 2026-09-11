@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 import ca.openosp.openo.commn.model.ConsultationRequest;
+import ca.openosp.openo.commn.model.ProfessionalSpecialist;
+import ca.openosp.openo.commn.model.Provider;
 import ca.openosp.openo.consultation.dto.ConsultationListDTO;
 
 public interface ConsultationRequestDao extends AbstractDao<ConsultationRequest> {
@@ -71,4 +73,47 @@ public interface ConsultationRequestDao extends AbstractDao<ConsultationRequest>
      * @since 2026-02-03
      */
     List<ConsultationListDTO> getConsultationDTOsByDemographic(Integer demoNo);
+
+    /**
+     * Retrieves consultation requests as lightweight DTOs with optional consultant and provider
+     * filters, in addition to the existing team, date, and completed filters. Both filters are
+     * optional and combine with each other and the other filters. Uses the same DTO projection
+     * and batch extension loading as {@link #getConsultationDTOs(String, boolean, Date, Date, String, String, String, Integer, Integer)}.
+     *
+     * @param team String the team/sendTo filter value (empty string for all teams)
+     * @param showCompleted boolean whether to include completed (status 4) consultations
+     * @param startDate Date the start date filter (null for no lower bound)
+     * @param endDate Date the end date filter (null for no upper bound)
+     * @param orderby String the sort column identifier (1-9), null for default referral date desc
+     * @param desc String "1" for descending sort, null/other for ascending
+     * @param searchDate String "1" to filter on appointment date instead of referral date
+     * @param offset Integer the pagination offset (null defaults to 0)
+     * @param limit Integer the page size (null defaults to {@link #DEFAULT_CONSULT_REQUEST_RESULTS_LIMIT})
+     * @param consultantId Integer the ProfessionalSpecialist id to filter by (null for no consultant filter)
+     * @param filterProviderNo String the patient MRP provider number to filter by (null/empty for no provider filter)
+     * @return List of ConsultationListDTO with all display fields populated
+     */
+    List<ConsultationListDTO> getConsultationDTOs(String team, boolean showCompleted, Date startDate, Date endDate, String orderby, String desc, String searchDate, Integer offset, Integer limit, Integer consultantId, String filterProviderNo);
+
+    /**
+     * Searches distinct consultants (specialists) that appear on any consultation request and whose
+     * name matches the given keyword, ordered by last then first name and capped to maxResults.
+     * The keyword is split into terms on whitespace and commas and every term must appear in the
+     * specialist's "lastName, firstName" name, so terms match in any order and spacing around the
+     * comma is irrelevant: "Smith,B", "Smith, B" and "B Smith" all match "Smith, Brian".
+     *
+     * @param keyword String the case-insensitive search term(s) to match against specialist name
+     * @param maxResults int the maximum number of results to return
+     * @return List of matching ProfessionalSpecialist referenced by consultation requests, empty
+     *         if the keyword is null or contains no searchable terms
+     */
+    List<ProfessionalSpecialist> searchDistinctConsultants(String keyword, int maxResults);
+
+    /**
+     * Returns the distinct patient providers (MRPs) that appear on any consultation request,
+     * ordered by last then first name, for populating the provider filter options.
+     *
+     * @return List of distinct Provider acting as MRP for patients with consultation requests
+     */
+    List<Provider> getDistinctConsultProviders();
 }
