@@ -178,6 +178,9 @@ public class Startup implements ServletContextListener {
                 checkAndSetProperty(baseDocumentDir, contextPath, "OMD_stored", "/hrm/stored/");
                 checkAndSetProperty(baseDocumentDir, contextPath, "OMD_downloads", "/hrm/sftp_downloads/");
 
+                //EHR Connectivity Directories
+                checkAndSetProperty(baseDocumentDir, contextPath, "EHR_KEYSTORE_DIR", "/ehrConnectivity/keystore/");
+
 
             }
 

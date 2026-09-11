@@ -10,19 +10,21 @@ import com.google.gson.annotations.Expose;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.Date;
 
 @Entity
 public class OneIdViewlet extends AbstractModel<Object> {
 
-    @Expose @Id @GeneratedValue private Integer id;
+    @Expose @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Integer id;
     @Expose private String name;
     @Expose private String keyValue;
     @Expose private String updatedBy;
     @Expose private Date updateTime;
     @Expose private boolean showInEchart;
     @Expose private boolean deleted;
+    @Expose private String displayMode;
 
     public OneIdViewlet() {}
 
@@ -46,4 +48,7 @@ public class OneIdViewlet extends AbstractModel<Object> {
 
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
+    public String getDisplayMode() { return displayMode; }
+    public void setDisplayMode(String displayMode) { this.displayMode = displayMode; }
 }

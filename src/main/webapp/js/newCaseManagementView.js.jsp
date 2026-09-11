@@ -527,8 +527,9 @@
                 ctx + "/oscarEncounter/displayMeasurements.do?hC=" + Colour.measurements,
                 ctx + "/oscarEncounter/displayConsultation.do?hC=" + Colour.consultation,
                 ctx + "/oscarEncounter/displayHRM.do?hC=" + Colour.hrmDocuments,
+                ctx + "/oscarEncounter/displayEHR.do?hC=" + Colour.ehr,
             ];
-            var leftNavBarTitles = ["preventions", "tickler", "Dx", "forms", "eforms", "docs", "labs", "msgs", "measurements", "consultation", "HRM"];
+            var leftNavBarTitles = ["preventions", "tickler", "Dx", "forms", "eforms", "docs", "labs", "msgs", "measurements", "consultation", "HRM", "ehr"];
             var rightNavBar = [
                 ctx + "/oscarEncounter/displayAllergy.do?hC=" + Colour.allergy,
                 ctx + "/oscarEncounter/displayRx.do?hC=" + Colour.rx + "&numToDisplay=12",

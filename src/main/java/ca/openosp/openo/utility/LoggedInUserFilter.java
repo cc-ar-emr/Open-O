@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import ca.openosp.openo.commn.model.Facility;
 import ca.openosp.openo.commn.model.Provider;
 import ca.openosp.openo.commn.model.Security;
+import ca.openosp.openo.integration.oneId.OneIdGatewayData;
 
 public class LoggedInUserFilter extends OscarBaseFilter {
     private static final Logger logger = MiscUtils.getLogger();
@@ -70,6 +71,7 @@ public class LoggedInUserFilter extends OscarBaseFilter {
         loggedInInfo.setCurrentFacility((Facility) session.getAttribute(SessionConstants.CURRENT_FACILITY));
         loggedInInfo.setLoggedInProvider((Provider) session.getAttribute(SessionConstants.LOGGED_IN_PROVIDER));
         loggedInInfo.setLoggedInSecurity((Security) session.getAttribute(SessionConstants.LOGGED_IN_SECURITY));
+        loggedInInfo.setOneIdGatewayData((OneIdGatewayData) session.getAttribute(LoggedInInfo.OH_GATEWAY_DATA));
         loggedInInfo.setInitiatingCode(request.getRequestURI());
         loggedInInfo.setLocale(request.getLocale());
         loggedInInfo.setIp(request.getRemoteAddr());

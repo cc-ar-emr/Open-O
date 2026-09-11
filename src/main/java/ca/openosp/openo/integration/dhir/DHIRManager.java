@@ -148,7 +148,7 @@ public class DHIRManager extends OmdGateway {
           .header("X-Request-Id", uuid)
           .header("Content-Type", "application/json")
           .post(bundleJSON);
-      completeLog(omdGatewayTransactionLog, response2);
+      completeLog(omdGatewayTransactionLog, response2, true);
       transactionLogDao.merge(omdGatewayTransactionLog);
     } catch (Exception e) {
       e.getMessage();

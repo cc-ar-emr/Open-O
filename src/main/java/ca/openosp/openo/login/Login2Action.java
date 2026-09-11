@@ -394,7 +394,21 @@ public final class Login2Action extends ActionSupport {
 
             // invalidate the existing session
             HttpSession session = request.getSession(false);
+            String verifiedOneIdSubject = null;
+            String verifiedOneIdEmail = null;
+            String sessionNameId = null;
             if (session != null) {
+                verifiedOneIdSubject = pendingOneIdSubject(session);
+                verifiedOneIdEmail = (String) session.getAttribute("oneIdSubjectEmail");
+                // Consumed here: read once and gone, so a link left half-finished cannot be picked
+                // up again by a later sign-in attempt in the same browser.
+                session.removeAttribute("oneIdSubject");
+                session.removeAttribute("oneIdSubjectEmail");
+                session.removeAttribute("oneIdSubjectAt");
+                // The SAML sign-in leaves its subject on the session and index.jsp renders it into
+                // a hidden field for this form to post back. Held here because the session is
+                // about to be replaced, and the posted value is only trusted if it matches this.
+                sessionNameId = (String) session.getAttribute("nameId");
                 if (request.getParameter("invalidate_session") != null
                         && request.getParameter("invalidate_session").equals("false")) {
                     // don't invalidate in this case it messes up authenticity of OAUTH
@@ -410,8 +424,14 @@ public final class Login2Action extends ActionSupport {
             }
 
             // Process ONE ID if present
-            String oneIdKey = request.getParameter("nameId");
-            String oneIdEmail = request.getParameter("email");
+            String oneIdKey = (verifiedOneIdSubject != null && !verifiedOneIdSubject.isEmpty())
+                    ? verifiedOneIdSubject
+                    : postedNameIdMatchingSession(sessionNameId, strAuth[0]);
+            // The address that came with the verified subject, not the one the form posted. The
+            // form has no verified address to send, and a posted one is whatever the browser chose.
+            String oneIdEmail = (verifiedOneIdSubject != null && !verifiedOneIdSubject.isEmpty())
+                    ? verifiedOneIdEmail
+                    : request.getParameter("email");
             
             // If the oneIdKey parameter is not null and is not an empty string
             if (oneIdKey != null && !oneIdKey.equals("")) {
@@ -889,4 +909,67 @@ public final class Login2Action extends ActionSupport {
     public void setMfaRegistrationFlow(boolean mfaRegistrationFlow) {
         this.mfaRegistrationFlow = mfaRegistrationFlow;
     }
+
+    /**
+     * How long a ONE ID subject waiting to be linked stays usable, in milliseconds.
+     *
+     * <p>The subject sits on the session between the ONE ID sign-in and the local sign-in that
+     * binds it. A provider who starts that and walks away leaves it there, and the next person to
+     * sign in at that browser would have it bound to their account: the ONE ID would then resolve
+     * to an account that is not its owner's. Ten minutes is long enough to type a password.
+     */
+    private static final long ONE_ID_LINK_WINDOW_MILLIS = 10L * 60L * 1000L;
+
+    /**
+     * The ONE ID subject waiting to be linked, when the wait has not gone on too long.
+     *
+     * @param session HttpSession the session the callback left it on
+     * @return String the subject, or null when there is none or it has gone stale
+     */
+    private String pendingOneIdSubject(HttpSession session) {
+        String subject = (String) session.getAttribute("oneIdSubject");
+        if (subject == null || subject.isEmpty()) {
+            return null;
+        }
+        Object startedAt = session.getAttribute("oneIdSubjectAt");
+        if (!(startedAt instanceof Long)
+                || System.currentTimeMillis() - ((Long) startedAt).longValue() > ONE_ID_LINK_WINDOW_MILLIS) {
+            logger.warn("Ignored a ONE ID subject left waiting to be linked for too long");
+            return null;
+        }
+        return subject;
+    }
+
+    /**
+     * The ONE ID subject posted with the sign-in form, but only when it is the one the server had
+     * already put on the session.
+     *
+     * <p>The subject arrives as a hidden field, so on its own it is whatever the browser chose to
+     * send. Binding an account to an unchecked value lets anyone who can sign in claim somebody
+     * else's ONE ID identity: the next time its real owner signs in through ONE ID, the subject
+     * resolves to the account that claimed it and they are signed in as that person, with their
+     * tokens stored against it.</p>
+     *
+     * <p>The legitimate route for this field is the SAML sign-in, which leaves the subject on the
+     * session for index.jsp to render, so a genuine value always matches what was held. A value
+     * matching nothing was invented by the sender and is refused.</p>
+     *
+     * @param sessionNameId String the subject held on the session before it was replaced, or null
+     * @param providerNo    String the provider signing in, for the log line
+     * @return String the posted subject when it matches the session, otherwise null
+     */
+    private String postedNameIdMatchingSession(String sessionNameId, String providerNo) {
+        String posted = request.getParameter("nameId");
+        if (posted == null || posted.isEmpty()) {
+            return null;
+        }
+        if (sessionNameId != null && sessionNameId.equals(posted)) {
+            return posted;
+        }
+        // Not logged with the value: it names a person.
+        logger.warn("Refused a ONE ID subject posted with the sign-in form for provider " + providerNo
+                + "; it did not match the one held on the session");
+        return null;
+    }
+
 }

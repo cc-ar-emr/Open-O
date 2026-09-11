@@ -823,6 +823,12 @@ String curProvider_no = (String)session.getAttribute("user");
 						<li>&nbsp;<a href='javascript:void(0);' class="xlink" rel="${ctx}/admin/api/clients.jsp">REST Clients</a></li>
 						</ul>
 					</li>
+					<security:oscarSec roleName="<%=roleName$%>" objectName="_admin.ehrConnectivity" rights="r" reverse="<%=false%>">
+						<li><a href='javascript:void(0);' class="xlink" rel="${ctx}/admin/ehrConnectivitySettings.do">EHR Connectivity - Gateway Settings</a></li>
+						<li><a href='javascript:void(0);' class="xlink" rel="${ctx}/admin/ehrConnectivityLog.do">EHR Connectivity - Gateway Log</a></li>
+						<li><a href='javascript:void(0);' class="xlink" rel="${ctx}/admin/uaoAdmin.do">EHR Connectivity - Under Authority Of (UAO)</a></li>
+						<li><a href='javascript:void(0);' class="xlink" rel="${ctx}/admin/viewletAdmin.do">EHR Connectivity - Viewlets</a></li>
+					</security:oscarSec>
 <%--					<li><a  href='javascript:void(0);' class="xlink" rel="${ctx}/admin/integratorStatus.jsp">Integrator Status</a></li>--%>
 					
 <%--					<li><a href='javascript:void(0);' class="xlink" rel='${ctx}/setProviderStaleDate.do?method=viewIntegratorProperties'><fmt:setBundle basename="oscarResources"/><fmt:message key="providers.btnSetIntegratorPreferences"/></a></li>--%>

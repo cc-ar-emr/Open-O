@@ -28,5 +28,16 @@ public class TokenExpiredException extends Exception {
 	public TokenExpiredException() {
 		super();
 	}
-	
+
+	/**
+	 * Raised with wording the EMR user can act on. Callers that surface the message - the DHIR
+	 * views report {@code getMessage()} straight to the screen - then say what to do rather than
+	 * showing an empty error.
+	 *
+	 * @param message String what the user should do about it
+	 */
+	public TokenExpiredException(String message) {
+		super(message);
+	}
+
 }

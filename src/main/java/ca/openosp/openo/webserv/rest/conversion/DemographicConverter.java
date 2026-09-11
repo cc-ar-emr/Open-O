@@ -28,6 +28,7 @@ import ca.openosp.openo.utility.MiscUtils;
 import org.apache.logging.log4j.Logger;
 import ca.openosp.openo.commn.model.Demographic;
 import ca.openosp.openo.commn.model.DemographicExt;
+import ca.openosp.openo.utility.Age;
 import ca.openosp.openo.utility.AgeCalculator;
 import ca.openosp.openo.utility.LoggedInInfo;
 import ca.openosp.openo.webserv.rest.to.model.AgeTo1;
@@ -206,7 +207,12 @@ public class DemographicConverter extends AbstractConverter<Demographic, Demogra
             t.setProvider(providerConverter.getAsTransferObject(loggedInInfo, d.getProvider()));
         }
 
-        t.setAge(new AgeTo1(AgeCalculator.calculateAge(d.getBirthDay())));
+        // A patient with no recorded date of birth has no age; AgeTo1 reads its fields eagerly,
+        // so leave the age unset rather than wrapping a null.
+        Age age = AgeCalculator.calculateAge(d.getBirthDay());
+        if (age != null) {
+            t.setAge(new AgeTo1(age));
+        }
 
         return t;
     }

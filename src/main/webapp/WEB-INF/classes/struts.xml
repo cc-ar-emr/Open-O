@@ -95,6 +95,44 @@
             <result name="success">/admin/lookUpLists/</result>
         </action>
         <action name="admin/oncallClinic" class="ca.openosp.openo.admin.reports.SaveOnCallClinic2Action"/>
+        <action name="admin/ehrConnectivitySettings" class="ca.openosp.openo.integration.oneId.web.EhrConnectivitySettingsAction">
+            <result name="success">/admin/ehrConnectivitySettings.jsp</result>
+        </action>
+        <action name="admin/ehrConnectivitySettingsSave" class="ca.openosp.openo.integration.oneId.web.EhrConnectivitySettingsAction" method="save">
+            <result name="success">/admin/ehrConnectivitySettings.jsp</result>
+        </action>
+        <action name="admin/ehrConnectivityLog" class="ca.openosp.openo.integration.oneId.web.GatewayLogAction">
+            <result name="success">/admin/ehrConnectivityLog.jsp</result>
+        </action>
+        <action name="oneIdLogin" class="ca.openosp.openo.integration.oneId.web.OneIdLoginAction"/>
+        <action name="oneIdCallback" class="ca.openosp.openo.integration.oneId.web.OneIdCallbackAction"/>
+        <action name="oneIdUnlink" class="ca.openosp.openo.integration.oneId.web.OneIdUnlinkAction"/>
+        <action name="oneIdSignOut" class="ca.openosp.openo.integration.oneId.web.OneIdSignOutAction"/>
+        <action name="admin/uaoAdmin" class="ca.openosp.openo.integration.oneId.web.UaoAdminAction">
+            <result name="success">/admin/uaoAdmin.jsp</result>
+        </action>
+        <action name="admin/uaoAdminAdd" class="ca.openosp.openo.integration.oneId.web.UaoAdminAction" method="add"/>
+        <action name="admin/uaoAdminDelete" class="ca.openosp.openo.integration.oneId.web.UaoAdminAction" method="delete"/>
+        <action name="admin/uaoAdminSetDefault" class="ca.openosp.openo.integration.oneId.web.UaoAdminAction" method="setDefault"/>
+        <action name="admin/viewletAdmin" class="ca.openosp.openo.integration.oneId.web.ViewletAdminAction">
+            <result name="success">/admin/viewletAdmin.jsp</result>
+        </action>
+        <action name="admin/viewletAdminAdd" class="ca.openosp.openo.integration.oneId.web.ViewletAdminAction" method="add"/>
+        <action name="admin/viewletAdminUpdate" class="ca.openosp.openo.integration.oneId.web.ViewletAdminAction" method="update"/>
+        <action name="admin/viewletAdminDisable" class="ca.openosp.openo.integration.oneId.web.ViewletAdminAction" method="disable"/>
+        <action name="admin/viewletAdminEnable" class="ca.openosp.openo.integration.oneId.web.ViewletAdminAction" method="enable"/>
+        <action name="uaoSelect" class="ca.openosp.openo.integration.oneId.web.UaoSelectAction">
+            <result name="success">/provider/uaoSelect.jsp</result>
+        </action>
+        <action name="uaoSelectApply" class="ca.openosp.openo.integration.oneId.web.UaoSelectAction" method="select"/>
+        <action name="viewletLaunch" class="ca.openosp.openo.integration.oneId.web.ViewletLaunchAction" method="launch"/>
+        <action name="viewletPatientClose" class="ca.openosp.openo.integration.oneId.web.ViewletLaunchAction" method="patientClose"/>
+        <action name="viewletResult" class="ca.openosp.openo.integration.oneId.web.ViewletLaunchAction" method="result"/>
+        <action name="viewletNoticeSetting" class="ca.openosp.openo.integration.oneId.web.ViewletLaunchAction" method="noticeSetting"/>
+        <action name="viewletNoticeToggle" class="ca.openosp.openo.integration.oneId.web.ViewletLaunchAction" method="noticeToggle"/>
+        <action name="dhdr/consentOverrideReport" class="ca.openosp.openo.integration.dhdr.ConsentOverrideReport2Action">
+            <result name="success">/dhdr/consentOverrideReport.jsp</result>
+        </action>
         <action name="providerLinkingRules" class="ca.openosp.openo.dashboard.admin.ProviderLinkingRulesAction" />
         <action name="web/dashboard/display/DashboardDisplay" class="ca.openosp.openo.dashboard.display.DisplayDashboard2Action">
             <result name="success">/web/dashboard/display/DashboardDisplay.jsp</result>
@@ -1401,6 +1439,7 @@
             <result name="genRxPageSize">/provider/setGenRxPageSizeProperty.jsp</result>
             <result name="genHl7LabResultPrefs">/provider/setHl7LabResultPrefs.jsp</result>
             <result name="genRxDefaultQuantity">/provider/setGenRxDefaultQuantityProperty.jsp</result>
+            <result name="genDhdrSearchDays">/provider/setDhdrSearchDays.jsp</result>
             <result name="genRxProfileView">/provider/setGenRxProfileViewProperty.jsp</result>
             <result name="genRxUseRx3">/provider/setToUseRx3.jsp</result>
             <result name="genDefaultDocQueue">/provider/setDocDefaultQueue.jsp</result>

@@ -200,6 +200,7 @@
 			<bean class="ca.openosp.openo.webserv.rest.TicklerWebService" autowire="byName"/>
             <bean class="ca.openosp.openo.webserv.rest.RxWebService" autowire="byName"/>
             <bean class="ca.openosp.openo.webserv.rest.RxLookupService" autowire="byName"/>
+            <bean class="ca.openosp.openo.webserv.rest.DHDRService" autowire="byName"/>
 			<bean class="ca.openosp.openo.webserv.rest.ProviderService" autowire="byName"/>
 			<bean class="ca.openosp.openo.webserv.rest.PatientDetailStatusService" autowire="byName"/>
 			<bean class="ca.openosp.openo.webserv.rest.PersonaService" autowire="byName"/>

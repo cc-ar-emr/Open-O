@@ -122,7 +122,7 @@ public class OneIdGatewayData implements Serializable {
           hubTopic = tokens.getString("hub.topic");
         }
       } catch (Exception e) {
-        logger.error("Error with parsing tokens " + oneIdString, e);
+        logger.error("Error parsing ONE ID token response", e);
       }
     }
   }
@@ -310,6 +310,10 @@ public class OneIdGatewayData implements Serializable {
     this.idTokenStr = idTokenStr;
   }
 
+  public String getIdTokenStr() {
+    return idTokenStr;
+  }
+
   public void setHubTopic(String hubTopicResponseBody) {
     this.hubTopic = hubTopicResponseBody;
   }
@@ -336,6 +340,10 @@ public class OneIdGatewayData implements Serializable {
 
   public String getCtxSessionId() {
     return ctxSessionId;
+  }
+
+  public void setCtxSessionId(String ctxSessionId) {
+    this.ctxSessionId = ctxSessionId;
   }
 
   public String getUao() {

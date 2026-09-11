@@ -29,7 +29,6 @@
 <%@ page import="ca.openosp.openo.managers.MfaManager" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri='http://java.sun.com/jsp/jstl/core' prefix="c" %>
-<%@ taglib uri="/WEB-INF/oscar-tag.tld" prefix="oscar" %>
 <%@ page contentType="text/html;charset=UTF-8" session="false" %>
 
 <%
@@ -94,10 +93,6 @@
                 var page = "" + varpage;
                 windowprops = "height=" + vheight + ",width=" + vwidth + ",location=no,scrollbars=yes,menubars=no,toolbars=no,resizable=yes";
                 window.open(page, "gpl", windowprops);
-            }
-
-            function addStartTime() {
-                document.getElementById("oneIdLogin").href += (Math.round(new Date().getTime() / 1000).toString());
             }
 
 
@@ -619,6 +614,12 @@
                     </div>
                 </c:if>
 
+                <c:if test="${not empty oneIdSubject}">
+                    <div class="alert">
+                        Sign in once with your OpenO username and password to link your ONE ID account.
+                    </div>
+                </c:if>
+
                 <div class="panel-body">
                     <div class="leftinput">
                         <%--
@@ -682,15 +683,17 @@
 
                         </form>
 
-                        <oscar:oscarPropertiesCheck property="oneid.enabled" value="true" defaultVal="false">
-                            <a href="${ LoginResourceBean.econsultURL }"
-                               id="oneIdLogin" onclick="addStartTime()" class="btn btn-primary btn-block oneIDLogin">
+                        <%-- Shown from the oneid_enabled setting, editable on the EHR Connectivity
+                             admin screen, rather than from a properties file that needs a restart. --%>
+                        <c:if test="${LoginResourceBean.oneIdEnabled}">
+                            <a href="${pageContext.request.contextPath}/oneIdLogin.do"
+                               id="oneIdLogin" class="btn btn-primary btn-block oneIDLogin">
                                 <span class="oneIDLogo"></span>
                                 <span class="oneIdText">
     									<fmt:setBundle basename="oscarResources"/><fmt:message key="loginApplication.oneid"/>
     								</span>
                             </a>
-                        </oscar:oscarPropertiesCheck>
+                        </c:if>
 
                         <c:if test="${ LoginResourceBean.acceptableUseAgreementManager.auaAvailable }">
     			            <span class="extrasmall">

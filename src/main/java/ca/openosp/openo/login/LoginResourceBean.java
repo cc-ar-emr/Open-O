@@ -28,9 +28,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+import ca.openosp.openo.commn.model.SystemPreferences;
 import ca.openosp.openo.commn.service.AcceptableUseAgreementManager;
+import ca.openosp.openo.managers.EhrConnectivityManager;
 import ca.openosp.openo.utility.MiscUtils;
 
+import ca.openosp.openo.utility.SpringUtils;
 import ca.openosp.openo.utility.SSOUtility;
 import ca.openosp.OscarProperties;
 
@@ -44,9 +47,9 @@ public class LoginResourceBean {
     private String supportName;
     private String tabName;
     private String buildTag;
-    private String econsultURL;
     private String ssoLoginUrl;
     private boolean ssoEnabled;
+    private boolean oneIdEnabled;
 
     public boolean isSsoEnabled() {
         return ssoEnabled;
@@ -104,15 +107,39 @@ public class LoginResourceBean {
 
         this.buildTag = OscarProperties.getBuildDate() + " " + OscarProperties.getBuildTag();
 
-        /*
-         * Not even sure that Ontario eConsult is currently an active service.
-         * Adjustments need to be made here if eConsult is needed.
-         */
-        this.econsultURL = oscarProperties.getProperty("backendEconsultUrl");
-
         this.acceptableUseAgreementManager = new AcceptableUseAgreementManager();
 
         setSsoEnabled(SSOUtility.isSSOEnabled());
+        this.oneIdEnabled = readOneIdEnabled();
+    }
+
+    /**
+     * Whether the ONE ID sign-in button is shown, from the {@code oneid_enabled} setting.
+     *
+     * <p>Wrapped because this runs while the sign-in page is being built: a settings read that
+     * failed - no row yet on an instance that has not run the migration, or a database the page
+     * cannot reach - must hide the ONE ID button, not take the whole login screen down with it.</p>
+     *
+     * @return boolean true when ONE ID sign-in is switched on, false when it is off or unreadable
+     */
+    private boolean readOneIdEnabled() {
+        try {
+            EhrConnectivityManager ehrConnectivityManager =
+                    SpringUtils.getBean(EhrConnectivityManager.class);
+            return ehrConnectivityManager.getConfigFlag(
+                    SystemPreferences.ONEID_KEYS.oneid_enabled, false);
+        } catch (Exception e) {
+            MiscUtils.getLogger().warn("Could not read the ONE ID sign-in setting; hiding the button", e);
+            return false;
+        }
+    }
+
+    public boolean isOneIdEnabled() {
+        return oneIdEnabled;
+    }
+
+    public void setOneIdEnabled(boolean oneIdEnabled) {
+        this.oneIdEnabled = oneIdEnabled;
     }
 
     public String getSupportLink() {
@@ -161,14 +188,6 @@ public class LoginResourceBean {
 
     public void setBuildTag(@SuppressWarnings("unused") String buildTag) {
         this.buildTag = null;
-    }
-
-    public String getEconsultURL() {
-        return econsultURL;
-    }
-
-    public void setEconsultURL(@SuppressWarnings("unused") String econsultURL) {
-        this.econsultURL = null;
     }
 
     public AcceptableUseAgreementManager getAcceptableUseAgreementManager() {

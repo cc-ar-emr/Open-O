@@ -107,8 +107,30 @@ public class OneIDTokenUtils {
     return sb.toString();
   }
 
+  /**
+   * Makes sure the provider has an access token the gateway will accept, refreshing an expired one.
+   *
+   * <p>A provider who has not signed in to ONE ID has no gateway data at all, and every caller
+   * reads the access token off it on the next line. Left unguarded that is a NullPointerException,
+   * which reaches the user as whatever the caller says about an unexpected failure - on the DHDR
+   * search, "the service could not be reached", pointing at Ontario Health for something a sign-in
+   * fixes. No session and a dead session call for the same thing from the user, so they raise the
+   * same exception and land on the same prompt.</p>
+   *
+   * <p>The expiry read here is only what decides whether to go and refresh. A provider's refreshes
+   * are serialized in {@link OmdGateway#refreshToken}, which re-reads the expiry once it holds the
+   * lock, so two requests arriving together do not both exchange the same refresh token.</p>
+   *
+   * @param loggedInInfo LoggedInInfo the current session, used to persist a refreshed token
+   * @param oneIdGatewayData OneIdGatewayData the provider's ONE ID tokens, or null when they have
+   *     not signed in
+   * @throws TokenExpiredException when there is no session, or the refresh token is dead too
+   */
   public static void verifyAccessTokenIsValid(LoggedInInfo loggedInInfo,
                                               OneIdGatewayData oneIdGatewayData) throws TokenExpiredException {
+    if (oneIdGatewayData == null) {
+      throw new TokenExpiredException("No ONE ID session. Sign in to ONE ID and try again.");
+    }
     if (oneIdGatewayData.isAccessTokenExpired()) {
       refreshToken(loggedInInfo, oneIdGatewayData);
     }

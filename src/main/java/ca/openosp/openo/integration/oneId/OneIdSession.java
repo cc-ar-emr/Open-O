@@ -19,8 +19,10 @@ import javax.persistence.Id;
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * OneID session entity for managing OAuth 2.0 authentication tokens and user information.
@@ -71,12 +73,30 @@ public class OneIdSession extends AbstractModel<Object> {
   }
 
   /**
+   * Sets the provider number.
+   *
+   * @param providerNo String the provider number
+   */
+  public void setProviderNo(String providerNo) {
+    this.providerNo = providerNo;
+  }
+
+  /**
    * Gets the access token.
    *
    * @return String the OAuth 2.0 access token
    */
   public String getAccessToken() {
     return accessToken;
+  }
+
+  /**
+   * Sets the access token.
+   *
+   * @param accessToken String the OAuth 2.0 access token
+   */
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
   }
 
   /**
@@ -385,13 +405,35 @@ public class OneIdSession extends AbstractModel<Object> {
    * @param key String the configurable key to get the URL from the toolbar
    * @return String a URL or an empty string if the key is not found
    */
-  @SuppressWarnings("unchecked")
   public String getUrlFromToolbar(final String key) {
+    return MapUtils.getOrDefault(decodeToolbar(), key, "").toString();
+  }
+
+  /**
+   * Returns the keys present in the decoded toolbar. These are endpoint and service configuration
+   * keys (no PHI or secrets), suitable for logging when an expected key is absent.
+   *
+   * @return Set<String> the toolbar keys, empty when the toolbar is missing or unparseable
+   */
+  public Set<String> getToolbarKeys() {
+    return decodeToolbar().keySet();
+  }
+
+  /**
+   * Decodes the Base64 toolbar JSON string into a key/URL map.
+   *
+   * @return Map<String, Object> the decoded toolbar, empty when the toolbar is missing or unparseable
+   */
+  @SuppressWarnings("unchecked")
+  private Map<String, Object> decodeToolbar() {
+    if (toolbar == null || toolbar.isEmpty()) {
+      return Collections.emptyMap();
+    }
     Map<String, Object> toolbarMap =
         new Gson()
             .fromJson(
                 new String(DatatypeConverter.parseBase64Binary(toolbar), StandardCharsets.UTF_8),
                 Map.class);
-    return MapUtils.getOrDefault(toolbarMap, key, "").toString();
+    return toolbarMap == null ? Collections.emptyMap() : toolbarMap;
   }
 }

@@ -74,6 +74,15 @@ public class DrugTo1 implements Serializable {
 
     private String form;
 
+    /**
+     * The dosage unit of measure, from {@code drugs.unit}. Read-only here: this is
+     * surfaced so viewers can show a dose as "1 tab" rather than a bare "1", and the
+     * inbound direction deliberately still derives the column from the strength unit.
+     * Unreliable in older data, where the strength unit was written here instead, so
+     * compare against {@link #getStrengthUnit()} before trusting it.
+     */
+    private String unit;
+
     private String method;
 
     private Boolean prn;
@@ -258,6 +267,20 @@ public class DrugTo1 implements Serializable {
 
     public void setForm(String form) {
         this.form = form;
+    }
+
+    /**
+     * @return String the dosage unit of measure, or null
+     */
+    public String getUnit() {
+        return unit;
+    }
+
+    /**
+     * @param unit String the dosage unit of measure
+     */
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     public String getMethod() {

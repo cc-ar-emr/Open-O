@@ -58,6 +58,10 @@
 <%@page import="ca.openosp.openo.utility.SpringUtils" %>
 <%@page import="java.util.List" %>
 <%@page import="ca.openosp.openo.utility.LoggedInInfo" %>
+<%@page import="ca.openosp.openo.commn.model.Demographic" %>
+<%@page import="ca.openosp.openo.commn.dao.DemographicDao" %>
+<%@page import="ca.openosp.openo.commn.model.SystemPreferences" %>
+<%@page import="ca.openosp.openo.commn.dao.SystemPreferencesDao" %>
 <%@page import="ca.openosp.openo.prescript.data.RxPrescriptionData" %>
 <%@page import="ca.openosp.openo.commn.model.ProviderPreference" %>
 <%@page import="ca.openosp.openo.web.admin.ProviderPreferencesUIBean" %>
@@ -817,6 +821,12 @@
       }
     }
 
+    // Opens the DHDR (Digital Health Drug Repository) viewer for the current patient. Requires a
+    // valid OneID gateway session;
+    function openDHDR() {
+      popupWindow(1000, 900, ctx + '/dhdr/index.jsp?demographic_no=<%=Encode.forUriComponent(String.valueOf(demoNo))%>', 'DHDR');
+    }
+
   </script>
   <style media="screen">
 
@@ -1136,6 +1146,37 @@
                   <tr id="prescriptionStageRow">
                     <td>
 
+                      <%-- Sits OUTSIDE #prescriptionStageSet deliberately: that container is
+                           display:none until a drug is staged, so links placed inside it are
+                           invisible on arrival at the prescribing screen and only appear after
+                           the first prescription is staged. DHDR12.01/12.02 require them on the
+                           screen where the prescription is entered, which includes before one
+                           has been started - checking coverage precedes prescribing. --%>
+                      <oscar:oscarPropertiesCheck property="billregion" value="ON">
+                          <%-- DHDR12.01 / DHDR12.02: both links MUST sit on the screen where the
+                               prescription is entered. RX3 is the default prescribing UI
+                               (RxChoosePatient2Action reads RX3, shipped "yes"), so this screen is
+                               that screen - WriteScript.jsp carries the same block for the legacy
+                               RX1 flow, which RX3 users never reach. URLs are admin-configurable
+                               (dhdr.odb_formulary_url, dhdr.eap_url), shared with the DHDR viewer.
+                               The SADIE default is ontario.ca, not the v3.0 Related Documents
+                               address, whose certificate expired 2024-10-23 - see divergence D3. --%>
+                          <div class="dhdr-formulary-links" style="margin:4px 0;">
+                              <%-- rel on both: these open a third-party site in a named window, so
+                                   without it the opened page holds a window.opener handle back into
+                                   an authenticated EMR session and can navigate it. The URLs are
+                                   admin-configurable, so the destination is not guaranteed to stay
+                                   ontario.ca. --%>
+                              <a target="_new" rel="noopener noreferrer"
+                                 href="<%=Encode.forHtmlAttribute(OscarProperties.getInstance().getProperty("dhdr.odb_formulary_url", "https://www.ontario.ca/check-medication-coverage/"))%>">ODB
+                                  lookup</a>
+                              &nbsp;|&nbsp;
+                              <a target="_new" rel="noopener noreferrer"
+                                 href="<%=Encode.forHtmlAttribute(OscarProperties.getInstance().getProperty("dhdr.eap_url", "https://www.ontario.ca/page/sadie-special-authorization-digital-information-exchange"))%>">EAP
+                                  (SADIE)</a>
+                          </div>
+                      </oscar:oscarPropertiesCheck>
+
                       <div id="prescriptionStageSet">
 
                         <div id="interactingDrugErrorMsg"></div>
@@ -1259,6 +1300,27 @@
                       <a  class="btn btn-link"
                           href="javascript:popupWindow(720,920, ctx + '/oscarRx/chartDrugProfile.jsp?demographic_no=<%=Encode.forUriComponent(String.valueOf(demoNo))%>','PrintDrugProfile2')">Timeline
                         Drug Profile</a>
+<%
+                        // The DHDR viewer is offered only when OneID and DHDR are both enabled for
+                        // this instance (the oneid_enabled + dhdr_enabled feature flags, mirroring
+                        // oscarPro's isOneIdEnabled() && isDhdrEnabled()), and only for patients with
+                        // an Ontario health card (HIN).
+                        SystemPreferencesDao systemPreferencesDao = SpringUtils.getBean(SystemPreferencesDao.class);
+                        boolean dhdrConfigured =
+                            systemPreferencesDao.isReadBooleanPreference(SystemPreferences.ONEID_KEYS.oneid_enabled)
+                            && systemPreferencesDao.isReadBooleanPreference(SystemPreferences.ONEID_KEYS.dhdr_enabled);
+                        if (dhdrConfigured) {
+                          DemographicDao demographicDao = SpringUtils.getBean(DemographicDao.class);
+                          Demographic dhdrPatient = demographicDao.getDemographicById(demoNo);
+                          boolean dhdrEligible = dhdrPatient != null
+                              && dhdrPatient.getHin() != null && !dhdrPatient.getHin().trim().isEmpty()
+                              && "ON".equalsIgnoreCase(dhdrPatient.getHcType());
+                          if (dhdrEligible) { %>
+                      <a class="btn btn-link" href="javascript:openDHDR();" title="Digital Health Drug Repository">DHDR</a>
+<%                        } else { %>
+                      <a class="btn btn-link" style="color: grey;cursor: not-allowed;" title="Ontario health card (HIN) required for DHDR">DHDR</a>
+<%                        }
+                        } %>
 
                     </div>
 

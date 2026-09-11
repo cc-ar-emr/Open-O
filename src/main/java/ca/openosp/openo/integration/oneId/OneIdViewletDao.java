@@ -15,4 +15,6 @@ public interface OneIdViewletDao extends AbstractDao<OneIdViewlet> {
   OneIdViewlet queryOneIdViewletForKey(final String key);
 
   List<OneIdViewlet> findAllActiveAndShowInEchartTrue();
+
+  List<OneIdViewlet> findAllOrderByName();
 }

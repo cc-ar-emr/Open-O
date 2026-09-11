@@ -821,6 +821,12 @@
                 <ul>
 
                     <li>&nbsp;<a href="#" onclick='popupPage(500,800, "${pageContext.request.contextPath}/admin/api/clients.jsp");return false;'>REST Clients</a></li>
+                    <security:oscarSec roleName="<%=roleName$%>" objectName="_admin.ehrConnectivity" rights="r" reverse="<%=false%>">
+                        <li><a href="${pageContext.request.contextPath}/admin/ehrConnectivitySettings.do">EHR Connectivity - Gateway Settings</a></li>
+                        <li><a href="${pageContext.request.contextPath}/admin/ehrConnectivityLog.do">EHR Connectivity - Gateway Log</a></li>
+                        <li><a href="${pageContext.request.contextPath}/admin/uaoAdmin.do">EHR Connectivity - Under Authority Of (UAO)</a></li>
+                        <li><a href="${pageContext.request.contextPath}/admin/viewletAdmin.do">EHR Connectivity - Viewlets</a></li>
+                    </security:oscarSec>
                     <li><a href="#"
                            onclick="popupPage(900, 500, '<%=request.getContextPath()%>/setProviderStaleDate.do?method=viewIntegratorProperties');return false;"><fmt:setBundle basename="oscarResources"/><fmt:message key="provider.btnSetIntegratorPreferences"/></a></li>
                     <li><a href="#"

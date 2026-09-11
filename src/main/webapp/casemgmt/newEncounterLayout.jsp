@@ -170,6 +170,7 @@
                 measurements: '<%=Encode.forJavaScript(String.valueOf(Colour.getInstance().measurements))%>',
                 consultation: '<%=Encode.forJavaScript(String.valueOf(Colour.getInstance().consultation))%>',
                 hrmDocuments: '<%=Encode.forJavaScript(String.valueOf(Colour.getInstance().hrmDocuments))%>',
+                ehr: '<%=Encode.forJavaScript(String.valueOf(Colour.getInstance().ehr))%>',
                 allergy: '<%=Encode.forJavaScript(String.valueOf(Colour.getInstance().allergy))%>',
                 rx: '<%=Encode.forJavaScript(String.valueOf(Colour.getInstance().rx))%>',
                 omed: '<%=Encode.forJavaScript(String.valueOf(Colour.getInstance().omed))%>',
@@ -187,6 +188,8 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/validateTextInputs.js"></script>
 <!--js code for newCaseManagementView.jsp -->
 <script type="text/javascript" src="<c:out value="${ctx}/js/newCaseManagementView.js.jsp"/>"></script>
+<script type="text/javascript" src="<c:out value="${ctx}"/>/csrfguard"></script>
+<script type="text/javascript" src="<c:out value="${ctx}"/>/share/javascript/oneid.js"></script>
 
             <%-- Javascripts for the BC Care Connect Button --%>
         <oscar:oscarPropertiesCheck value="BC" property="billregion">

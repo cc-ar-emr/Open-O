@@ -25,6 +25,20 @@ public class AuditInfo {
   public static final String RETRIEVAL = "RETRIEVAL";
   public static final String SUBMISSION = "SUBMISSION";
 
+  /**
+   * A user opened a screen that renders retrieved DHDR data. Unlike {@link #SEARCH}, no call to the
+   * DHDR EHR Service is made; the row records that a user read the data, which DHDR15.01's closing
+   * clause ("any additional information needed to facilitate troubleshooting and auditing") requires
+   * for the cross-patient consent-override report.
+   */
+  public static final String VIEW = "VIEW";
+
+  /**
+   * A user rendered retrieved DHDR data to PDF. Recorded because the print takes PHI out of the EMR
+   * (DHDR15.01, closing clause).
+   */
+  public static final String PRINT = "PRINT";
+
   private String externalSystem = null;
   private String transactionType = null;
   private Integer demographicNo = null;

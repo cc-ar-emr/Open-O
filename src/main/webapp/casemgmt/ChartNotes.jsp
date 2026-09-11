@@ -186,6 +186,8 @@
 </script>
 <script src="<c:out value="${ctx}"/>/share/javascript/scriptaculous.js" type="text/javascript"></script>
 <script type="text/javascript" src="<c:out value="${ctx}/js/newCaseManagementView.js.jsp"/>"></script>
+<script type="text/javascript" src="<c:out value="${ctx}"/>/csrfguard"></script>
+<script type="text/javascript" src="<c:out value="${ctx}"/>/share/javascript/oneid.js"></script>
 <script type="text/javascript">
     ctx = "<c:out value="${ctx}"/>";
     imgPrintgreen.src = ctx + "/oscarEncounter/graphics/printerGreen.png"; //preload green print image so firefox will update properly

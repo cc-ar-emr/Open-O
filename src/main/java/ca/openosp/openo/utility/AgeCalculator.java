@@ -32,7 +32,22 @@ import org.joda.time.PeriodType;
 
 public class AgeCalculator {
 
+    /**
+     * Calculates a patient's age from their date of birth.
+     *
+     * <p>A patient may have no recorded date of birth, in which case there is no age to report and
+     * null is returned. Without this guard {@code LocalDate.fromCalendarFields(null)} throws, and
+     * {@link ca.openosp.openo.commn.model.Demographic#getBirthDay()} returns null whenever any of
+     * the three birth columns is unset.</p>
+     *
+     * @param birthDate Calendar the date of birth, or null when none is recorded
+     * @return Age the age in years, months and days, or null when birthDate is null
+     */
     public static Age calculateAge(Calendar birthDate) {
+        if (birthDate == null) {
+            return null;
+        }
+
         LocalDate birthdate = LocalDate.fromCalendarFields(birthDate);
         LocalDate now = new LocalDate();                    //Today's date
         Period period = new Period(birthdate, now, PeriodType.yearMonthDay());

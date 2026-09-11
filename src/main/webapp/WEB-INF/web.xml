@@ -145,6 +145,11 @@
 		<filter-name>PMMFilter</filter-name>
 		<filter-class>ca.openosp.openo.PMmodule.web.PMMFilter</filter-class>
 	</filter>
+	<!-- Restores the ONE ID gateway session for logged-in providers on each request -->
+	<filter>
+		<filter-name>OneIdFilter</filter-name>
+		<filter-class>ca.openosp.openo.integration.oneId.OneIdFilter</filter-class>
+	</filter>
 
   <filter-mapping>
     <filter-name>DbConnectionFilter</filter-name>
@@ -168,6 +173,10 @@
   </filter-mapping>
   <filter-mapping>
     <filter-name>LoginFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>OneIdFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 

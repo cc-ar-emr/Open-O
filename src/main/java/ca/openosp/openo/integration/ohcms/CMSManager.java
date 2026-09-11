@@ -24,20 +24,48 @@ import ca.openosp.openo.integration.dhdr.OmdGateway;
 import ca.openosp.openo.integration.fhircast.Event;
 import ca.openosp.openo.integration.fhircast.UserLogin;
 import ca.openosp.openo.integration.oneId.OneIdGatewayData;
+import ca.openosp.openo.managers.EhrConnectivityManager;
 import ca.openosp.openo.utility.LoggedInInfo;
 import ca.openosp.openo.utility.MiscUtils;
 import ca.openosp.openo.utility.SpringUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
+import org.hl7.fhir.r4.model.Location;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class CMSManager {
 
   static Logger logger = MiscUtils.getLogger();
+
+  /** One lock per provider, guarding the patient held in their CMS context. */
+  private static final ConcurrentMap<String, Object> contextLocks =
+      new ConcurrentHashMap<String, Object>();
+
+  /**
+   * The lock guarding a provider's CMS patient context.
+   *
+   * <p>Keyed by provider rather than taken on the gateway data, which the session filter replaces
+   * whenever the stored session moves on: two requests can then hold different instances and
+   * synchronize on nothing.
+   *
+   * <p>A caller whose work depends on the context staying put - composing a launch URL for the
+   * patient just put in context - holds this across both steps. Setting the context and then
+   * launching under it are one operation; between them a second request can move the context to
+   * another patient, and the launch opens the wrong record.
+   *
+   * @param loggedInInfo LoggedInInfo the acting provider session
+   * @return Object the monitor to synchronize on
+   */
+  public static Object contextLock(LoggedInInfo loggedInInfo) {
+    String providerNo = loggedInInfo == null ? null : loggedInInfo.getLoggedInProviderNo();
+    return contextLocks.computeIfAbsent(providerNo == null ? "" : providerNo, key -> new Object());
+  }
 
   public static String createHubTopic(LoggedInInfo loggedInInfo) throws Exception {
     OmdGateway omdGateway = new OmdGateway();
@@ -48,8 +76,14 @@ public class CMSManager {
         new Event(UUID.randomUUID().toString(), "hubTopic", "createHubTopic"));
     String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
     JSONObject responseB = new JSONObject(hubTopicResponseBody);
-    logger.debug("hubTopicResponse: " + hubTopicResponseBody);
-    oneIdGatewayData.setHubTopic(responseB.getString("hub.topic"));
+    logStatus("hubTopicResponse", hubTopicResponse);
+    String hubTopic = responseB.getString("hub.topic");
+    oneIdGatewayData.setHubTopic(hubTopic);
+    // The hub.topic is the CMS-issued identifier of this context session; carrying it as the
+    // context session id puts it on every context audit row.
+    oneIdGatewayData.setCtxSessionId(hubTopic);
+    EhrConnectivityManager ehrConnectivityManager = SpringUtils.getBean(EhrConnectivityManager.class);
+    ehrConnectivityManager.setOwnSessionHubTopic(loggedInInfo, hubTopic);
     return null;
   }
 
@@ -66,18 +100,26 @@ public class CMSManager {
     String uuid = UUID.randomUUID().toString();
     UserLogin userLogin = new UserLogin(uuid, oneIdGatewayData.getHubTopic());
     try {
+      // The context is made up of four profiles: Organization, Location, Practitioner and Patient.
+      // The first three are set here, at sign-in; Patient is sent separately in patientOpen,
+      // immediately before an EHR service launches, so the patient in context is the one on screen.
+      // Organization is the custodian the provider acts for and changes with their authority;
+      // Location is this clinic, and there is one of it.
       userLogin.addContext("organization",
           fhirResources.getString(fhirResources.getOrganization(loggedInInfo)));
+      Location location = fhirResources.getLocation(loggedInInfo);
+      if (location != null) {
+        userLogin.addContext("location", fhirResources.getString(location));
+      }
       userLogin.addContext("practitioner",
           fhirResources.getString(fhirResources.getPractitioner(loggedInInfo)));
       String language = loggedInInfo.getLocale().getLanguage();
-      if ("en".equals(language) || "fr".equals(language)) {
-        logger.debug("Language selected was " + language);//all good
-      } else {
-        logger.info("unknown Language selected: " + language + " changing to en");//all good
+      if (!"en".equals(language) && !"fr".equals(language)) {
+        logger.info("unsupported CMS language " + language + ", defaulting to en");
+        language = "en";
       }
       userLogin.addContext("parameters", fhirResources.getString(
-          fhirResources.getLanguageParameter(UUID.randomUUID().toString(), "en")));
+          fhirResources.getLanguageParameter(UUID.randomUUID().toString(), language)));
 
     } catch (CMSException cme) {
       omdGateway.logError(loggedInInfo, "CMS", "userLogin configuration error",
@@ -86,9 +128,10 @@ public class CMSManager {
     }
     Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic, userLogin);
     String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
-    logger.error("userLoginResponse: " + hubTopicResponseBody);
+    logStatus("userLoginResponse", hubTopicResponse);
     if (hubTopicResponse.getStatus() >= 200 && hubTopicResponse.getStatus() < 300) {
       oneIdGatewayData.setCmsLoggedIn(hubTopicResponseBody);
+      oneIdGatewayData.setUpdateUAOInCMS(false);
     } else if (hubTopicResponse.getStatus() >= 400 && hubTopicResponseBody != null) {
       throw new CMSException(hubTopicResponseBody);
     } else {
@@ -111,9 +154,15 @@ public class CMSManager {
     Event event = new Event(uuid, oneIdGatewayData.getHubTopic(), "OH.Organization-change");
     event.addContext("organization",
         fhirResources.getString(fhirResources.getOrganization(loggedInInfo)));
+    // The custodian the provider acts for has changed. The clinic they are working from has not,
+    // but it is re-sent with it so the pair in context always belongs together.
+    Location location = fhirResources.getLocation(loggedInInfo);
+    if (location != null) {
+      event.addContext("location", fhirResources.getString(location));
+    }
     Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic, event);
     String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
-    logger.debug("OH.Organization-change: " + hubTopicResponseBody);
+    logStatus("OH.Organization-change", hubTopicResponse);
     if (hubTopicResponse.getStatus() >= 200 && hubTopicResponse.getStatus() < 300) {
       oneIdGatewayData.setUpdateUAOInCMS(false);
     } else if (hubTopicResponse.getStatus() >= 400 && hubTopicResponseBody != null) {
@@ -147,7 +196,7 @@ public class CMSManager {
     }
     Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic, event);
     String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
-    logger.debug("patientOpen: " + hubTopicResponseBody);
+    logStatus("patientOpen", hubTopicResponse);
 
     if (hubTopicResponse.getStatus() >= 200 && hubTopicResponse.getStatus() < 300) {
       oneIdGatewayData.setCmsPatientInContext("" + demographicNo);
@@ -165,26 +214,65 @@ public class CMSManager {
     FhirResources fhirResources = new FhirResources();
     OmdGateway omdGateway = new OmdGateway();
     OneIdGatewayData oneIdGatewayData = loggedInInfo.getOneIdGatewayData();
-    if (oneIdGatewayData.getHubTopic() == null) {
-      createHubTopic(loggedInInfo);
+    // Same lock as patientChange: the close must not interleave with a concurrent
+    // open for another patient in the same session.
+    synchronized (contextLock(loggedInInfo)) {
+      if (oneIdGatewayData.getHubTopic() == null) {
+        createHubTopic(loggedInInfo);
+      }
+      WebClient createHubTopic = omdGateway.getWebClientWholeURL(loggedInInfo,
+          oneIdGatewayData.getCmsUrl());
+      String uuid = UUID.randomUUID().toString();
+      Event event = new Event(uuid, oneIdGatewayData.getHubTopic(), "Patient-close");
+      event.addContext("patient",
+          fhirResources.getString(fhirResources.getPatient(demographic)));
+      Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic, event);
+      String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
+      logStatus("patientClose", hubTopicResponse);
+      if (hubTopicResponse.getStatus() >= 200 && hubTopicResponse.getStatus() < 300) {
+        oneIdGatewayData.setCmsPatientInContext(null);
+      } else if (hubTopicResponse.getStatus() >= 400 && hubTopicResponseBody != null) {
+        throw new CMSException(hubTopicResponseBody);
+      } else {
+        throw new CMSException();
+      }
+      return null;
     }
-    WebClient createHubTopic = omdGateway.getWebClientWholeURL(loggedInInfo,
-        oneIdGatewayData.getCmsUrl());
-    String uuid = UUID.randomUUID().toString();
-    Event event = new Event(uuid, oneIdGatewayData.getHubTopic(), "Patient-close");
-    event.addContext("patient",
-        fhirResources.getString(fhirResources.getPatient(demographic)));
-    Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic, event);
-    String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
-    logger.debug("patientOpen: " + hubTopicResponseBody);
-    if (hubTopicResponse.getStatus() >= 200 && hubTopicResponse.getStatus() < 300) {
-      oneIdGatewayData.setCmsPatientInContext(null);
-    } else if (hubTopicResponse.getStatus() >= 400 && hubTopicResponseBody != null) {
-      throw new CMSException(hubTopicResponseBody);
-    } else {
-      throw new CMSException();
+  }
+
+  /**
+   * Makes the given patient the one in CMS context: opens it when no patient is in context, or
+   * closes the current patient and opens the new one when a different patient is in context. When
+   * the acting provider's UAO has changed since the CMS login, the organization context is
+   * refreshed first so the CMS reflects the current authority.
+   *
+   * @param loggedInInfo LoggedInInfo the acting provider session
+   * @param demographicNo int the patient to put in context
+   * @throws Exception CMSException when the CMS does not acknowledge the context change
+   */
+  public static void patientChange(LoggedInInfo loggedInInfo, int demographicNo) throws Exception {
+    OneIdGatewayData oneIdGatewayData = loggedInInfo.getOneIdGatewayData();
+    if (oneIdGatewayData == null) {
+      // No ONE ID session, so there is no context to move. Raised as a CMS refusal because that is
+      // what the callers here already handle; left to fall through it is a NullPointerException,
+      // which reaches the clinician as a server error instead of a prompt to sign in.
+      throw new CMSException("No ONE ID session. Sign in to ONE ID and try again.");
     }
-    return null;
+    // The read-then-write of the patient context must not interleave between concurrent
+    // requests in one session, or two launches can leave the wrong patient in context. A caller
+    // whose next step depends on the context holds the same lock across both.
+    synchronized (contextLock(loggedInInfo)) {
+      if (oneIdGatewayData.getCmsLoggedIn() != null && oneIdGatewayData.isUpdateUAOInCMS()) {
+        organizationChange(loggedInInfo);
+      }
+      String patientInContext = oneIdGatewayData.getCmsPatientInContext();
+      if (patientInContext == null) {
+        patientOpen(loggedInInfo, demographicNo);
+      } else if (Integer.parseInt(patientInContext) != demographicNo) {
+        patientClose(loggedInInfo, Integer.parseInt(patientInContext));
+        patientOpen(loggedInInfo, demographicNo);
+      }
+    }
   }
 
   @Nullable
@@ -194,13 +282,7 @@ public class CMSManager {
       String param
   ) throws Exception {
     OneIdGatewayData oneIdGatewayData = loggedInInfo.getOneIdGatewayData();
-    String patientInContext = oneIdGatewayData.getCmsPatientInContext();
-    if (patientInContext == null) {
-      patientOpen(loggedInInfo, demographicNo);
-    } else if (Integer.parseInt(patientInContext) != demographicNo) {
-      patientClose(loggedInInfo, Integer.parseInt(patientInContext));
-      patientOpen(loggedInInfo, demographicNo);
-    }
+    patientChange(loggedInInfo, demographicNo);
     OmdGateway omdGateway = new OmdGateway();
     FhirResources fhirResources = new FhirResources();
     WebClient createHubTopic = omdGateway.getWebClientWholeURL(loggedInInfo,
@@ -213,8 +295,14 @@ public class CMSManager {
             param)));
     Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic, event);
     String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
-    logger.debug("userLoginResponse: " + hubTopicResponseBody);
-    return null;
+    logStatus("consentTargetChange", hubTopicResponse);
+    if (hubTopicResponse.getStatus() >= 200 && hubTopicResponse.getStatus() < 300) {
+      return null;
+    } else if (hubTopicResponse.getStatus() >= 400 && hubTopicResponseBody != null) {
+      throw new CMSException(hubTopicResponseBody);
+    } else {
+      throw new CMSException();
+    }
   }
 
   @Nullable
@@ -225,16 +313,7 @@ public class CMSManager {
   )
       throws Exception {
     OneIdGatewayData oneIdGatewayData = loggedInInfo.getOneIdGatewayData();
-    String patientInContext = oneIdGatewayData.getCmsPatientInContext();
-    logger.debug("is legacy for same patient ? current patientInContext " + patientInContext
-        + " request demogrpahic " + demographicNo);
-    if (patientInContext == null) {
-      patientOpen(loggedInInfo, demographicNo);
-    } else if (Integer.parseInt(patientInContext)
-        != demographicNo) {
-      patientClose(loggedInInfo, Integer.parseInt(patientInContext));
-      patientOpen(loggedInInfo, demographicNo);
-    }
+    patientChange(loggedInInfo, demographicNo);
     OmdGateway omdGateway = new OmdGateway();
     FhirResources fhirResources = new FhirResources();
     WebClient createHubTopic = omdGateway.getWebClientWholeURL(loggedInInfo,
@@ -246,8 +325,14 @@ public class CMSManager {
             param)));
     Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic, event);
     String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
-    logger.debug("legacyLaunch: " + hubTopicResponseBody);
-    return null;
+    logStatus("legacyLaunch", hubTopicResponse);
+    if (hubTopicResponse.getStatus() >= 200 && hubTopicResponse.getStatus() < 300) {
+      return null;
+    } else if (hubTopicResponse.getStatus() >= 400 && hubTopicResponseBody != null) {
+      throw new CMSException(hubTopicResponseBody);
+    } else {
+      throw new CMSException();
+    }
   }
 
 
@@ -264,10 +349,21 @@ public class CMSManager {
             oneIdGatewayData.getCmsUrl());
         Response hubTopicResponse = omdGateway.doPost(loggedInInfo, createHubTopic,
             new Event(UUID.randomUUID().toString(), oneIdGatewayData.getHubTopic(), "userLogout"));
-        String hubTopicResponseBody = hubTopicResponse.readEntity(String.class);
-        logger.debug("hubTopicResponse: " + hubTopicResponseBody);
+        logStatus("userLogout", hubTopicResponse);
       }
     }
     return null;
   }
+
+  /**
+   * Records the outcome of a CMS call without its response body. When the CMS refuses a context
+   * change its body quotes back the patient just sent, so only the status is logged.
+   *
+   * @param label String the call being recorded
+   * @param response Response the response returned by the CMS
+   */
+  private static void logStatus(String label, Response response) {
+    logger.debug(label + ": status " + response.getStatus());
+  }
+
 }
