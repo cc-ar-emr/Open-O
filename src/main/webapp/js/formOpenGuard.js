@@ -58,21 +58,26 @@
 
     /**
      * Turns the server's dd-MM-yyyy HH:mm:ss stamp into something a person reads, such as
-     * "20 Aug 2026 at 2:32 PM". Hands back whatever it was given if it is not that shape.
+     * "20 Aug 2026 at 2:32 PM". A date-only stamp (the created date, sent when the record has
+     * no edited date) reads as "20 Aug 2026". Hands back whatever it was given if it is not
+     * either shape.
      *
      * @param {string} stamp when the existing record was last edited
      * @returns {string} the same moment, written out
      */
     const readableDate = (stamp) => {
-        const parts = /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})/.exec(stamp || "");
+        const parts = /^(\d{2})-(\d{2})-(\d{4})(?: (\d{2}):(\d{2}))?/.exec(stamp || "");
         if (!parts) {
             return stamp;
         }
 
         const [, day, month, year, hours, minutes] = parts;
-        const date = new Date(year, month - 1, day, hours, minutes);
-        return date.toLocaleDateString("en-GB", {day: "numeric", month: "short", year: "numeric"})
-            + " at " + date.toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit"});
+        const date = new Date(year, month - 1, day, hours || 0, minutes || 0);
+        const dayText = date.toLocaleDateString("en-GB", {day: "numeric", month: "short", year: "numeric"});
+        if (hours === undefined) {
+            return dayText;
+        }
+        return dayText + " at " + date.toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit"});
     };
 
     /**

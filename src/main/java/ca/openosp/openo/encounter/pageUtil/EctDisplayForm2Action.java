@@ -302,9 +302,10 @@ public class EctDisplayForm2Action extends EctDisplayAction {
                 continue;
             }
 
-            // sorted by edited date, the same record formId=latest opens
+            // same lookup, record, date and link as the Forms section in getInfo, so the
+            // warning describes the entry shown there and the button opens what clicking it opens
             EctFormData.PatientForm[] pforms =
-                    EctFormData.getPatientFormsFromLocalAndRemote(loggedInInfo, bean.demographicNo, table, true);
+                    EctFormData.getPatientFormsFromLocalAndRemote(loggedInInfo, bean.demographicNo, table);
             if (pforms.length == 0) {
                 continue;
             }
@@ -312,9 +313,7 @@ public class EctDisplayForm2Action extends EctDisplayAction {
             EctFormData.PatientForm latest = pforms[0];
             answer.put("exists", true);
             // getEdited() formats the date without a null check
-            if (latest.edited != null) {
-                answer.put("lastEdited", latest.getEdited());
-            }
+            answer.put("lastEdited", latest.edited != null ? latest.getEdited() : latest.getCreated());
             answer.put("url", request.getContextPath()
                     + "/form/forwardshortcutname.do?formname="
                     + URLEncoder.encode(encounterForm.getFormName(), StandardCharsets.UTF_8)
