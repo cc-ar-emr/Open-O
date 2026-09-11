@@ -574,7 +574,6 @@
                 document.EDITAPPT.chart_no.value = "<%=Encode.forJavaScriptBlock(apptObj.getChart_no())%>";
                 document.EDITAPPT.keyword.value = "<%=Encode.forJavaScriptBlock(apptObj.getName())%>";
                 document.EDITAPPT.demographic_no.value = "<%=Encode.forJavaScriptBlock(apptObj.getDemographic_no())%>";
-                jQuery("#keyword").trigger("patient:relink");
                 document.forms[0].reason.value = "<%= Encode.forJavaScriptBlock(apptObj.getReason()) %>";
                 document.forms[0].notes.value = "<%= Encode.forJavaScriptBlock(apptObj.getNotes()) %>";
                 document.EDITAPPT.location.value = "<%=Encode.forJavaScriptBlock(apptObj.getLocation())%>";
@@ -693,25 +692,11 @@
                 // and commit it if the field loses focus while that row is still shown.
                 var highlightedDemographic = null;
 
-                // The patient the field is currently linked to. Refreshed whenever the
-                // field gains focus or a pick is committed, so an edit that ends up back
-                // at the same name can keep its link.
-                var linkedDemographic = null;
-
-                function currentDemographic() {
-                    return {
-                        value: jQuery("#demographic_no").val(),
-                        provider: jQuery("#mrp").val(),
-                        formattedName: jQuery("#keyword").val()
-                    };
-                }
-
                 function commitDemographic(item) {
                     jQuery("#demographic_no").val(item.value);
                     jQuery("#mrp").val(item.provider);
                     jQuery("#keyword").val(item.formattedName);
                     highlightedDemographic = null;
-                    linkedDemographic = currentDemographic();
                 }
 
                 jQuery("#keyword").autocomplete({
@@ -734,26 +719,11 @@
                         .appendTo(ul);
                 };
 
-                jQuery("#keyword").on("focus", function () {
-                    linkedDemographic = currentDemographic();
-                });
-
-                // Editing the name breaks the link to whoever is in demographic_no, so
-                // drop the link until a patient is picked again. patient:unlink is for
-                // code that sets the field directly: assigning value fires no input
-                // event, and triggering one would also start an autocomplete search.
-                jQuery("#keyword").on("input patient:unlink", function () {
+                // Typing makes the highlighted row stale. The patient link is left alone,
+                // so a stray keystroke can't unlink the appointment; only a new pick
+                // replaces it.
+                jQuery("#keyword").on("input", function () {
                     highlightedDemographic = null;
-                    jQuery("#demographic_no").val("");
-                    jQuery("#mrp").val("");
-                });
-
-                // pasteAppt fills the field with a patient the appointment is genuinely
-                // linked to, but writes value directly, so take that as the new baseline
-                // rather than leaving the snapshot on whatever focus last saw.
-                jQuery("#keyword").on("patient:relink", function () {
-                    highlightedDemographic = null;
-                    linkedDemographic = currentDemographic();
                 });
 
                 // Escape restores the typed term without an input event, so the row the
@@ -764,15 +734,10 @@
                     }
                 });
 
+                // Highlighted but never committed with Enter/Tab/click.
                 jQuery("#keyword").on("blur", function () {
-                    var name = jQuery("#keyword").val();
-                    if (highlightedDemographic && highlightedDemographic.formattedName === name) {
-                        // Highlighted but never committed with Enter/Tab/click.
+                    if (highlightedDemographic && highlightedDemographic.formattedName === jQuery("#keyword").val()) {
                         commitDemographic(highlightedDemographic);
-                    } else if (!jQuery("#demographic_no").val() && linkedDemographic
-                            && linkedDemographic.value && linkedDemographic.formattedName === name) {
-                        // Edited back to exactly the linked patient's name.
-                        commitDemographic(linkedDemographic);
                     }
                 });
 
