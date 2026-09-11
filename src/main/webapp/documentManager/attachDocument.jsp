@@ -71,6 +71,24 @@
             background-color: white !important;
         }
 
+        /* Pin weights and margins so the picker renders the same in every host page
+           (Consult loads no Bootstrap; the Tickler windows load Bootstrap 3). */
+        .attachmentContainer h2 {
+            font-weight: bold;
+            margin: 0.83em 0;
+        }
+
+        .attachmentContainer label {
+            font-weight: normal;
+            display: inline;
+            margin-bottom: 0;
+            max-width: none;
+        }
+
+        .attachmentContainer ul {
+            margin: 1em 0;
+        }
+
         .attachmentContainer {
             display: flex;
             width: 95vw;

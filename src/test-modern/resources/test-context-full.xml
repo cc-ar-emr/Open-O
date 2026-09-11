@@ -185,6 +185,7 @@
     <bean id="ticklerDao" class="ca.openosp.openo.commn.dao.TicklerDaoImpl" autowire="byName" />
     <bean id="ticklerCommentDao" class="ca.openosp.openo.commn.dao.TicklerCommentDaoImpl" autowire="byName" />
     <bean id="ticklerLinkDao" class="ca.openosp.openo.commn.dao.TicklerLinkDaoImpl" autowire="byName" />
+    <bean id="ticklerDocsDao" class="ca.openosp.openo.commn.dao.TicklerDocsDaoImpl" autowire="byName" />
     <bean id="ticklerUpdateDao" class="ca.openosp.openo.commn.dao.TicklerUpdateDaoImpl" autowire="byName" />
     <bean id="ticklerTextSuggestDao" class="ca.openosp.openo.commn.dao.TicklerTextSuggestDaoImpl" autowire="byName" />
     <bean id="ticklerCategoryDao" class="ca.openosp.openo.commn.dao.TicklerCategoryDaoImpl" autowire="byName" />
@@ -205,6 +206,21 @@
     <bean id="providerDao" class="ca.openosp.openo.PMmodule.dao.ProviderDaoImpl" autowire="byName" />
     <bean id="providerExtDao" class="ca.openosp.openo.commn.dao.ProviderExtDaoImpl" autowire="byName" />
     <bean id="hashAuditDao" class="ca.openosp.openo.commn.dao.HashAuditDaoImpl" autowire="byName" />
+
+    <!--
+      Resolved by TicklerList2Action's field initialisers via SpringUtils.getBean(), so the context
+      has to supply them before the action can be constructed. Mocked rather than real, since
+      DocumentAttachmentManagerImpl declares a dozen required @Autowired collaborators.
+
+      type="java.lang.Class" is required: Mockito 5 also exposes a reified mock(T...), and without
+      an explicit type Spring binds to that overload and the mock fails to build.
+    -->
+    <bean id="patientLabRoutingDao" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg type="java.lang.Class" value="ca.openosp.openo.commn.dao.PatientLabRoutingDao" />
+    </bean>
+    <bean id="documentAttachmentManager" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg type="java.lang.Class" value="ca.openosp.openo.documentManager.DocumentAttachmentManager" />
+    </bean>
 
     <!-- Manually define managers -->
     <bean id="ticklerManager" class="ca.openosp.openo.managers.TicklerManagerImpl" autowire="byName" />

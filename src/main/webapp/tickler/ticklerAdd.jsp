@@ -179,17 +179,57 @@
         <title><fmt:setBundle basename="oscarResources"/><fmt:message key="tickler.ticklerAdd.title"/></title>
 
       <style>
-        *:not(h2):not(.btn) {
+        /* Don't compress the attachment picker dialog — it styles itself. */
+        *:not(h2):not(.btn):not(.ui-dialog):not(.ui-dialog *) {
           line-height: 1 !important;
           font-size: 12px !important;
         }
         table tr td {
           border:none !important;
         }
+
+        /* Keep the "Manage Attachments" button and its count badge on one line. */
+        .attachments-cell {
+            white-space: nowrap;
+        }
+
+        /* Visible list of attachment names below the "Manage Attachments" button. */
+        #attachmentNames {
+            white-space: normal;
+            margin-top: 6px;
+        }
+
+        #attachmentNames .attachment-group-heading {
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        #attachmentNames ul {
+            list-style: none;
+            margin: 2px 0 4px;
+            padding-left: 1.5em;
+        }
+
+        #attachmentNames li {
+            padding: 2px 0;
+        }
+
+        /* jQuery UI renders the dialog close control as a fixed ~20px square, which
+           crushes the "Save and Close" label onto multiple overflowing lines. Let it
+           grow to fit the text (matches the Consult/eForm attachment dialog). */
+        .save-and-close-button {
+            width: auto !important;
+            white-space: nowrap;
+            padding: 0 8px !important;
+        }
       </style>
       <link href="<%=request.getContextPath()%>/share/css/dateTimeQuickPick.css" rel="stylesheet" type="text/css" />
       <link href="<%= request.getContextPath() %>/library/bootstrap/3.0.0/css/bootstrap.css" rel="stylesheet" type="text/css">
+      <link href="<%=request.getContextPath() %>/library/jquery/jquery-ui-1.12.1.min.css" rel="stylesheet" type="text/css">
       <script type="text/javascript" src="<%=request.getContextPath()%>/share/javascript/dateTimeQuickPick.js"></script>
+      <script type="text/javascript" src="<%=request.getContextPath()%>/library/jquery/jquery-3.6.4.min.js"></script>
+      <script type="text/javascript" src="<%=request.getContextPath()%>/library/jquery/jquery-ui-1.12.1.min.js"></script>
+      <script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery_oscar_defaults.js"></script>
 
       <script>
         function pasteMessageText() {
@@ -559,7 +599,7 @@
                 </tr>
             </table>
         </form>
-        <form name="serviceform" method="post">
+        <form name="serviceform" id="serviceform" method="post">
             <input type="hidden" name="parentAjaxId" value="<%=Encode.forHtmlAttribute(parentAjaxId)%>">
             <input type="hidden" name="updateParent" value="<%=Encode.forHtmlAttribute(updateParent)%>">
             <input type="hidden" name="user_no" value="<%=Encode.forHtmlAttribute(user_no)%>">
@@ -727,6 +767,38 @@
                     </td>
                 </tr>
                 <tr>
+                    <td><label>Attachments:</label></td>
+                    <td class="attachments-cell">
+                        <button type="button" class="btn" id="manageAttachmentsBtn" title="Manage Attachments">
+                            <i class="glyphicon glyphicon-paperclip"></i> Manage Attachments
+                        </button>
+                        <span id="attachmentCount" class="badge">0</span>
+                        <%-- Staged attachment names by type; filled by the picker dialog's beforeClose handler. --%>
+                        <div id="attachmentNames">
+                            <div class="attachment-group" id="attachmentGroup_eFormNo" style="display:none;">
+                                <div class="attachment-group-heading">eForms</div>
+                                <ul id="attachmentNames_eFormNo"></ul>
+                            </div>
+                            <div class="attachment-group" id="attachmentGroup_docNo" style="display:none;">
+                                <div class="attachment-group-heading">Documents</div>
+                                <ul id="attachmentNames_docNo"></ul>
+                            </div>
+                            <div class="attachment-group" id="attachmentGroup_labNo" style="display:none;">
+                                <div class="attachment-group-heading">Labs</div>
+                                <ul id="attachmentNames_labNo"></ul>
+                            </div>
+                            <div class="attachment-group" id="attachmentGroup_hrmNo" style="display:none;">
+                                <div class="attachment-group-heading">HRM</div>
+                                <ul id="attachmentNames_hrmNo"></ul>
+                            </div>
+                            <div class="attachment-group" id="attachmentGroup_formNo" style="display:none;">
+                                <div class="attachment-group-heading">Forms</div>
+                                <ul id="attachmentNames_formNo"></ul>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
                     <td colspan="2"><input type="button" name="Button" class="btn btn-primary"
                                value="<fmt:setBundle basename="oscarResources"/><fmt:message key="tickler.ticklerAdd.btnSubmit"/>"
                                onclick="validate(this.form);">
@@ -737,7 +809,85 @@
                 </tr>
 
             </table>
+            <div id="attachDocumentDisplay" style="display:none;"></div>
         </form>
     </div>
+
+    <jsp:include page="/images/spinner.jsp" flush="true"/>
+
+    <script type="text/javascript">
+        /**
+         * Tickler document attachment dialog (Add screen).
+         *
+         * Mirrors the edit screen: the shared attachment picker (attachDocument.jsp) is loaded into a
+         * jQuery UI dialog. Because a new tickler has no id yet, the picker is loaded with only the
+         * patient's demographicNo and the checked items are written back to the add form as hidden
+         * ".delegateAttachment" inputs (docNo / labNo / eFormNo / hrmNo / formNo). dbTicklerAdd.jsp
+         * reads those parameters after the tickler is created and persists them to ticklerdocs.
+         *
+         * The demographic is resolved at click time rather than page-render time, since the patient
+         * may be selected (via the search form) after this page first loads.
+         */
+        jQuery(document).on('click', '#manageAttachmentsBtn', function () {
+            var $form = jQuery('#serviceform');
+            var trigger = jQuery(this);
+            var title = trigger.attr("title");
+            var demographicNo = $form.find('input[name="demographic_no"]').val();
+
+            if (!demographicNo) {
+                alert("Please select a patient before managing attachments.");
+                return;
+            }
+
+            var poload = '<%=request.getContextPath()%>/previewDocs.do?method=fetchTicklerDocuments&demographicNo='
+                + encodeURIComponent(demographicNo);
+
+            jQuery("#attachDocumentDisplay").load(poload, function (response, status, xhr) {
+                if (status === "success") {
+                    // Pre-check the picker boxes for attachments already staged on this add form.
+                    $form.find(".delegateAttachment").each(function () {
+                        var checkboxId = this.name + this.value;
+                        jQuery('#attachDocumentsForm').find('#' + jQuery.escapeSelector(checkboxId)).prop('checked', true);
+                    });
+                }
+            }).dialog({
+                title: title,
+                modal: true,
+                closeText: "Save and Close",
+                height: 'auto',
+                width: 'auto',
+                resizable: true,
+                open: function (event, ui) {
+                    jQuery(this).parent().css({top: 0, left: 0});
+                    var closeBtn = jQuery(this).parent().find(".ui-dialog-titlebar-close");
+                    closeBtn.removeClass("ui-button-icon-only");
+                    closeBtn.addClass("save-and-close-button");
+                    closeBtn.html("Save and Close");
+                },
+                beforeClose: function (event, ui) {
+                    // Rebuild the add form's staged attachment set from the picker's checked boxes.
+                    $form.find(".delegateAttachment").remove();
+                    jQuery('#attachmentNames ul').empty();
+                    jQuery('#attachDocumentsForm')
+                        .find(".document_check:checked, .lab_check:checked, .form_check:checked, .eForm_check:checked, .hrm_check:checked")
+                        .each(function () {
+                            var element = jQuery(this);
+                            jQuery("<input />", {
+                                type: 'hidden',
+                                name: element.attr('name'),
+                                value: element.val(),
+                                id: "delegate_" + element.attr('name') + element.val(),
+                                "class": 'delegateAttachment'
+                            }).appendTo($form);
+                            jQuery("<li>").text(element.attr('title')).appendTo('#attachmentNames_' + element.attr('name'));
+                        });
+                    jQuery('#attachmentNames .attachment-group').each(function () {
+                        jQuery(this).toggle(jQuery(this).find('li').length > 0);
+                    });
+                    jQuery('#attachmentCount').text($form.find(".delegateAttachment").length);
+                }
+            });
+        });
+    </script>
     </body>
 </html>

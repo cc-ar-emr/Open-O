@@ -35,6 +35,12 @@
 <%@ page import="ca.openosp.OscarProperties" %>
 <%@ page import="ca.openosp.openo.commn.model.Site" %>
 <%@ page import="ca.openosp.openo.commn.dao.SiteDao" %>
+<%@ page import="ca.openosp.openo.commn.model.CustomFilter" %>
+<%@ page import="ca.openosp.openo.managers.TicklerManager" %>
+<%@ page import="ca.openosp.openo.tickler.dto.TicklerListDTO" %>
+<%@ page import="ca.openosp.openo.tickler.dto.TicklerCommentDTO" %>
+<%@ page import="java.text.DateFormat" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.owasp.encoder.Encode" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -222,7 +228,7 @@
             function renderEditIcon(data, type, row) {
                 return '<a href="javascript:void(0)" title="Edit Tickler" ' +
                     'onClick="window.open(\'' + ctx + '/tickler/ticklerEdit.jsp?tickler_no=' + row.id +
-                    '\', \'edit_tickler\', \'width=800, height=650\')">' +
+                    '\', \'edit_tickler\', \'width=960, height=650\')">' +
                     '<span class="glyphicon glyphicon-pencil"></span></a>';
             }
 
@@ -243,7 +249,7 @@
                 var html = '<span style="white-space:pre-wrap">' + escapeHtml(row.message) + '</span>';
                 if (row.links) {
                     for (var i = 0; i < row.links.length; i++) {
-                        html += buildAttachmentLink(row.links[i].tableName, row.links[i].tableId);
+                        html += buildAttachmentLink(row.links[i], row);
                     }
                 }
                 return html;
@@ -256,9 +262,16 @@
                     '<span class="glyphicon glyphicon-comment"></span></a>';
             }
 
-            function buildAttachmentLink(type, tableId) {
+            // encodeURIComponent leaves "'" as-is, which would close the JS string inside the
+            // javascript: hrefs below. %27 is its equivalent percent-encoding.
+            function encodeUrlParam(value) {
+                return encodeURIComponent(value).replace(/'/g, "%27");
+            }
+
+            function buildAttachmentLink(link, row) {
+                var type = link.tableName;
                 var uNo = encodeURIComponent(userNo);
-                var safeTableId = encodeURIComponent(tableId);
+                var safeTableId = encodeURIComponent(link.tableId);
                 var href;
                 if (type === 'MDS') {
                     href = "javascript:reportWindow('" + ctx + "/oscarMDS/SegmentDisplay.jsp?segmentID=" + safeTableId +
@@ -275,6 +288,17 @@
                 } else if (type === 'HRM') {
                     href = "javascript:reportWindow('" + ctx + "/hospitalReportManager/Display.do?id=" + safeTableId +
                         "&segmentID=" + safeTableId + "')";
+                } else if (type === 'EFORM') {
+                    href = "javascript:reportWindow('" + ctx + "/eform/efmshowform_data.jsp?fdid=" + safeTableId + "')";
+                } else if (type === 'FORM') {
+                    // Encounter forms are spread across many tables, so the id alone cannot address
+                    // one. Without the name resolved server-side there is no URL to build.
+                    if (!link.formName) {
+                        return ' <i class="glyphicon glyphicon-paperclip" title="Attached form"></i>';
+                    }
+                    href = "javascript:reportWindow('" + ctx + "/form/forwardshortcutname.do?formname=" +
+                        encodeUrlParam(link.formName) + "&demographic_no=" + encodeUrlParam(row.demoNo) +
+                        "&formId=" + safeTableId + "')";
                 } else {
                     href = "javascript:reportWindow('" + ctx + "/lab/CA/BC/labDisplay.jsp?segmentID=" + safeTableId +
                         "&providerNo=" + uNo + "&searchProviderNo=" + uNo + "&status=')";

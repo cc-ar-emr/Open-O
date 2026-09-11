@@ -23,4 +23,19 @@ public enum DocumentType {
     public String getName() {
         return this.name;
     }
+
+    /**
+     * Resolves a DocumentType from its single-letter type code.
+     *
+     * @param type String the type code (e.g. "D", "L")
+     * @return DocumentType the matching type, or null if unknown
+     */
+    public static DocumentType fromType(String type) {
+        for (DocumentType documentType : values()) {
+            if (documentType.type.equals(type)) {
+                return documentType;
+            }
+        }
+        return null;
+    }
 }

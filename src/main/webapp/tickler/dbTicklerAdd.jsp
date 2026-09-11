@@ -30,8 +30,8 @@
 <%@ page import="org.springframework.web.context.WebApplicationContext" %>
 <%@ page import="ca.openosp.openo.utility.SpringUtils" %>
 <%@ page import="ca.openosp.openo.commn.model.Tickler" %>
-<%@ page import="ca.openosp.openo.commn.model.TicklerLink" %>
-<%@ page import="ca.openosp.openo.commn.dao.TicklerLinkDao" %>
+<%@ page import="ca.openosp.openo.commn.model.enumerator.DocumentType" %>
+<%@ page import="ca.openosp.openo.documentManager.DocumentAttachmentManager" %>
 <%@ page import="ca.openosp.openo.util.UtilDateUtilities" %>
 <%@page import="ca.openosp.openo.utility.MiscUtils" %>
 <%@ page import="ca.openosp.openo.utility.LoggedInInfo" %>
@@ -96,18 +96,59 @@
     ticklerManager.addTickler(loggedInInfo, tickler);
 
     int ticklerNo = tickler.getId();
-    if (docType != null && docId != null && !docType.trim().equals("") && !docId.trim().equals("") && !docId.equalsIgnoreCase("null")) {
-        if (ticklerNo > 0) {
-            try {
-                TicklerLink tLink = new TicklerLink();
-                tLink.setTableId(Long.parseLong(docId));
-                tLink.setTableName(docType);
-                tLink.setTicklerNo(new Long(ticklerNo).intValue());
-                TicklerLinkDao ticklerLinkDao = (TicklerLinkDao) SpringUtils.getBean(TicklerLinkDao.class);
-                ticklerLinkDao.save(tLink);
-            } catch (Exception e) {
-                MiscUtils.getLogger().error("No link with this tickler", e);
+    if (ticklerNo > 0) {
+        try {
+            DocumentAttachmentManager documentAttachmentManager = SpringUtils.getBean(DocumentAttachmentManager.class);
+
+            // Map the legacy forward-from-document docType (a table_name code: DOC / HRM / HL7 / MDS /
+            // CML / ...) to a DocumentType so it can be merged into the matching picker selection.
+            // Anything that is not a document or HRM report is treated as a lab.
+            DocumentType forwardedType = null;
+            if (docType != null && docId != null && !docType.trim().isEmpty()
+                    && !docId.trim().isEmpty() && !docId.equalsIgnoreCase("null")) {
+                if ("DOC".equalsIgnoreCase(docType)) {
+                    forwardedType = DocumentType.DOC;
+                } else if ("HRM".equalsIgnoreCase(docType)) {
+                    forwardedType = DocumentType.HRM;
+                } else {
+                    forwardedType = DocumentType.LAB;
+                }
             }
+
+            // The interactive attachment picker (ticklerAdd.jsp) submits one parameter per document
+            // type. attachToTickler performs a full per-type sync (it soft-deletes any stored doc of
+            // that type not in the submitted array), so each type is synced exactly once and the
+            // forwarded document is unioned into its type's list rather than attached separately.
+            java.util.LinkedHashMap<DocumentType, String> attachParams = new java.util.LinkedHashMap<DocumentType, String>();
+            attachParams.put(DocumentType.DOC, "docNo");
+            attachParams.put(DocumentType.LAB, "labNo");
+            attachParams.put(DocumentType.EFORM, "eFormNo");
+            attachParams.put(DocumentType.HRM, "hrmNo");
+            attachParams.put(DocumentType.FORM, "formNo");
+
+            for (java.util.Map.Entry<DocumentType, String> entry : attachParams.entrySet()) {
+                DocumentType attachmentType = entry.getKey();
+                String[] picked = request.getParameterValues(entry.getValue());
+
+                java.util.LinkedHashSet<String> ids = new java.util.LinkedHashSet<String>();
+                if (picked != null) {
+                    for (String id : picked) {
+                        if (id != null && !id.trim().isEmpty()) {
+                            ids.add(id.trim());
+                        }
+                    }
+                }
+                if (forwardedType == attachmentType) {
+                    ids.add(docId.trim());
+                }
+
+                // Audit the authenticated provider, not the submitted user_no, which reaches us
+                // through a hidden field and so is client-controlled. Matches EditTickler2Action.
+                documentAttachmentManager.attachToTickler(loggedInInfo, attachmentType,
+                        ids.toArray(new String[0]), loggedInInfo.getLoggedInProviderNo(), ticklerNo, tickler.getDemographicNo());
+            }
+        } catch (Exception e) {
+            MiscUtils.getLogger().error("Unable to attach documents to tickler " + ticklerNo, e);
         }
     }
 

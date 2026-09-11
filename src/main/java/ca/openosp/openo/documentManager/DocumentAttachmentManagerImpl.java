@@ -6,12 +6,16 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import ca.openosp.openo.commn.dao.ConsultDocsDao;
 import ca.openosp.openo.commn.dao.EFormDocsDao;
+import ca.openosp.openo.commn.dao.TicklerDocsDao;
+import ca.openosp.openo.commn.model.Document;
+import ca.openosp.openo.commn.model.TicklerDocs;
 import ca.openosp.openo.commn.model.ConsultDocs;
 import ca.openosp.openo.commn.model.EFormData;
 import ca.openosp.openo.commn.model.EFormDocs;
 import ca.openosp.openo.hospitalReportManager.HRMUtil;
 import ca.openosp.openo.commn.model.enumerator.DocumentType;
 import ca.openosp.openo.documentManager.data.AttachmentLabResultData;
+import ca.openosp.openo.documentManager.data.TicklerAttachmentData;
 import ca.openosp.openo.utility.DateUtils;
 import ca.openosp.openo.utility.LoggedInInfo;
 import ca.openosp.openo.utility.PDFGenerationException;
@@ -75,6 +79,8 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
     private ca.openosp.openo.commn.dao.PatientLabRoutingDao patientLabRoutingDao;
     @Autowired
     private ca.openosp.openo.commn.dao.EFormDataDao eFormDataDao;
+    @Autowired
+    private TicklerDocsDao ticklerDocsDao;
 
     @Autowired
     private ConsultationManager consultationManager;
@@ -182,6 +188,60 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
         }
 
         return attachedForms;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, String> getFormNamesByFormId(LoggedInInfo loggedInInfo, Integer demographicNo) {
+        if (demographicNo == null) {
+            return Collections.emptyMap();
+        }
+        return getFormNamesByDemographic(loggedInInfo, Collections.singletonList(demographicNo))
+                .getOrDefault(demographicNo, Collections.emptyMap());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<Integer, Map<String, String>> getFormNamesByDemographic(LoggedInInfo loggedInInfo,
+                                                                       Collection<Integer> demographicNos) {
+        // FormsManager throws when "_form" read is missing, which would abort whatever list is
+        // being rendered. Degrade to unresolved names instead, checking the same way it does.
+        if (demographicNos == null || demographicNos.isEmpty()
+                || !securityInfoManager.hasPrivilege(loggedInInfo, "_form", SecurityInfoManager.READ, null)) {
+            return Collections.emptyMap();
+        }
+
+        // getAllVersions must stay true: an attached form stops being the patient's latest as soon
+        // as a newer one of the same type is created, and it still has to resolve.
+        Map<Integer, List<EctFormData.PatientForm>> formsByDemographic =
+                formsManager.getEncounterFormsByDemographicNumbers(loggedInInfo, demographicNos, true, true);
+
+        Map<Integer, Map<String, String>> formNamesByDemographic = new HashMap<>();
+        for (Map.Entry<Integer, List<EctFormData.PatientForm>> entry : formsByDemographic.entrySet()) {
+            formNamesByDemographic.put(entry.getKey(), toFormNamesByFormId(entry.getValue()));
+        }
+        return formNamesByDemographic;
+    }
+
+    /**
+     * Keys one patient's forms by form id, dropping ids claimed by more than one form type.
+     */
+    private Map<String, String> toFormNamesByFormId(List<EctFormData.PatientForm> forms) {
+        Map<String, String> formNames = new HashMap<>();
+        Set<String> ambiguousFormIds = new HashSet<>();
+        for (EctFormData.PatientForm form : forms) {
+            // A repeated id means two form types claim it and the attachment cannot say which.
+            // Dropping both is safer than linking to another form's record.
+            if (formNames.put(form.getFormId(), form.getFormName()) != null) {
+                ambiguousFormIds.add(form.getFormId());
+            }
+        }
+        formNames.keySet().removeAll(ambiguousFormIds);
+        return formNames;
     }
 
     /**
@@ -369,6 +429,151 @@ public class DocumentAttachmentManagerImpl implements DocumentAttachmentManager 
 
         DocumentAttach documentAttach = new DocumentAttach();
         documentAttach.attachToEForm(attachments, documentType, providerNo, fdid);
+    }
+
+    /**
+     * Retrieves a list of document IDs attached to a specific tickler.
+     *
+     * Tickler counterpart of {@link #getConsultAttachments} and {@link #getEFormAttachments}. Security
+     * checks ensure the user has read access to tickler data for the specified patient.
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param ticklerId Integer the unique identifier of the tickler
+     * @param documentType DocumentType the type of documents to retrieve (e.g., DOC, LAB, EFORM, HRM, FORM)
+     * @param demographicNo Integer the patient's demographic number for security validation
+     * @return List&lt;String&gt; a list of document IDs as strings attached to the tickler
+     * @throws RuntimeException if the user lacks the required "_tickler" read privilege
+     */
+    @Override
+    public List<String> getTicklerAttachments(LoggedInInfo loggedInInfo, Integer ticklerId, DocumentType documentType, Integer demographicNo) {
+        if (!securityInfoManager.hasPrivilege(loggedInInfo, "_tickler", SecurityInfoManager.READ, demographicNo)) {
+            throw new RuntimeException("missing required sec object (_tickler)");
+        }
+
+        List<String> ticklerAttachments = new ArrayList<>();
+        List<TicklerDocs> ticklerDocs = ticklerDocsDao.findByTicklerIdDocType(ticklerId, documentType.getType());
+        for (TicklerDocs ticklerDocs1 : ticklerDocs) {
+            ticklerAttachments.add(String.valueOf(ticklerDocs1.getDocumentNo()));
+        }
+        return ticklerAttachments;
+    }
+
+    /**
+     * Retrieves every attachment on a tickler with its display name resolved. Patient-wide
+     * lookups (labs, HRM, forms) are loaded lazily, only when that type is attached.
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param ticklerId Integer the unique identifier of the tickler
+     * @param demographicNo Integer the patient's demographic number for security validation
+     * @return List&lt;TicklerAttachmentData&gt; all attachments with display names (empty if none)
+     * @throws RuntimeException if the user lacks the required "_tickler" read privilege
+     */
+    @Override
+    public List<TicklerAttachmentData> getTicklerAttachmentDetails(LoggedInInfo loggedInInfo, Integer ticklerId, Integer demographicNo) {
+        if (!securityInfoManager.hasPrivilege(loggedInInfo, "_tickler", SecurityInfoManager.READ, demographicNo)) {
+            throw new RuntimeException("missing required sec object (_tickler)");
+        }
+
+        List<TicklerAttachmentData> attachmentDetails = new ArrayList<>();
+        Map<String, String> labNamesBySegmentId = null;
+        ArrayList<HashMap<String, ? extends Object>> allHrmDocuments = null;
+        Map<String, String> formNamesByFormId = null;
+
+        for (TicklerDocs ticklerDoc : ticklerDocsDao.findByTicklerId(ticklerId)) {
+            DocumentType documentType = DocumentType.fromType(ticklerDoc.getDocType());
+            if (documentType == null) {
+                continue;
+            }
+            String documentId = String.valueOf(ticklerDoc.getDocumentNo());
+            String displayName = null;
+
+            switch (documentType) {
+                case DOC:
+                    Document document = documentDao.getDocument(documentId);
+                    if (document != null) {
+                        displayName = document.getDocdesc();
+                    }
+                    break;
+                case LAB:
+                    if (labNamesBySegmentId == null) {
+                        labNamesBySegmentId = buildLabNamesBySegmentId(loggedInInfo, demographicNo);
+                    }
+                    displayName = labNamesBySegmentId.get(documentId);
+                    break;
+                case EFORM:
+                    EFormData eForm = eFormDataDao.find(ticklerDoc.getDocumentNo());
+                    if (eForm != null) {
+                        displayName = eForm.getFormName();
+                    }
+                    break;
+                case HRM:
+                    if (allHrmDocuments == null) {
+                        allHrmDocuments = HRMUtil.listHRMDocuments(loggedInInfo, "report_date", false, String.valueOf(demographicNo), false);
+                    }
+                    for (HashMap<String, ? extends Object> hrmDocument : allHrmDocuments) {
+                        if (documentId.equals(String.valueOf(hrmDocument.get("id")))) {
+                            displayName = String.valueOf(hrmDocument.get("name"));
+                            break;
+                        }
+                    }
+                    break;
+                case FORM:
+                    if (formNamesByFormId == null) {
+                        formNamesByFormId = getFormNamesByFormId(loggedInInfo, demographicNo);
+                    }
+                    displayName = formNamesByFormId.get(documentId);
+                    break;
+            }
+
+            if (StringUtils.isNullOrEmpty(displayName)) {
+                displayName = documentType.getName() + " #" + documentId;
+            }
+            attachmentDetails.add(new TicklerAttachmentData(documentType, documentId, displayName));
+        }
+        return attachmentDetails;
+    }
+
+    /**
+     * Maps every lab segment id to its display name; older versions are prefixed "vN"
+     * to match the attachment picker's labels.
+     */
+    private Map<String, String> buildLabNamesBySegmentId(LoggedInInfo loggedInInfo, Integer demographicNo) {
+        Map<String, String> labNames = new HashMap<>();
+        for (AttachmentLabResultData lab : getAllLabsSortedByVersions(loggedInInfo, String.valueOf(demographicNo))) {
+            labNames.put(lab.getSegmentID(), lab.getLabName());
+            int totalVersions = lab.getLabVersionIds().size();
+            int index = 0;
+            for (String versionSegmentId : lab.getLabVersionIds().keySet()) {
+                labNames.put(versionSegmentId, "v" + (totalVersions - index) + " " + lab.getLabName());
+                index++;
+            }
+        }
+        return labNames;
+    }
+
+    /**
+     * Attaches documents to a tickler.
+     *
+     * Tickler counterpart of {@link #attachToConsult} and {@link #attachToEForm}. Synchronises the supplied
+     * set of document IDs with the tickler's existing attachments of the given type, persisting new
+     * attachments and soft-deleting those no longer present.
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param documentType DocumentType the type of documents being attached
+     * @param attachments String[] an array of document IDs to attach to the tickler
+     * @param providerNo String the provider number performing the attachment operation
+     * @param ticklerId Integer the unique identifier of the tickler
+     * @param demographicNo Integer the patient's demographic number for security validation
+     * @throws RuntimeException if the user lacks the required "_tickler" write privilege
+     */
+    @Override
+    public void attachToTickler(LoggedInInfo loggedInInfo, DocumentType documentType, String[] attachments, String providerNo, Integer ticklerId, Integer demographicNo) {
+        if (!securityInfoManager.hasPrivilege(loggedInInfo, "_tickler", SecurityInfoManager.WRITE, demographicNo)) {
+            throw new RuntimeException("missing required sec object (_tickler)");
+        }
+
+        DocumentAttach documentAttach = new DocumentAttach();
+        documentAttach.attachToTickler(attachments, documentType, providerNo, ticklerId);
     }
 
     /**

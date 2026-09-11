@@ -20,7 +20,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PatientLabRoutingDaoImpl extends AbstractDaoImpl<PatientLabRouting> implements PatientLabRoutingDao {
 
-
     public PatientLabRoutingDaoImpl() {
         super(PatientLabRouting.class);
     }
@@ -73,6 +72,17 @@ public class PatientLabRoutingDaoImpl extends AbstractDaoImpl<PatientLabRouting>
         Query q = entityManager.createQuery(query);
         q.setParameter(1, labNo);
         return this.getSingleResultOrNull(q);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PatientLabRouting> findByLabNos(List<Integer> labNos) {
+        if (labNos == null || labNos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Query q = entityManager.createQuery("select x from PatientLabRouting x where x.labNo in (:labNos)");
+        q.setParameter("labNos", labNos);
+        return q.getResultList();
     }
 
     @SuppressWarnings("unchecked")

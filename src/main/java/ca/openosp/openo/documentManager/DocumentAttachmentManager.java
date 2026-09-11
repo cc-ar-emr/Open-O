@@ -3,6 +3,7 @@ package ca.openosp.openo.documentManager;
 
 import ca.openosp.openo.commn.model.EFormData;
 import ca.openosp.openo.documentManager.data.AttachmentLabResultData;
+import ca.openosp.openo.documentManager.data.TicklerAttachmentData;
 import ca.openosp.openo.commn.model.enumerator.DocumentType;
 import ca.openosp.openo.utility.LoggedInInfo;
 import ca.openosp.openo.utility.PDFGenerationException;
@@ -91,6 +92,33 @@ public interface DocumentAttachmentManager {
     public List<EctFormData.PatientForm> getFormsAttachedToEForms(LoggedInInfo loggedInInfo, Integer fdid, DocumentType documentType, Integer demographicNo);
 
     /**
+     * Maps every encounter form belonging to a patient to its form name, keyed by form id.
+     *
+     * <p>Attachment tables store only {@code (document_no, doctype)}, which cannot identify a form
+     * because encounter forms span roughly forty tables with independent id sequences. Ids shared
+     * by two form types are therefore omitted rather than resolved to one of them at random.</p>
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param demographicNo Integer the patient's unique demographic identifier
+     * @return Map&lt;String, String&gt; form id to form name; empty when the demographic is null or
+     *         the user lacks "_form" read, so callers should render the attachment as non-clickable
+     */
+    public Map<String, String> getFormNamesByFormId(LoggedInInfo loggedInInfo, Integer demographicNo);
+
+    /**
+     * Batched form of {@link #getFormNamesByFormId}, for rendering lists spanning many patients.
+     *
+     * <p>Reads the encounter form configuration once for the whole batch rather than once per
+     * patient, which is where nearly all of the per-patient cost otherwise goes.</p>
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param demographicNos Collection&lt;Integer&gt; the patients to resolve; may be empty
+     * @return Map&lt;Integer, Map&lt;String, String&gt;&gt; demographic number to that patient's form
+     *         id to form name lookup; empty when the user lacks "_form" read
+     */
+    public Map<Integer, Map<String, String>> getFormNamesByDemographic(LoggedInInfo loggedInInfo, Collection<Integer> demographicNos);
+
+    /**
      * This method is responsible for lab version sorting and is intended for use in the attachment window (attachDocument.jsp).
      * In other parts of the application, developers should utilize CommonLabResultData.populateLabResultsData() to access all available lab data.
      */
@@ -162,6 +190,48 @@ public interface DocumentAttachmentManager {
      * @param demographicNo Integer the patient's unique demographic identifier
      */
     public void attachToEForm(LoggedInInfo loggedInInfo, DocumentType documentType, String[] attachments, String providerNo, Integer fdid, Integer demographicNo);
+
+    /**
+     * Retrieves all attachments of a given type associated with a specific tickler.
+     *
+     * <p>Tickler counterpart of {@link #getConsultAttachments} and {@link #getEFormAttachments}.
+     * Returns the document identifiers currently attached to the tickler for the requested
+     * document type (document, lab, eForm, HRM report or encounter form).</p>
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information for security and audit purposes
+     * @param ticklerId Integer the unique identifier of the tickler
+     * @param documentType DocumentType the type of documents to retrieve
+     * @param demographicNo Integer the patient's unique demographic identifier
+     * @return List&lt;String&gt; list of document identifiers attached to the tickler
+     */
+    public List<String> getTicklerAttachments(LoggedInInfo loggedInInfo, Integer ticklerId, DocumentType documentType, Integer demographicNo);
+
+    /**
+     * Retrieves every attachment on a tickler, of all types, with display names resolved.
+     * Used to render the named attachment lists in the Add/Edit Tickler windows.
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param ticklerId Integer the unique identifier of the tickler
+     * @param demographicNo Integer the patient's unique demographic identifier
+     * @return List&lt;TicklerAttachmentData&gt; all attachments with display names (empty if none)
+     */
+    public List<TicklerAttachmentData> getTicklerAttachmentDetails(LoggedInInfo loggedInInfo, Integer ticklerId, Integer demographicNo);
+
+    /**
+     * Attaches documents to a tickler.
+     *
+     * <p>Tickler counterpart of {@link #attachToConsult} and {@link #attachToEForm}. Synchronises the
+     * supplied set of document identifiers with the tickler's existing attachments of the given type:
+     * new identifiers are persisted and identifiers no longer present are soft-deleted.</p>
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information for security and audit purposes
+     * @param documentType DocumentType the type of documents being attached
+     * @param attachments String[] array of document identifiers that should be attached to the tickler
+     * @param providerNo String the provider number performing the attachment operation
+     * @param ticklerId Integer the unique identifier of the tickler
+     * @param demographicNo Integer the patient's unique demographic identifier
+     */
+    public void attachToTickler(LoggedInInfo loggedInInfo, DocumentType documentType, String[] attachments, String providerNo, Integer ticklerId, Integer demographicNo);
 
     /**
      * Concatenates multiple PDF documents into a single PDF file.

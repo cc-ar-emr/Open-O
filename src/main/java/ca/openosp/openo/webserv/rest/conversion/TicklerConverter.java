@@ -111,6 +111,8 @@ public class TicklerConverter extends AbstractConverter<Tickler, TicklerTo1> {
         }
 
         if (includeLinks) {
+            // TODO: still reads from the legacy tickler_link table via TicklerLinkDao.
+            // Update to use TicklerDocsDao/ticklerdocs as part of a future REST API migration.
             List<TicklerLink> links = ticklerLinkDao.getLinkByTickler(d.getId());
             TicklerLinkConverter tlc = new TicklerLinkConverter();
             d.setTicklerLinks(tlc.getAllAsTransferObjects(loggedInInfo, links));

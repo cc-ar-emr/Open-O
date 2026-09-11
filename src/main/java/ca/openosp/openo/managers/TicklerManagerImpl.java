@@ -116,18 +116,6 @@ public class TicklerManagerImpl implements TicklerManager {
     }
 
     @Override
-    public boolean addTicklerLink(LoggedInInfo loggedInInfo, TicklerLink ticklerLink) {
-        checkPrivilege(loggedInInfo, PRIVILEGE_WRITE);
-        ticklerDao.persist(ticklerLink);
-
-        // --- log action ---
-        LogAction.addLogSynchronous(loggedInInfo, "TicklerManager.addTicklerLink",
-                "ticklerLinkId=" + ticklerLink.getId());
-
-        return true;
-    }
-
-    @Override
     public boolean addTickler(LoggedInInfo loggedInInfo, Tickler tickler) {
         checkPrivilege(loggedInInfo, PRIVILEGE_WRITE);
 
@@ -204,6 +192,9 @@ public class TicklerManagerImpl implements TicklerManager {
         checkPrivilege(loggedInInfo, PRIVILEGE_READ);
         String providerNo = loggedInInfo.getLoggedInProviderNo();
 
+        // TODO: only reads legacy tickler_link rows. Lab attachments created via the new
+        // ticklerdocs-based attachment component (e.g. ReportMacro2Action) are not returned here.
+        // Needs a TicklerDocsDao reverse lookup (by documentNo/docType) merged into this result.
         List<TicklerLink> links = ticklerLinkDao.getLinkByTableId("HL7", Long.valueOf(labId));
 
         ArrayList<Tickler> results = new ArrayList<Tickler>();
@@ -224,6 +215,9 @@ public class TicklerManagerImpl implements TicklerManager {
         checkPrivilege(loggedInInfo, PRIVILEGE_READ);
         String providerNo = loggedInInfo.getLoggedInProviderNo();
 
+        // TODO: only reads legacy tickler_link rows. Lab attachments created via the new
+        // ticklerdocs-based attachment component (e.g. ReportMacro2Action) are not returned here.
+        // Needs a TicklerDocsDao reverse lookup (by documentNo/docType) merged into this result.
         List<TicklerLink> links = ticklerLinkDao.getLinkByTableId("HL7", Long.valueOf(labId));
 
         ArrayList<Tickler> results = new ArrayList<Tickler>();

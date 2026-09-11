@@ -3,8 +3,10 @@ package ca.openosp.openo.documentManager;
 
 import ca.openosp.openo.commn.dao.ConsultDocsDao;
 import ca.openosp.openo.commn.dao.EFormDocsDao;
+import ca.openosp.openo.commn.dao.TicklerDocsDao;
 import ca.openosp.openo.commn.model.ConsultDocs;
 import ca.openosp.openo.commn.model.EFormDocs;
+import ca.openosp.openo.commn.model.TicklerDocs;
 import ca.openosp.openo.commn.model.enumerator.DocumentType;
 import ca.openosp.openo.utility.SpringUtils;
 
@@ -17,6 +19,7 @@ import java.util.List;
 public class DocumentAttach {
     private final ConsultDocsDao consultDocsDao = SpringUtils.getBean(ConsultDocsDao.class);
     private final EFormDocsDao eFormDocsDao = SpringUtils.getBean(EFormDocsDao.class);
+    private final TicklerDocsDao ticklerDocsDao = SpringUtils.getBean(TicklerDocsDao.class);
 
     /*
      * When editOnOcean is set to false, it signifies a normal consult request, performing just attach or detach operations on the consult request form.
@@ -110,6 +113,40 @@ public class DocumentAttach {
             for (EFormDocs eFormDoc : detachList) {
                 eFormDoc.setDeleted("Y");
                 eFormDocsDao.merge(eFormDoc);
+            }
+        }
+    }
+
+    public void attachToTickler(String[] attachments, DocumentType documentType, String providerNo, Integer ticklerId) {
+        List<String> currentList = new ArrayList<>(Arrays.asList(attachments));
+        List<TicklerDocs> ticklerDocsList = ticklerDocsDao.findByTicklerIdDocType(ticklerId, documentType.getType());
+        List<String> oldList = new ArrayList<>();
+        for (TicklerDocs ticklerDoc : ticklerDocsList) {
+            oldList.add(Integer.toString(ticklerDoc.getDocumentNo()));
+        }
+        detachFromTickler(currentList, oldList, documentType, ticklerId);
+        attachToTickler(currentList, oldList, documentType, providerNo, ticklerId);
+    }
+
+    private void attachToTickler(List<String> currentList, List<String> oldList, DocumentType documentType, String providerNo, Integer ticklerId) {
+        for (String docId : currentList) {
+            if (oldList.contains(docId)) {
+                continue;
+            }
+            TicklerDocs ticklerDocs = new TicklerDocs(ticklerId, Integer.parseInt(docId), documentType.getType(), providerNo);
+            ticklerDocsDao.persist(ticklerDocs);
+        }
+    }
+
+    private void detachFromTickler(List<String> currentList, List<String> oldList, DocumentType documentType, Integer ticklerId) {
+        for (String docId : oldList) {
+            if (currentList.contains(docId)) {
+                continue;
+            }
+            List<TicklerDocs> detachList = ticklerDocsDao.findByTicklerIdDocNoDocType(ticklerId, Integer.valueOf(docId), documentType.getType());
+            for (TicklerDocs ticklerDoc : detachList) {
+                ticklerDoc.setDeleted(TicklerDocs.DELETED);
+                ticklerDocsDao.merge(ticklerDoc);
             }
         }
     }

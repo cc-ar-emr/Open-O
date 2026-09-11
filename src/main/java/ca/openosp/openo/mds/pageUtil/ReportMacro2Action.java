@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import ca.openosp.openo.commn.dao.TicklerDao;
-import ca.openosp.openo.commn.dao.TicklerLinkDao;
+import ca.openosp.openo.commn.dao.TicklerDocsDao;
 import ca.openosp.openo.commn.dao.UserPropertyDAO;
 import ca.openosp.openo.commn.model.Tickler;
-import ca.openosp.openo.commn.model.TicklerLink;
+import ca.openosp.openo.commn.model.TicklerDocs;
 import ca.openosp.openo.commn.model.UserProperty;
 import ca.openosp.openo.managers.SecurityInfoManager;
 import ca.openosp.openo.utility.LoggedInInfo;
@@ -61,7 +61,7 @@ public class ReportMacro2Action extends ActionSupport {
 
     private SecurityInfoManager securityInfoManager = SpringUtils.getBean(SecurityInfoManager.class);
     private TicklerDao ticklerDao = SpringUtils.getBean(TicklerDao.class);
-    private TicklerLinkDao ticklerLinkDao = SpringUtils.getBean(TicklerLinkDao.class);
+    private TicklerDocsDao ticklerDocsDao = SpringUtils.getBean(TicklerDocsDao.class);
 
     
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -138,11 +138,12 @@ public class ReportMacro2Action extends ActionSupport {
                 t.setCreator(LoggedInInfo.getLoggedInInfoFromSession(request).getLoggedInProviderNo());
                 ticklerDao.persist(t);
 
-                TicklerLink tl = new TicklerLink();
-                tl.setTableId(Long.valueOf(segmentID));
-                tl.setTableName(LabResultData.HL7TEXT);
-                tl.setTicklerNo(t.getId());
-                ticklerLinkDao.persist(tl);
+                // Attach the lab to the tickler using the modern attachment store (ticklerdocs).
+                // Use the authenticated provider (not the raw request param) for the audit trail,
+                // matching the tickler creator above.
+                String loggedInProviderNo = LoggedInInfo.getLoggedInInfoFromSession(request).getLoggedInProviderNo();
+                TicklerDocs ticklerDocs = new TicklerDocs(t.getId(), Integer.parseInt(segmentID), TicklerDocs.DOCTYPE_LAB, loggedInProviderNo);
+                ticklerDocsDao.persist(ticklerDocs);
             } else {
                 logger.info("Cannot sent tickler. Not enough information in macro definition. providers taskAssignedTo and message");
             }

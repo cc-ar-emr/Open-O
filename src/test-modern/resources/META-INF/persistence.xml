@@ -22,6 +22,7 @@
         <class>ca.openosp.openo.commn.model.TicklerCategory</class>
         <class>ca.openosp.openo.commn.model.TicklerComment</class>
         <class>ca.openosp.openo.commn.model.TicklerLink</class>
+        <class>ca.openosp.openo.commn.model.TicklerDocs</class>
         <class>ca.openosp.openo.commn.model.CustomFilter</class>
         <class>ca.openosp.openo.commn.model.Admission</class>
         <class>ca.openosp.openo.commn.model.OscarLog</class>

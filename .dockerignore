@@ -1,0 +1,14 @@
+# Build output — not needed by any Docker build context (e.g. the db image),
+# and can contain root-owned/unreadable files that break `docker compose build`
+# context tarring.
+target/
+
+# VCS metadata and IDE/editor state
+.git/
+.idea/
+.vscode/
+*.iml
+
+# Local build/tooling artifacts
+node_modules/
+*.log

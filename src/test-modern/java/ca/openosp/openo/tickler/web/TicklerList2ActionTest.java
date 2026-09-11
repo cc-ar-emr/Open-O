@@ -1,12 +1,15 @@
 package ca.openosp.openo.tickler.web;
 
+import ca.openosp.openo.commn.dao.PatientLabRoutingDao;
+import ca.openosp.openo.commn.dao.TicklerDocsDao;
 import ca.openosp.openo.commn.model.CustomFilter;
 import ca.openosp.openo.commn.model.Tickler;
+import ca.openosp.openo.commn.model.TicklerDocs;
+import ca.openosp.openo.documentManager.DocumentAttachmentManager;
 import ca.openosp.openo.managers.SecurityInfoManager;
 import ca.openosp.openo.managers.TicklerManager;
 import ca.openosp.openo.test.base.OpenOWebTestBase;
 import ca.openosp.openo.tickler.dto.TicklerCommentDTO;
-import ca.openosp.openo.tickler.dto.TicklerLinkDTO;
 import ca.openosp.openo.tickler.dto.TicklerListDTO;
 import ca.openosp.openo.tickler.pageUtil.TicklerList2Action;
 import ca.openosp.openo.utility.LoggedInInfo;
@@ -28,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Web layer tests for {@link TicklerList2Action}.
@@ -43,6 +47,15 @@ class TicklerList2ActionTest extends OpenOWebTestBase {
 
     @Mock
     private TicklerManager mockTicklerManager;
+
+    @Mock
+    private TicklerDocsDao mockTicklerDocsDao;
+
+    @Mock
+    private PatientLabRoutingDao mockPatientLabRoutingDao;
+
+    @Mock
+    private DocumentAttachmentManager mockDocumentAttachmentManager;
 
     private TicklerList2Action action;
 
@@ -69,9 +82,16 @@ class TicklerList2ActionTest extends OpenOWebTestBase {
         when(mockTicklerManager.getTicklerDTOs(any(LoggedInInfo.class), any(CustomFilter.class)))
                 .thenReturn(Collections.emptyList());
 
+        // Default: no attachments, so link-unrelated tests do not need to stub the attachment path
+        when(mockTicklerDocsDao.findByTicklerIds(anyList())).thenReturn(Collections.emptyList());
+        when(mockPatientLabRoutingDao.findByLabNos(anyList())).thenReturn(Collections.emptyList());
+
         action = new TicklerList2Action();
         injectField("ticklerManager", mockTicklerManager);
         injectField("securityInfoManager", mockSecurityInfoManager);
+        injectField("ticklerDocsDao", mockTicklerDocsDao);
+        injectField("patientLabRoutingDao", mockPatientLabRoutingDao);
+        injectField("documentAttachmentManager", mockDocumentAttachmentManager);
     }
 
     // ── Privilege Enforcement ──────────────────────────────────────────
@@ -206,19 +226,167 @@ class TicklerList2ActionTest extends OpenOWebTestBase {
 
     @Test
     @DisplayName("Should include links array in data rows")
-    void shouldIncludeLinks_whenTicklerHasLinks() throws Exception {
+    void shouldIncludeLinks_whenTicklerHasAttachments() throws Exception {
         allowPrivilege("_tickler", "r");
 
-        TicklerListDTO dto = createTestTickler(5, "Lab attached");
-        dto.setLinks(List.of(new TicklerLinkDTO(1, 5, "HL7", 999L)));
+        TicklerListDTO dto = createTestTickler(5, "Document attached");
         stubPaginatedResults(1, List.of(dto));
+        stubAttachments(ticklerDoc(5, 999, TicklerDocs.DOCTYPE_DOC));
 
         executeAction(action);
 
         JsonNode links = parseResponse().get("data").get(0).get("links");
         assertThat(links.size()).isEqualTo(1);
-        assertThat(links.get(0).get("tableName").asText()).isEqualTo("HL7");
+        assertThat(links.get(0).get("tableName").asText()).isEqualTo("DOC");
         assertThat(links.get(0).get("tableId").asLong()).isEqualTo(999L);
+    }
+
+    @Test
+    @DisplayName("Should not repeat a lab number when the same lab is attached to several ticklers")
+    void shouldDeduplicateLabNumbers_whenLabAttachedToSeveralTicklers() throws Exception {
+        allowPrivilege("_tickler", "r");
+
+        stubPaginatedResults(2, List.of(
+                createTestTickler(1, "First"),
+                createTestTickler(2, "Second")));
+        stubAttachments(
+                ticklerDoc(1, 999, TicklerDocs.DOCTYPE_LAB),
+                ticklerDoc(2, 999, TicklerDocs.DOCTYPE_LAB));
+
+        executeAction(action);
+
+        // The same lab on two ticklers would otherwise pad the IN (:labNos) list
+        ArgumentCaptor<List<Integer>> captor = ArgumentCaptor.forClass(List.class);
+        verify(mockPatientLabRoutingDao).findByLabNos(captor.capture());
+        assertThat(captor.getValue()).containsExactly(999);
+    }
+
+    // ── Form Attachments ───────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Should include formName when a form attachment resolves to a name")
+    void shouldIncludeFormName_whenFormAttachmentResolves() throws Exception {
+        allowPrivilege("_tickler", "r");
+
+        stubPaginatedResults(1, List.of(createTestTickler(5, "Form attached")));
+        stubAttachments(ticklerDoc(5, 7, TicklerDocs.DOCTYPE_FORM));
+        when(mockDocumentAttachmentManager.getFormNamesByDemographic(any(LoggedInInfo.class), anyCollection()))
+                .thenReturn(Map.of(1001, Map.of("7", "Annual")));
+
+        executeAction(action);
+
+        JsonNode link = parseResponse().get("data").get(0).get("links").get(0);
+        assertThat(link.get("tableName").asText()).isEqualTo("FORM");
+        assertThat(link.get("formName").asText()).isEqualTo("Annual");
+    }
+
+    @Test
+    @DisplayName("Should omit formName when the form id no longer resolves")
+    void shouldOmitFormName_whenFormIdDoesNotResolve() throws Exception {
+        allowPrivilege("_tickler", "r");
+
+        stubPaginatedResults(1, List.of(createTestTickler(5, "Deleted form attached")));
+        stubAttachments(ticklerDoc(5, 7, TicklerDocs.DOCTYPE_FORM));
+        when(mockDocumentAttachmentManager.getFormNamesByDemographic(any(LoggedInInfo.class), anyCollection()))
+                .thenReturn(Map.of(1001, Map.of("42", "Annual")));
+
+        executeAction(action);
+
+        // Absent rather than empty, so the client falls back to an unlinked icon
+        JsonNode link = parseResponse().get("data").get(0).get("links").get(0);
+        assertThat(link.get("tableName").asText()).isEqualTo("FORM");
+        assertThat(link.has("formName")).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should still render the list when form names cannot be read")
+    void shouldOmitFormName_whenFormPrivilegeDenied() throws Exception {
+        allowPrivilege("_tickler", "r");
+
+        stubPaginatedResults(1, List.of(createTestTickler(5, "Form attached")));
+        stubAttachments(ticklerDoc(5, 7, TicklerDocs.DOCTYPE_FORM));
+        // Missing "_form" read makes the lookup return nothing rather than throwing
+        when(mockDocumentAttachmentManager.getFormNamesByDemographic(any(LoggedInInfo.class), anyCollection()))
+                .thenReturn(Collections.emptyMap());
+
+        executeAction(action);
+
+        JsonNode json = parseResponse();
+        assertThat(json.get("data").size()).isEqualTo(1);
+        assertThat(json.get("data").get(0).get("links").get(0).has("formName")).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should resolve each form name against its own patient when a page spans patients")
+    void shouldResolveFormNamesPerDemographic_whenPageSpansPatients() throws Exception {
+        allowPrivilege("_tickler", "r");
+
+        // Same formId for two patients: form ids are only unique within one form's table, so a
+        // lookup keyed by document number alone would cross-label these two rows.
+        TicklerListDTO first = createTestTickler(1, "Patient A form");
+        TicklerListDTO second = new TicklerListDTO(
+                2, "Patient B form", new Date(), new Date(),
+                Tickler.STATUS.A, Tickler.PRIORITY.Normal,
+                2002, "Jones", "Mary",
+                "Doctor", "Jane",
+                "Nurse", "Bob");
+        stubPaginatedResults(2, List.of(first, second));
+        stubAttachments(
+                ticklerDoc(1, 7, TicklerDocs.DOCTYPE_FORM),
+                ticklerDoc(2, 7, TicklerDocs.DOCTYPE_FORM));
+
+        when(mockDocumentAttachmentManager.getFormNamesByDemographic(any(LoggedInInfo.class), anyCollection()))
+                .thenReturn(Map.of(
+                        1001, Map.of("7", "Annual"),
+                        2002, Map.of("7", "Rourke2020")));
+
+        executeAction(action);
+
+        JsonNode data = parseResponse().get("data");
+        assertThat(data.get(0).get("links").get(0).get("formName").asText()).isEqualTo("Annual");
+        assertThat(data.get(1).get("links").get(0).get("formName").asText()).isEqualTo("Rourke2020");
+    }
+
+    @Test
+    @DisplayName("Should not look up form names when no form is attached")
+    void shouldNotLookUpFormNames_whenNoFormAttachments() throws Exception {
+        allowPrivilege("_tickler", "r");
+
+        stubPaginatedResults(1, List.of(createTestTickler(5, "Document attached")));
+        stubAttachments(ticklerDoc(5, 999, TicklerDocs.DOCTYPE_DOC));
+
+        executeAction(action);
+
+        verify(mockDocumentAttachmentManager, never())
+                .getFormNamesByDemographic(any(LoggedInInfo.class), anyCollection());
+    }
+
+    @Test
+    @DisplayName("Should resolve every patient on the page in a single batched call")
+    void shouldLookUpFormNamesInOneCall_whenPageSpansPatients() throws Exception {
+        allowPrivilege("_tickler", "r");
+
+        TicklerListDTO other = new TicklerListDTO(
+                2, "Second", new Date(), new Date(),
+                Tickler.STATUS.A, Tickler.PRIORITY.Normal,
+                2002, "Jones", "Mary",
+                "Doctor", "Jane",
+                "Nurse", "Bob");
+        stubPaginatedResults(2, List.of(createTestTickler(1, "First"), other));
+        stubAttachments(
+                ticklerDoc(1, 7, TicklerDocs.DOCTYPE_FORM),
+                ticklerDoc(2, 8, TicklerDocs.DOCTYPE_FORM));
+        when(mockDocumentAttachmentManager.getFormNamesByDemographic(any(LoggedInInfo.class), anyCollection()))
+                .thenReturn(Map.of(1001, Map.of("7", "Annual"), 2002, Map.of("8", "Annual")));
+
+        executeAction(action);
+
+        // One call for the whole page, carrying both patients: reading the form config per patient
+        // is what made this path slow.
+        ArgumentCaptor<java.util.Collection<Integer>> captor = ArgumentCaptor.forClass(java.util.Collection.class);
+        verify(mockDocumentAttachmentManager, times(1))
+                .getFormNamesByDemographic(any(LoggedInInfo.class), captor.capture());
+        assertThat(captor.getValue()).containsExactlyInAnyOrder(1001, 2002);
     }
 
     // ── Paging Parameters ──────────────────────────────────────────────
@@ -275,7 +443,7 @@ class TicklerList2ActionTest extends OpenOWebTestBase {
     }
 
     @Test
-    @DisplayName("Should use paginated overload with totalRecords as limit when length is -1")
+    @DisplayName("Should fetch without a limit when length is -1")
     void shouldShowAll_whenLengthIsNegative() throws Exception {
         allowPrivilege("_tickler", "r");
 
@@ -285,8 +453,10 @@ class TicklerList2ActionTest extends OpenOWebTestBase {
 
         executeAction(action);
 
+        // limit 0 means unbounded (TicklerDaoImpl only applies a limit when it is > 0), so DataTables
+        // "All" returns every row rather than being truncated at MAX_PAGE_SIZE
         verify(mockTicklerManager).getTicklerDTOs(
-                any(LoggedInInfo.class), any(CustomFilter.class), eq(0), eq(150));
+                any(LoggedInInfo.class), any(CustomFilter.class), eq(0), eq(0));
     }
 
     @Test
@@ -460,6 +630,14 @@ class TicklerList2ActionTest extends OpenOWebTestBase {
                 1001, "Smith", "John",
                 "Doctor", "Jane",
                 "Nurse", "Bob");
+    }
+
+    private TicklerDocs ticklerDoc(int ticklerId, int documentNo, String docType) {
+        return new TicklerDocs(ticklerId, documentNo, docType, TEST_PROVIDER);
+    }
+
+    private void stubAttachments(TicklerDocs... ticklerDocs) {
+        when(mockTicklerDocsDao.findByTicklerIds(anyList())).thenReturn(List.of(ticklerDocs));
     }
 
     private void stubPaginatedResults(int total, List<TicklerListDTO> ticklers) {

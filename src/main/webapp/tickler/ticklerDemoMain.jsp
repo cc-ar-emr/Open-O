@@ -78,8 +78,6 @@
 <%@ page import="ca.openosp.openo.commn.model.TicklerComment" %>
 <%@ page import="ca.openosp.openo.commn.model.TicklerUpdate" %>
 <%@ page import="ca.openosp.openo.managers.TicklerManager" %>
-<%@ page import="ca.openosp.openo.commn.model.TicklerLink" %>
-<%@ page import="ca.openosp.openo.commn.dao.TicklerLinkDao" %>
 <%@ page import="ca.openosp.openo.lab.ca.on.*" %>
 <%@ page import="ca.openosp.openo.lab.ca.on.LabResultData" %>
 <%@ page import="org.owasp.encoder.Encode" %>
@@ -90,7 +88,12 @@
     OscarAppointmentDao appointmentDao = SpringUtils.getBean(OscarAppointmentDao.class);
     DemographicDao demographicDao = SpringUtils.getBean(DemographicDao.class);
 
-    TicklerLinkDao ticklerLinkDao = (TicklerLinkDao) SpringUtils.getBean(TicklerLinkDao.class);
+    ca.openosp.openo.commn.dao.TicklerDocsDao ticklerDocsDao = SpringUtils.getBean(ca.openosp.openo.commn.dao.TicklerDocsDao.class);
+    ca.openosp.openo.commn.dao.PatientLabRoutingDao patientLabRoutingDao = SpringUtils.getBean(ca.openosp.openo.commn.dao.PatientLabRoutingDao.class);
+    ca.openosp.openo.documentManager.DocumentAttachmentManager documentAttachmentManager = SpringUtils.getBean(ca.openosp.openo.documentManager.DocumentAttachmentManager.class);
+
+    // Encounter form names, resolved lazily per patient the first time a form attachment is seen.
+    java.util.Map<Integer, java.util.Map<String, String>> formNamesByDemographic = new java.util.HashMap<Integer, java.util.Map<String, String>>();
 %>
 
 
@@ -901,7 +904,7 @@
                             <TD ROWSPAN="1" class="<%=Encode.forHtmlAttribute(String.valueOf(cellColour))%>">
                                 <%if (Boolean.parseBoolean(OscarProperties.getInstance().getProperty("tickler_edit_enabled"))) {%>
                                 <a href=#
-                                   onClick="popupPage(600,800, '<%= request.getContextPath() %>/tickler/ticklerEdit.jsp?tickler_no=<%=Encode.forUriComponent(String.valueOf(t.getId()))%>')"><fmt:setBundle basename="oscarResources"/><fmt:message key="tickler.ticklerMain.editTickler"/></a>
+                                   onClick="popupPage(600,960, '<%= request.getContextPath() %>/tickler/ticklerEdit.jsp?tickler_no=<%=Encode.forUriComponent(String.valueOf(t.getId()))%>')"><fmt:setBundle basename="oscarResources"/><fmt:message key="tickler.ticklerMain.editTickler"/></a>
                                 <% } %>
                             </TD>
                             <TD ROWSPAN="1" class="<%=Encode.forHtmlAttribute(String.valueOf(cellColour))%>"><a
@@ -937,39 +940,69 @@
                             <TD ROWSPAN="1" class="<%=Encode.forHtmlAttribute(String.valueOf(cellColour))%>"><%=Encode.forHtml(String.valueOf(t.getMessage()))%>
 
                                 <%
-                                    List<TicklerLink> linkList = ticklerLinkDao.getLinkByTickler(t.getId().intValue());
-                                    if (linkList != null) {
-                                        for (TicklerLink tl : linkList) {
-                                            String type = tl.getTableName();
+                                    // Render the tickler's attachments from the modern attachment store (ticklerdocs).
+                                    // Lab sub-type is recovered from patient_lab_routing to pick the correct viewer.
+                                    List<ca.openosp.openo.commn.model.TicklerDocs> ticklerDocsList =
+                                            ticklerDocsDao.findByTicklerId(t.getId());
+                                    for (ca.openosp.openo.commn.model.TicklerDocs td : ticklerDocsList) {
+                                        String dtype = td.getDocType();
+                                        String docNoStr = String.valueOf(td.getDocumentNo());
+                                        String href;
+                                        if (ca.openosp.openo.commn.model.TicklerDocs.DOCTYPE_DOC.equals(dtype)) {
+                                            href = request.getContextPath() + "/documentManager/ManageDocument.do?method=display&doc_no="
+                                                    + Encode.forUriComponent(docNoStr) + "&providerNo=" + Encode.forUriComponent(String.valueOf(user_no))
+                                                    + "&searchProviderNo=" + Encode.forUriComponent(String.valueOf(user_no)) + "&status=";
+                                        } else if (ca.openosp.openo.commn.model.TicklerDocs.DOCTYPE_HRM.equals(dtype)) {
+                                            href = request.getContextPath() + "/hospitalReportManager/Display.do?id=" + Encode.forUriComponent(docNoStr);
+                                        } else if (ca.openosp.openo.commn.model.TicklerDocs.DOCTYPE_EFORM.equals(dtype)) {
+                                            href = request.getContextPath() + "/eform/efmshowform_data.jsp?fdid=" + Encode.forUriComponent(docNoStr);
+                                        } else if (ca.openosp.openo.commn.model.TicklerDocs.DOCTYPE_FORM.equals(dtype)) {
+                                            // Encounter forms span many tables, so the id alone cannot address one.
+                                            // Recover the name from the patient's forms to build a URL
+                                            // When it no longer resolves, fall through to the unlinked marker.
+                                            Integer formDemographicNo = t.getDemographicNo();
+                                            if (!formNamesByDemographic.containsKey(formDemographicNo)) {
+                                                formNamesByDemographic.put(formDemographicNo,
+                                                        documentAttachmentManager.getFormNamesByFormId(loggedInInfo, formDemographicNo));
+                                            }
+                                            String formName = formNamesByDemographic.get(formDemographicNo).get(docNoStr);
+                                            if (formName == null) {
+                                                href = null;
+                                            } else {
+                                                href = request.getContextPath() + "/form/forwardshortcutname.do?formname="
+                                                        + Encode.forUriComponent(formName)
+                                                        + "&demographic_no=" + Encode.forUriComponent(String.valueOf(formDemographicNo))
+                                                        + "&formId=" + Encode.forUriComponent(docNoStr);
+                                            }
+                                        } else {
+                                            ca.openosp.openo.commn.model.PatientLabRouting plr =
+                                                    patientLabRoutingDao.findByLabNo(td.getDocumentNo());
+                                            String labType = (plr != null) ? plr.getLabType() : null;
+                                            if (LabResultData.MDS.equals(labType)) {
+                                                href = request.getContextPath() + "/oscarMDS/SegmentDisplay.jsp?segmentID=" + Encode.forUriComponent(docNoStr)
+                                                        + "&providerNo=" + Encode.forUriComponent(String.valueOf(user_no))
+                                                        + "&searchProviderNo=" + Encode.forUriComponent(String.valueOf(user_no)) + "&status=";
+                                            } else if (LabResultData.CML.equals(labType)) {
+                                                href = request.getContextPath() + "/lab/CA/ON/CMLDisplay.jsp?segmentID=" + Encode.forUriComponent(docNoStr)
+                                                        + "&providerNo=" + Encode.forUriComponent(String.valueOf(user_no))
+                                                        + "&searchProviderNo=" + Encode.forUriComponent(String.valueOf(user_no)) + "&status=";
+                                            } else if (LabResultData.HL7TEXT.equals(labType)) {
+                                                href = request.getContextPath() + "/lab/CA/ALL/labDisplay.jsp?segmentID=" + Encode.forUriComponent(docNoStr)
+                                                        + "&providerNo=" + Encode.forUriComponent(String.valueOf(user_no))
+                                                        + "&searchProviderNo=" + Encode.forUriComponent(String.valueOf(user_no)) + "&status=";
+                                            } else {
+                                                href = request.getContextPath() + "/lab/CA/BC/labDisplay.jsp?segmentID=" + Encode.forUriComponent(docNoStr)
+                                                        + "&providerNo=" + Encode.forUriComponent(String.valueOf(user_no))
+                                                        + "&searchProviderNo=" + Encode.forUriComponent(String.valueOf(user_no)) + "&status=";
+                                            }
+                                        }
+                                        if (href != null) {
                                 %>
-
+                                <a href="javascript:reportWindow('<%=Encode.forJavaScript(href)%>')">ATT</a>
                                 <%
-                                    if (LabResultData.isMDS(type)) {
+                                        } else {
                                 %>
-                                <a href="javascript:reportWindow('SegmentDisplay.jsp?segmentID=<%=Encode.forUriComponent(String.valueOf(tl.getTableId()))%>&providerNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&searchProviderNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&status=')">ATT</a>
-                                <%
-                                } else if (LabResultData.isCML(type)) {
-                                %>
-                                <a href="javascript:reportWindow('<%= request.getContextPath() %>/lab/CA/ON/CMLDisplay.jsp?segmentID=<%=Encode.forUriComponent(String.valueOf(tl.getTableId()))%>&providerNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&searchProviderNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&status=')">ATT</a>
-                                <%
-                                } else if (LabResultData.isHL7TEXT(type)) {
-                                %>
-                                <a href="javascript:reportWindow('<%= request.getContextPath() %>/lab/CA/ALL/labDisplay.jsp?segmentID=<%=Encode.forUriComponent(String.valueOf(tl.getTableId()))%>&providerNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&searchProviderNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&status=')">ATT</a>
-                                <%
-                                } else if (LabResultData.isDocument(type)) {
-                                %>
-                                <a href="javascript:reportWindow('<%=request.getContextPath()%>/documentManager/ManageDocument.do?method=display&doc_no=<%=Encode.forUriComponent(String.valueOf(tl.getTableId()))%>&providerNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&searchProviderNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&status=')">ATT</a>
-                                <%
-                                } else if (LabResultData.isHRM(type)) {
-                                %>
-                                <a href="javascript:reportWindow('<%=request.getContextPath()%>/hospitalReportManager/Display.do?id=<%=Encode.forUriComponent(String.valueOf(tl.getTableId()))%>')">ATT</a>
-                                <%
-                                } else {
-                                %>
-                                <a href="javascript:reportWindow('<%= request.getContextPath() %>/lab/CA/BC/labDisplay.jsp?segmentID=<%=Encode.forUriComponent(String.valueOf(tl.getTableId()))%>&providerNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&searchProviderNo=<%=Encode.forUriComponent(String.valueOf(user_no))%>&status=')">ATT</a>
-                                <%
-                                    }
-                                %>
+                                <span title="Attached form">ATT</span>
                                 <%
                                         }
                                     }

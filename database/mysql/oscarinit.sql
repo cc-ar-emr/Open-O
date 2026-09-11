@@ -8127,6 +8127,21 @@ CREATE TABLE IF NOT EXISTS `consultdocs` (
   `provider_no` varchar(6) NOT NULL
 );
 
+--
+-- CREATE TABLE IF NOT EXISTS ticklerdocs
+--
+CREATE TABLE IF NOT EXISTS `ticklerdocs` (
+  `id` int(10) NOT NULL auto_increment PRIMARY KEY,
+  `tickler_id` int(10) NOT NULL,
+  `document_no` int(10) NOT NULL,
+  `doctype` char(1) NOT NULL,
+  `deleted` char(1) DEFAULT NULL,
+  `attach_date` date,
+  `provider_no` varchar(6) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS `idx_ticklerdocs_tickler_id` ON `ticklerdocs` (`tickler_id`);
+
 CREATE TABLE IF NOT EXISTS report_letters(
     ID int(10) auto_increment primary key,
     provider_no varchar(6),

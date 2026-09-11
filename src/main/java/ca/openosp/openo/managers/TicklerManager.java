@@ -15,7 +15,6 @@ import java.util.Map;
 import ca.openosp.openo.commn.model.CustomFilter;
 import ca.openosp.openo.commn.model.Tickler;
 import ca.openosp.openo.commn.model.TicklerCategory;
-import ca.openosp.openo.commn.model.TicklerLink;
 import ca.openosp.openo.commn.model.TicklerTextSuggest;
 import ca.openosp.openo.tickler.dto.TicklerListDTO;
 import ca.openosp.openo.utility.LoggedInInfo;
@@ -37,8 +36,6 @@ public interface TicklerManager {
     public List<TicklerCategory> getActiveTicklerCategories(LoggedInInfo loggedInInfo);
 
     public boolean validateTicklerIsValid(Tickler tickler);
-
-    public boolean addTicklerLink(LoggedInInfo loggedInInfo, TicklerLink ticklerLink);
 
     public boolean addTickler(LoggedInInfo loggedInInfo, Tickler tickler);
 

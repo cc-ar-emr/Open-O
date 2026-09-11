@@ -44,10 +44,14 @@
 <%@page import="ca.openosp.openo.utility.LoggedInInfo" %>
 <%@page import="ca.openosp.openo.managers.TicklerManager" %>
 <%@page import="ca.openosp.openo.managers.DemographicManager" %>
+<%@page import="ca.openosp.openo.documentManager.DocumentAttachmentManager" %>
+<%@page import="ca.openosp.openo.documentManager.data.TicklerAttachmentData" %>
+<%@page import="ca.openosp.openo.commn.model.enumerator.DocumentType" %>
 <%@page import="ca.openosp.OscarProperties" %>
 <%
     TicklerManager ticklerManager = SpringUtils.getBean(TicklerManager.class);
     DemographicManager demographicManager = SpringUtils.getBean(DemographicManager.class);
+    DocumentAttachmentManager documentAttachmentManager = SpringUtils.getBean(DocumentAttachmentManager.class);
     LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
 %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -122,9 +126,55 @@
                 background-color: white;
             }
 
-            *:not(h2):not(.btn) {
+            /* Don't compress the attachment picker dialog — it styles itself. */
+            *:not(h2):not(.btn):not(.ui-dialog):not(.ui-dialog *) {
               line-height: 1 !important;
               font-size: 12px !important;
+            }
+
+            /* Shrink the quick-pick date grid so all 10 columns fit the edit window's width. */
+            #quickPickDateOptions {
+                grid-gap: 1px;
+                width: 400px;
+            }
+            #quickPickDateOptions a {
+                padding: 2px 4px;
+                min-width: 0;
+            }
+
+            /* Keep the "Manage Attachments" button and its count badge on one line. */
+            .attachments-cell {
+                white-space: nowrap;
+            }
+
+            /* Visible list of attachment names below the "Manage Attachments" button. */
+            #attachmentNames {
+                white-space: normal;
+                margin-top: 6px;
+            }
+
+            #attachmentNames .attachment-group-heading {
+                font-weight: bold;
+                margin-top: 4px;
+            }
+
+            #attachmentNames ul {
+                list-style: none;
+                margin: 2px 0 4px;
+                padding-left: 1.5em;
+            }
+
+            #attachmentNames li {
+                padding: 2px 0;
+            }
+
+            /* jQuery UI renders the dialog close control as a fixed ~20px square, which
+               crushes the "Save and Close" label onto multiple overflowing lines. Let it
+               grow to fit the text (matches the Consult/eForm attachment dialog). */
+            .save-and-close-button {
+                width: auto !important;
+                white-space: nowrap;
+                padding: 0 8px !important;
             }
 
             /*.grid {*/
@@ -294,11 +344,17 @@
         <link href="<%= request.getContextPath() %>/library/bootstrap/3.0.0/css/bootstrap.css" rel="stylesheet"
               type="text/css">
 
+        <script type="text/javascript" src="<%=request.getContextPath()%>/library/jquery/jquery-3.6.4.min.js"></script>
+        <script type="text/javascript" src="<%=request.getContextPath()%>/library/jquery/jquery-ui-1.12.1.min.js"></script>
+        <script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery_oscar_defaults.js"></script>
+        <link href="<%=request.getContextPath() %>/library/jquery/jquery-ui-1.12.1.min.css" rel="stylesheet"
+              type="text/css">
+
     </head>
 
     <body>
     <div class="container">
-        <form name="serviceform" action="${pageContext.request.contextPath}/tickler/EditTickler.do" method="post">
+        <form id="ticklerEditForm" name="serviceform" action="${pageContext.request.contextPath}/tickler/EditTickler.do" method="post">
             <input type="hidden" name="method" value="editTickler"/>
             <input type="hidden" name="ticklerNo" value="<%=Encode.forHtmlAttribute(String.valueOf(ticklerNo))%>"/>
             <input type="hidden" name="parentAjaxId" value="<e:forHtml value='${param.parentAjaxId}' />"/>
@@ -416,7 +472,7 @@
                 </tr>
 
                 <tr>
-                    <td colspan="2" rowspan="7" style="border: none;">
+                    <td colspan="2" rowspan="8" style="border: none;">
                         <textarea class="form-control" rows="23" style="width:100%;" id="newMessage"
                                   name="newMessage"></textarea>
                         <input type="button" class="btn" name="pasteMessage" onclick="pasteMessageText()"
@@ -508,6 +564,64 @@
                         </div>
                     </td>
                 </tr>
+                <%
+                    // Ids build hidden "delegate" inputs mirroring the picker's checkbox names so the
+                    // dialog can pre-check them; names build the visible attachment list.
+                    java.util.LinkedHashMap<DocumentType, String[]> ticklerAttachTypes = new java.util.LinkedHashMap<DocumentType, String[]>();
+                    ticklerAttachTypes.put(DocumentType.EFORM, new String[]{"eFormNo", "eForms"});
+                    ticklerAttachTypes.put(DocumentType.DOC, new String[]{"docNo", "Documents"});
+                    ticklerAttachTypes.put(DocumentType.LAB, new String[]{"labNo", "Labs"});
+                    ticklerAttachTypes.put(DocumentType.HRM, new String[]{"hrmNo", "HRM"});
+                    ticklerAttachTypes.put(DocumentType.FORM, new String[]{"formNo", "Forms"});
+
+                    List<TicklerAttachmentData> ticklerAttachments = documentAttachmentManager.getTicklerAttachmentDetails(loggedInInfo, ticklerNo, t.getDemographicNo());
+
+                    StringBuilder delegateInputs = new StringBuilder();
+                    for (TicklerAttachmentData ticklerAttachment : ticklerAttachments) {
+                        String paramName = ticklerAttachTypes.get(ticklerAttachment.getDocumentType())[0];
+                        delegateInputs.append("<input type=\"hidden\" class=\"delegateAttachment\" name=\"")
+                                .append(paramName)
+                                .append("\" value=\"").append(Encode.forHtmlAttribute(ticklerAttachment.getDocumentId()))
+                                .append("\" id=\"delegate_").append(Encode.forHtmlAttribute(paramName + ticklerAttachment.getDocumentId()))
+                                .append("\">");
+                    }
+                    int attachmentCount = ticklerAttachments.size();
+                %>
+                <tr>
+                    <th colspan="2" style="background-color: #666699;color:white;">Attachments</th>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <span class="attachments-cell">
+                            <button type="button" class="btn" id="manageAttachmentsBtn"
+                                    title="Manage Attachments"
+                                    data-poload="${pageContext.request.contextPath}/previewDocs.do?method=fetchTicklerDocuments&amp;demographicNo=<%=Encode.forHtmlAttribute(String.valueOf(d.getDemographicNo()))%>&amp;ticklerId=<%=Encode.forHtmlAttribute(String.valueOf(ticklerNo))%>">
+                                <i class="glyphicon glyphicon-paperclip"></i> Manage Attachments
+                            </button>
+                            <span id="attachmentCount" class="badge"><%=attachmentCount%></span>
+                        </span>
+                        <div id="attachmentNames">
+                            <%
+                                for (java.util.Map.Entry<DocumentType, String[]> attachEntry : ticklerAttachTypes.entrySet()) {
+                                    String paramName = attachEntry.getValue()[0];
+                                    String groupLabel = attachEntry.getValue()[1];
+                                    StringBuilder groupItems = new StringBuilder();
+                                    for (TicklerAttachmentData ticklerAttachment : ticklerAttachments) {
+                                        if (ticklerAttachment.getDocumentType() != attachEntry.getKey()) {
+                                            continue;
+                                        }
+                                        groupItems.append("<li>").append(Encode.forHtmlContent(ticklerAttachment.getDisplayName())).append("</li>");
+                                    }
+                            %>
+                            <div class="attachment-group" id="attachmentGroup_<%=paramName%>" <%=groupItems.length() == 0 ? "style=\"display:none;\"" : ""%>>
+                                <div class="attachment-group-heading"><%=groupLabel%></div>
+                                <ul id="attachmentNames_<%=paramName%>"><%=groupItems.toString()%></ul>
+                            </div>
+                            <% } %>
+                        </div>
+                        <%=delegateInputs.toString()%>
+                    </td>
+                </tr>
                 <tr>
                     <td colspan="2" style="vertical-align: bottom;text-align:right; padding-top:15px; border:none;">
                         <oscar:oscarPropertiesCheck property="tickler_email_enabled" value="true">
@@ -522,8 +636,76 @@
                     </td>
                 </tr>
             </table>
+            <div id="attachDocumentDisplay" style="display:none;"></div>
         </form>
     </div>
+
+    <jsp:include page="/images/spinner.jsp" flush="true"/>
+
+    <script type="text/javascript">
+        /**
+         * Tickler document attachment dialog.
+         *
+         * Loads the shared attachment picker (attachDocument.jsp) into a jQuery UI dialog. Existing
+         * attachments are pre-checked from the hidden ".delegateAttachment" inputs rendered in the
+         * tickler form. On "Save and Close" the full set of checked items is written back as
+         * ".delegateAttachment" hidden inputs, which EditTickler2Action reads to synchronise the
+         * tickler's attachments (the manager soft-deletes any that were removed).
+         */
+        jQuery(document).on('click', '#manageAttachmentsBtn', function () {
+            var $form = jQuery('#ticklerEditForm');
+            var trigger = jQuery(this);
+            var title = trigger.attr("title");
+
+            jQuery("#attachDocumentDisplay").load(trigger.data('poload'), function (response, status, xhr) {
+                if (status === "success") {
+                    // Pre-check the picker boxes for attachments already on this tickler.
+                    $form.find(".delegateAttachment").each(function () {
+                        var checkboxId = this.name + this.value;
+                        jQuery('#attachDocumentsForm').find('#' + jQuery.escapeSelector(checkboxId)).prop('checked', true);
+                    });
+                }
+            }).dialog({
+                title: title,
+                modal: true,
+                closeText: "Save and Close",
+                height: 'auto',
+                width: 'auto',
+                resizable: true,
+                open: function (event, ui) {
+                    jQuery(this).parent().css({top: 0, left: 0});
+                    var closeBtn = jQuery(this).parent().find(".ui-dialog-titlebar-close");
+                    closeBtn.removeClass("ui-button-icon-only");
+                    closeBtn.addClass("save-and-close-button");
+                    closeBtn.html("Save and Close");
+                },
+                beforeClose: function (event, ui) {
+                    // Rebuild the tickler form's attachment set from the picker's checked boxes.
+                    // attachToTickler() diffs this against the stored set, so submitting the full
+                    // current selection per type is sufficient for both adds and removals.
+                    $form.find(".delegateAttachment").remove();
+                    jQuery('#attachmentNames ul').empty();
+                    jQuery('#attachDocumentsForm')
+                        .find(".document_check:checked, .lab_check:checked, .form_check:checked, .eForm_check:checked, .hrm_check:checked")
+                        .each(function () {
+                            var element = jQuery(this);
+                            jQuery("<input />", {
+                                type: 'hidden',
+                                name: element.attr('name'),
+                                value: element.val(),
+                                id: "delegate_" + element.attr('name') + element.val(),
+                                "class": 'delegateAttachment'
+                            }).appendTo($form);
+                            jQuery("<li>").text(element.attr('title')).appendTo('#attachmentNames_' + element.attr('name'));
+                        });
+                    jQuery('#attachmentNames .attachment-group').each(function () {
+                        jQuery(this).toggle(jQuery(this).find('li').length > 0);
+                    });
+                    jQuery('#attachmentCount').text($form.find(".delegateAttachment").length);
+                }
+            });
+        });
+    </script>
 
     </body>
 </html>

@@ -33,6 +33,8 @@ import ca.openosp.openo.commn.model.Tickler;
 import ca.openosp.openo.commn.model.TicklerComment;
 import ca.openosp.openo.commn.model.TicklerTextSuggest;
 import ca.openosp.openo.commn.model.TicklerUpdate;
+import ca.openosp.openo.commn.model.enumerator.DocumentType;
+import ca.openosp.openo.documentManager.DocumentAttachmentManager;
 import ca.openosp.openo.managers.SecurityInfoManager;
 import ca.openosp.openo.managers.TicklerManager;
 import ca.openosp.openo.utility.LoggedInInfo;
@@ -51,6 +53,7 @@ public class EditTickler2Action extends ActionSupport {
     private static final Logger logger = MiscUtils.getLogger();
     private TicklerManager ticklerManager = SpringUtils.getBean(TicklerManager.class);
     private SecurityInfoManager securityInfoManager = SpringUtils.getBean(SecurityInfoManager.class);
+    private DocumentAttachmentManager documentAttachmentManager = SpringUtils.getBean(DocumentAttachmentManager.class);
 
     public String execute() {
         if ("editTickler".equals(request.getParameter("method"))) {
@@ -180,6 +183,10 @@ public class EditTickler2Action extends ActionSupport {
             ticklerManager.updateTickler(loggedInInfo, t);
         }
 
+        // Process document attachments unconditionally: a user may change only the attachments
+        // without touching any other tickler field, so this must not be gated on isUpdate/isComment.
+        processAttachments(loggedInInfo, t, providerNo);
+
         if (emailFailed) {
             addActionError(getText("tickler.ticklerEdit.emailFailed.error"));
             return "failure";
@@ -191,6 +198,32 @@ public class EditTickler2Action extends ActionSupport {
 
         return "close";
 
+    }
+
+    /**
+     * Synchronises the tickler's document attachments with the values submitted by the
+     * attachment picker. Each document type is processed independently; a {@code null} array
+     * (the type was not present in the submission) is treated as an empty selection so that
+     * de-selecting all attachments of a type correctly soft-deletes them.
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param t Tickler the tickler being edited
+     * @param providerNo String the provider performing the attachment operation
+     */
+    private void processAttachments(LoggedInInfo loggedInInfo, Tickler t, String providerNo) {
+        Integer ticklerId = t.getId();
+        Integer demographicNo = t.getDemographicNo();
+
+        documentAttachmentManager.attachToTickler(loggedInInfo, DocumentType.DOC, attachmentValues("docNo"), providerNo, ticklerId, demographicNo);
+        documentAttachmentManager.attachToTickler(loggedInInfo, DocumentType.LAB, attachmentValues("labNo"), providerNo, ticklerId, demographicNo);
+        documentAttachmentManager.attachToTickler(loggedInInfo, DocumentType.EFORM, attachmentValues("eFormNo"), providerNo, ticklerId, demographicNo);
+        documentAttachmentManager.attachToTickler(loggedInInfo, DocumentType.HRM, attachmentValues("hrmNo"), providerNo, ticklerId, demographicNo);
+        documentAttachmentManager.attachToTickler(loggedInInfo, DocumentType.FORM, attachmentValues("formNo"), providerNo, ticklerId, demographicNo);
+    }
+
+    private String[] attachmentValues(String parameterName) {
+        String[] values = request.getParameterValues(parameterName);
+        return values == null ? new String[0] : values;
     }
 
     public String updateTextSuggest() {

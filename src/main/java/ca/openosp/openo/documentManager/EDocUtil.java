@@ -1226,6 +1226,9 @@ public final class EDocUtil {
     public static String getHtmlTicklers(LoggedInInfo loggedInInfo, String docId) {
 
         Long table_id = Long.valueOf(docId);
+        // TODO: only reads legacy tickler_link rows. Document attachments created via the new
+        // ticklerdocs-based attachment component are not returned here. Needs a TicklerDocsDao
+        // reverse lookup (by documentNo/docType) merged into this result.
         List<TicklerLink> linkList = ticklerLinkDao.getLinkByTableId("DOC", table_id);
         String HtmlTickler = "";
         Integer ticklerNo;

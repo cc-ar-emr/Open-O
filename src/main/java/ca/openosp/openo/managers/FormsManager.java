@@ -4,7 +4,9 @@ package ca.openosp.openo.managers;
 
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import ca.openosp.openo.commn.dao.EFormDao.EFormSortOrder;
 import ca.openosp.openo.commn.model.EForm;
@@ -41,6 +43,20 @@ public interface FormsManager {
     public List<EncounterForm> getSelectedEncounterForms();
 
     public List<PatientForm> getEncounterFormsbyDemographicNumber(LoggedInInfo loggedInInfo, Integer demographicId, boolean getAllVersions, boolean getOnlyPDFReadyForms);
+
+    /**
+     * Batched form of {@link #getEncounterFormsbyDemographicNumber}, grouped by demographic.
+     *
+     * <p>The encounter form configuration is read once for the whole batch instead of once per
+     * patient, which is what makes this worth using when rendering a list spanning many patients.</p>
+     *
+     * @param loggedInInfo LoggedInInfo the current user's session information
+     * @param demographicIds Collection&lt;Integer&gt; the patients to look up; may be empty
+     * @param getAllVersions boolean true to return every version, false for the most recent only
+     * @param getOnlyPDFReadyForms boolean true to restrict to PDF-ready forms
+     * @return Map&lt;Integer, List&lt;PatientForm&gt;&gt; forms grouped by demographic number
+     */
+    public Map<Integer, List<PatientForm>> getEncounterFormsByDemographicNumbers(LoggedInInfo loggedInInfo, Collection<Integer> demographicIds, boolean getAllVersions, boolean getOnlyPDFReadyForms);
 
     public Integer saveFormDataAsEDoc(LoggedInInfo loggedInInfo, FormTransportContainer formTransportContainer);
 
