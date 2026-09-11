@@ -141,14 +141,16 @@
     thisEForm.addCSS(request.getContextPath()+"/library/jquery/jquery-ui-1.12.1.min.css", "all");
     thisEForm.addBodyJavascript(request.getContextPath()+"/eform/eformFloatingToolbar/eform_floating_toolbar.js");
     thisEForm.addBodyJavascript(request.getContextPath()+"/js/oscar-alert.js");
+    LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
+
     thisEForm.addHiddenInputElement("context", request.getContextPath());
     thisEForm.addHiddenInputElement("demographicNo", demographic_no);
     thisEForm.addHiddenInputElement("fid", fid);
     thisEForm.addHiddenInputElement("fdid", request.getParameter("fdid"));
     thisEForm.addHiddenInputElement("newForm", "true");
+    thisEForm.addHiddenInputElement("providerNo", loggedInInfo.getLoggedInProviderNo());
 
     // Add email consent properties
-    LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
     addHiddenEmailProperties(loggedInInfo, thisEForm, demographic_no);
 
     out.print(thisEForm.getFormHtml());

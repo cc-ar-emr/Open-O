@@ -129,10 +129,13 @@
     eForm.addCSS(request.getContextPath() + "/library/jquery/jquery-ui-1.12.1.min.css", "all");
     eForm.addBodyJavascript(request.getContextPath() + "/eform/eformFloatingToolbar/eform_floating_toolbar.js");
     eForm.addFontLibrary(request.getContextPath() + "/share/javascript/eforms/dejavufonts/ttf/DejaVuSans.ttf");
+    LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
+
     eForm.addHiddenInputElement("context", request.getContextPath());
     eForm.addHiddenInputElement("demographicNo", eForm.getDemographicNo());
     eForm.addHiddenInputElement("fdid", fdid);
     eForm.addHiddenInputElement("fid", eForm.getFid());
+    eForm.addHiddenInputElement("providerNo", loggedInInfo.getLoggedInProviderNo());
 
     // Add EForm error message
     eForm.addHiddenInputElement("error", request.getParameter("error"));
@@ -143,8 +146,8 @@
     eForm.addHiddenInputElement("eFormPDF", (String) request.getAttribute("eFormPDF"));
     eForm.addHiddenInputElement("isDownloadEForm", (String) request.getAttribute("isDownload"));
     eForm.addHiddenInputElement("isSuccess_Autoclose", (String) request.getAttribute("isSuccess_Autoclose"));
+
     // Add EForm attachments
-    LoggedInInfo loggedInInfo = LoggedInInfo.getLoggedInInfoFromSession(request);
     addHiddenEFormAttachments(loggedInInfo, eForm, fdid);
 
     // Add email consent properties

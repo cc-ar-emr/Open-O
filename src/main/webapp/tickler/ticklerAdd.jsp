@@ -452,11 +452,28 @@
             }
         }
 
+        // Prefill the message from the opener (same-origin, in-memory) instead of
+        // a URL parameter, since it may contain PHI.
+        function applyOpenerTicklerPrefill() {
+          try {
+            if (window.opener && typeof window.opener._eformTicklerPrefillMessage === 'string') {
+              var textarea = document.getElementById('ticklerMessage');
+              if (textarea) {
+                textarea.value = window.opener._eformTicklerPrefillMessage;
+              }
+              delete window.opener._eformTicklerPrefillMessage;
+            }
+          } catch (e) {
+            // Cross-origin or no opener: nothing to prefill.
+          }
+        }
+
         // on load
         document.addEventListener('DOMContentLoaded', function() {
           addQuickPick();
           setfocus();
           initResize();
+          applyOpenerTicklerPrefill();
         });
         </script>
 
