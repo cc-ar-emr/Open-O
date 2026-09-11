@@ -262,7 +262,8 @@ public final class RxSearchDrug2Action extends ActionSupport {
      * The Exact / Any control that used to supply this was removed, so the value is normally
      * absent and this default is what the search actually uses. It is TRUE because the DPD
      * backend is meant to search "starts with", which is the behaviour this screen had before a
-     * merge reverted it. Vigilance ignores the flag entirely.
+     * merge reverted it. Current drugref ignores the flag on Vigilance. Older drugref builds read
+     * it there as ingredient-only, which is why the drugref change has to be deployed first.
      *
      * @param wildcard String the posted wildcard value, normally absent
      * @return boolean true to anchor the search to the start of the name
