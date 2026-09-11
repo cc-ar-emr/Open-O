@@ -7,12 +7,26 @@ import java.io.OutputStream;
 import java.util.HashMap;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Logger;
+
+import ca.openosp.openo.utility.MiscUtils;
 
 import io.woo.htmltopdf.HtmlToPdf;
 import io.woo.htmltopdf.HtmlToPdfObject;
 import io.woo.htmltopdf.PdfPageSize;
 
 public class InternalEDocConverter implements EDocConverterInterface {
+
+    private static final Logger logger = MiscUtils.getLogger();
+
+    /**
+     * Resolution the page is laid out at. If not set, the renderer defaults to 96, one device
+     * pixel per CSS pixel, and rounds font and line sizes to whole device pixels; at ten device
+     * pixels per CSS pixel nothing the forms use is rounded, so text wraps where the browser
+     * wraps it.
+     */
+    private static final int LAYOUT_DPI = 960;
+
     /**
      * Converts HTML to PDF using the internal io.woo.htmltopdf library.
      * Requires the required native .so file to be bundled (e.g.,
@@ -41,7 +55,11 @@ public class InternalEDocConverter implements EDocConverterInterface {
         }};
         try (InputStream in = HtmlToPdf.create()
                 .object(HtmlToPdfObject.forHtml(document, htmlToPdfSettings))
+                // log fonts and images the renderer could not load; the conversion finishes anyway
+                .warning(message -> logger.warn("PDF conversion: " + message))
+                .error(message -> logger.error("PDF conversion: " + message))
                 .pageSize(PdfPageSize.Letter)
+                .dpi(LAYOUT_DPI)
                 .convert()) {
             IOUtils.copy(in, os);
         }

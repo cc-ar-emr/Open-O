@@ -35,6 +35,7 @@ import org.jsoup.nodes.Entities;
 import org.jsoup.select.Elements;
 import ca.openosp.openo.commn.model.EFormData;
 import ca.openosp.openo.email.core.EmailData;
+import ca.openosp.openo.eform.data.EFormFieldFont;
 import ca.openosp.openo.managers.NioFileManager;
 import ca.openosp.openo.utility.MiscUtils;
 import ca.openosp.openo.utility.PDFGenerationException;
@@ -97,7 +98,7 @@ public final class ConvertToEdoc {
         String filename = buildFilename(eform.getFormName(), demographicNo);
         String eDocDescription = eform.getSubject().trim().isEmpty() ? eform.getFormName() : eform.getSubject();
         EDoc edoc = null;
-        Path path = execute(eformString, filename);
+        Path path = execute(eformString, filename, true);
 
         if (Files.isReadable(path)) {
             edoc = buildEDoc(path.getFileName().toString(),
@@ -201,7 +202,21 @@ public final class ConvertToEdoc {
     public synchronized static Path saveAsTempPDF(EFormData eform) {
         String eformString = eform.getFormData();
         String filename = buildFilename(eform.getFormName(), eform.getDemographicId() + "");
-        return execute(eformString, filename);
+        return execute(eformString, filename, true);
+    }
+
+    /**
+     * Save HTML that is not an eForm as a temporary PDF. Does not save or return an eDoc entity.
+     * This is a temporary file location. Ensure that the file is deleted after it's used.
+     *
+     * For HTML that is not an eForm, such as an HRM report, which keeps its own fonts.
+     *
+     * @param html String the document to render
+     * @param filename String a name for the temporary file
+     * @return temporary path to the produced PDF.
+     */
+    public synchronized static Path saveHtmlAsTempPDF(String html, String filename) {
+        return execute(html, buildFilename(filename, ""), false);
     }
 
     /**
@@ -234,8 +249,18 @@ public final class ConvertToEdoc {
      * Execute building and saving PDF to temp directory.
      */
     private static Path execute(final String eformString, final String filename) {
+        return execute(eformString, filename, false);
+    }
+
+    /**
+     * Execute building and saving PDF to temp directory.
+     *
+     * @param isEForm boolean true for an eForm, whose text is forced onto the DejaVu Sans fonts
+     *                the browser uses
+     */
+    private static Path execute(final String eformString, final String filename, final boolean isEForm) {
         Path path = null;
-        String document = tidyDocument(eformString);
+        String document = tidyDocument(eformString, isEForm);
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             renderPDF(document, os);
             path = nioFileManager.saveTempFile(filename, os);
@@ -749,7 +774,7 @@ public final class ConvertToEdoc {
      * Clean up any artifacts or poorly formed XHTML
      * and fetch the HTML template resources.
      */
-    private static String tidyDocument(final String documentString) {
+    private static String tidyDocument(final String documentString, final boolean isEForm) {
         Document document = getDocument(documentString);
 
         /*
@@ -759,6 +784,14 @@ public final class ConvertToEdoc {
          */
         translateResourcePaths(document);
         addCss(document);
+
+        /*
+         * Force the DejaVu Sans fonts on eForm text, matching the browser, so wkhtmltopdf draws
+         * it the same way.
+         */
+        if (isEForm) {
+            EFormFieldFont.apply(document);
+        }
 
         /*
          * Convert edited Document object back to String
