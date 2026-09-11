@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class EctDisplayForm2Action extends EctDisplayAction {
@@ -310,7 +311,10 @@ public class EctDisplayForm2Action extends EctDisplayAction {
 
             EctFormData.PatientForm latest = pforms[0];
             answer.put("exists", true);
-            answer.put("lastEdited", latest.getEdited());
+            // getEdited() formats the date without a null check
+            if (latest.edited != null) {
+                answer.put("lastEdited", latest.getEdited());
+            }
             answer.put("url", request.getContextPath()
                     + "/form/forwardshortcutname.do?formname="
                     + URLEncoder.encode(encounterForm.getFormName(), StandardCharsets.UTF_8)
@@ -334,7 +338,7 @@ public class EctDisplayForm2Action extends EctDisplayAction {
      * @return boolean true for a longitudinal form, false for a one-visit snapshot or no table
      */
     private static boolean isLongitudinal(String formTable) {
-        return formTable != null && LONGITUDINAL_FORM_TABLES.contains(formTable.trim().toLowerCase());
+        return formTable != null && LONGITUDINAL_FORM_TABLES.contains(formTable.trim().toLowerCase(Locale.ROOT));
     }
 
     @Override

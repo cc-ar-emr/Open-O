@@ -27,8 +27,8 @@
     /** The entry whose click is being replayed, so the replay is not warned about again. */
     let replaying = null;
 
-    /** True while a check is in flight, so a double click asks only once. */
-    let checking = false;
+    /** Entries whose check is in flight, so a double click on one asks only once. */
+    const pending = new Set();
 
     const canShowDialog = () => Boolean(window.jQuery && jQuery.fn && jQuery.fn.dialog);
 
@@ -138,7 +138,7 @@
      * @param {HTMLAnchorElement} entry the menu entry that was clicked
      */
     const check = (entry) => {
-        checking = true;
+        pending.add(entry);
         jQuery.getJSON(`${contextPath}${CHECK_PATH}`, {formName: entry.textContent.trim()}).done((existing) => {
             if (existing && existing.exists) {
                 warn(entry, existing);
@@ -148,7 +148,7 @@
         }).fail(() => {
             openBlankForm(entry);
         }).always(() => {
-            checking = false;
+            pending.delete(entry);
         });
     };
 
@@ -165,7 +165,7 @@
         event.preventDefault();
         event.stopPropagation();
 
-        if (!checking) {
+        if (!pending.has(entry)) {
             check(entry);
         }
     }, true);
